@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Finance Tracker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --inc:#1D9E75;--inc-bg:#E1F5EE;--inc-t:#085041;
+  --exp:#D85A30;--exp-bg:#FAECE7;--exp-t:#4A1B0C;
+  --warn:#BA7517;--warn-bg:#FAEEDA;--warn-t:#412402;
+  --blue:#378ADD;--blue-bg:#E6F1FB;--blue-t:#0C447C;
+  --bg:#f9f9f8;--surface:#ffffff;--border:rgba(0,0,0,0.1);
+  --text:#1a1a19;--muted:#6b6b68;--radius:10px;--rs:6px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1a1a19;--surface:#242422;--border:rgba(255,255,255,0.1);
+    --text:#f0ede8;--muted:#9a9894;
+    --inc-bg:#04342C;--inc-t:#9FE1CB;
+    --exp-bg:#4A1B0C;--exp-t:#F0997B;
+    --warn-bg:#412402;--warn-t:#FAC775;
+    --blue-bg:#042C53;--blue-t:#85B7EB;
+  }
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.app{max-width:920px;margin:0 auto;padding:1.5rem 1rem 4rem}
+.hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.hdr-left h1{font-size:20px;font-weight:600;color:var(--text)}
+.hdr-left p{font-size:13px;color:var(--muted);margin-top:2px}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#ccc;display:inline-block;margin-right:6px;transition:background .3s}
+.status-dot.ok{background:var(--inc)}
+.status-dot.err{background:var(--exp)}
+.status-txt{font-size:12px;color:var(--muted)}
+.tabs{display:flex;gap:3px;background:rgba(0,0,0,0.06);border-radius:8px;padding:3px;width:fit-content}
+@media(prefers-color-scheme:dark){.tabs{background:rgba(255,255,255,0.07)}}
+.tab{padding:6px 14px;font-size:13px;border:none;border-radius:6px;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;font-family:inherit}
+.tab.active{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.period-row{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
+.pbtn{padding:5px 13px;font-size:12px;border:1px solid var(--border);border-radius:20px;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;font-family:inherit}
+.pbtn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+.mnav{display:flex;align-items:center;gap:6px;margin-left:auto}
+.mnav button{width:28px;height:28px;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;color:var(--muted);font-size:15px;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.mnav button:hover{background:rgba(0,0,0,0.05)}
+#mLabel{font-size:13px;font-weight:500;color:var(--text);min-width:90px;text-align:center}
+.summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:1.25rem}
+.sc{background:rgba(0,0,0,0.04);border-radius:8px;padding:14px 16px}
+@media(prefers-color-scheme:dark){.sc{background:rgba(255,255,255,0.05)}}
+.sc-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.sc-val{font-size:22px;font-weight:600}
+.sc-val.i{color:var(--inc)}.sc-val.e{color:var(--exp)}.sc-val.b{color:var(--text)}
+.panel{display:none}.panel.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem}
+.card h3{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text)}
+.fg{display:flex;flex-direction:column;gap:4px}
+.fg label{font-size:11px;color:var(--muted);font-weight:500}
+.fg input,.fg select{height:34px;border:1px solid var(--border);border-radius:var(--rs);padding:0 10px;font-size:13px;background:var(--surface);color:var(--text);font-family:inherit}
+.fg input:focus,.fg select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(55,138,221,.15)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end}
+.rec-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr auto;gap:8px;align-items:end}
+.ttype{display:flex;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;height:34px}
+.ttype button{flex:1;border:none;background:transparent;font-size:12px;font-weight:500;cursor:pointer;padding:0 10px;transition:all .15s;color:var(--muted);font-family:inherit}
+.ttype button.ae{background:var(--exp-bg);color:var(--exp-t)}
+.ttype button.ai{background:var(--inc-bg);color:var(--inc-t)}
+.add-btn{height:34px;padding:0 16px;background:var(--text);color:var(--bg);border:none;border-radius:var(--rs);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:opacity .15s;font-family:inherit}
+.add-btn:hover{opacity:.8}
+.add-btn:disabled{opacity:.4;cursor:not-allowed}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-ttl{font-size:14px;font-weight:600;color:var(--text)}
+.fsel{height:28px;border:1px solid var(--border);border-radius:var(--rs);padding:0 8px;font-size:12px;background:var(--surface);color:var(--muted);font-family:inherit}
+.tx-list{display:flex;flex-direction:column;gap:4px}
+.txi{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);transition:background .1s}
+.txi:hover{background:rgba(0,0,0,0.02)}
+@media(prefers-color-scheme:dark){.txi:hover{background:rgba(255,255,255,0.03)}}
+.txi-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.txi-info{flex:1;min-width:0}
+.txi-desc{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txi-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.txi-amt{font-size:14px;font-weight:600;white-space:nowrap}
+.txi-amt.i{color:var(--inc)}.txi-amt.e{color:var(--exp)}
+.del-btn{width:24px;height:24px;border:none;background:none;cursor:pointer;color:var(--muted);border-radius:4px;font-size:16px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;font-family:inherit}
+.txi:hover .del-btn{opacity:1}
+.del-btn:hover{background:var(--exp-bg);color:var(--exp-t)}
+.empty{text-align:center;padding:2rem 1rem;color:var(--muted);font-size:13px}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.badge-warn{background:var(--warn-bg);color:var(--warn-t)}
+.badge-over{background:var(--exp-bg);color:var(--exp-t)}
+.badge-ok{background:var(--inc-bg);color:var(--inc-t)}
+.badge-pend{background:var(--blue-bg);color:var(--blue-t)}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.cat-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.cat-name{font-size:13px;font-weight:500;color:var(--text);flex:1}
+.cat-act{display:flex;gap:4px}
+.cat-act button{font-size:11px;color:var(--blue);border:none;background:none;cursor:pointer;padding:2px 7px;border-radius:4px;font-family:inherit}
+.cat-act button:hover{background:var(--blue-bg)}
+.cat-act button.danger{color:var(--exp)}
+.cat-act button.danger:hover{background:var(--exp-bg)}
+.bar-wrap{height:5px;background:rgba(0,0,0,0.07);border-radius:3px;overflow:hidden;margin-bottom:6px}
+@media(prefers-color-scheme:dark){.bar-wrap{background:rgba(255,255,255,0.08)}}
+.bar-fill{height:100%;border-radius:3px;transition:width .4s}
+.cat-stats{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.budget-row{display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.budget-row label{font-size:11px;color:var(--muted);white-space:nowrap}
+.budget-row input{width:90px;height:26px;border:1px solid var(--border);border-radius:4px;padding:0 8px;font-size:12px;background:var(--surface);color:var(--text);font-family:inherit}
+.budget-row button{height:26px;padding:0 10px;font-size:11px;background:rgba(0,0,0,0.05);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--muted);font-family:inherit}
+.budget-row button:hover{color:var(--text)}
+.add-cat-row{display:flex;gap:8px;align-items:center}
+.add-cat-row input{height:34px;border:1px solid var(--border);border-radius:var(--rs);padding:0 10px;font-size:13px;background:var(--surface);color:var(--text);font-family:inherit}
+.add-cat-row input:focus{outline:none;border-color:var(--blue)}
+.add-cat-row button{height:34px;padding:0 14px;background:var(--blue-bg);color:var(--blue-t);border:none;border-radius:var(--rs);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:inherit}
+.rec-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs)}
+.rec-info{flex:1;min-width:0}
+.rec-desc{font-size:13px;font-weight:500;color:var(--text)}
+.rec-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.rec-amt{font-size:14px;font-weight:600;white-space:nowrap;margin-right:8px}
+.rec-amt.i{color:var(--inc)}.rec-amt.e{color:var(--exp)}
+.rec-actions{display:flex;gap:6px}
+.approve-btn{height:28px;padding:0 12px;font-size:12px;font-weight:500;border:none;border-radius:4px;cursor:pointer;background:var(--inc-bg);color:var(--inc-t);font-family:inherit}
+.approve-btn:hover{opacity:.85}
+.skip-btn{height:28px;padding:0 12px;font-size:12px;border:none;border-radius:4px;cursor:pointer;background:rgba(0,0,0,0.06);color:var(--muted);font-family:inherit}
+.skip-btn:hover{background:var(--exp-bg);color:var(--exp-t)}
+.del-rec-btn{height:28px;padding:0 10px;font-size:12px;border:none;border-radius:4px;cursor:pointer;background:transparent;color:var(--muted);font-family:inherit}
+.del-rec-btn:hover{background:var(--exp-bg);color:var(--exp-t)}
+.pending-banner{background:var(--blue-bg);border:1px solid rgba(55,138,221,0.3);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--blue-t);margin-bottom:12px;display:flex;align-items:center;gap:8px;cursor:pointer}
+.pending-banner:hover{opacity:.85}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.chart-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px}
+.chart-full{grid-column:1/-1}
+.loading{text-align:center;padding:3rem;color:var(--muted);font-size:14px}
+@media(max-width:640px){
+  .form-grid,.rec-form-grid{grid-template-columns:1fr 1fr}
+  .summary{grid-template-columns:1fr}
+  .charts-grid,.cat-grid{grid-template-columns:1fr}
+  .hdr{flex-direction:column;align-items:flex-start;gap:12px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr">
+    <div class="hdr-left">
+      <h1>Finance Tracker</h1>
+      <p><span class="status-dot" id="statusDot"></span><span class="status-txt" id="statusTxt">Connecting...</span></p>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('overview')">Overview</button>
+      <button class="tab" onclick="switchTab('recurring')">Recurring</button>
+      <button class="tab" onclick="switchTab('charts')">Charts</button>
+      <button class="tab" onclick="switchTab('categories')">Categories</button>
+    </div>
+  </div>
+
+  <div class="period-row">
+    <button class="pbtn active" onclick="setPeriod('monthly',this)">Monthly</button>
+    <button class="pbtn" onclick="setPeriod('all',this)">All time</button>
+    <div class="mnav" id="mNav">
+      <button onclick="shiftMonth(-1)">&#8249;</button>
+      <span id="mLabel"></span>
+      <button onclick="shiftMonth(1)">&#8250;</button>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="sc"><div class="sc-lbl">Income</div><div class="sc-val i" id="sInc">—</div></div>
+    <div class="sc"><div class="sc-lbl">Expenses</div><div class="sc-val e" id="sExp">—</div></div>
+    <div class="sc"><div class="sc-lbl">Balance</div><div class="sc-val b" id="sBal">—</div></div>
+  </div>
+
+  <div id="panel-overview" class="panel active">
+    <div id="pendingBanner" style="display:none" class="pending-banner" onclick="switchTab('recurring')">
+      <span>⏳</span><span id="pendingBannerText"></span><span style="margin-left:auto;font-size:11px">Review →</span>
+    </div>
+    <div class="card">
+      <h3>Add transaction</h3>
+      <div class="form-grid">
+        <div class="fg"><label>Description</label><input type="text" id="txDesc" placeholder="e.g. Groceries"/></div>
+        <div class="fg"><label>Amount ($)</label><input type="number" id="txAmt" placeholder="0.00" min="0" step="0.01"/></div>
+        <div class="fg"><label>Category</label><select id="txCat"></select></div>
+        <div class="fg"><label>Type</label>
+          <div class="ttype">
+            <button id="btnExp" class="ae" onclick="setType('expense')">Expense</button>
+            <button id="btnInc" onclick="setType('income')">Income</button>
+          </div>
+        </div>
+        <button class="add-btn" onclick="addTx()">+ Add</button>
+      </div>
+    </div>
+    <div class="sec-hdr">
+      <span class="sec-ttl" id="listTitle">Transactions</span>
+      <select class="fsel" id="filterCat" onchange="loadTransactions()">
+        <option value="all">All categories</option>
+      </select>
+    </div>
+    <div class="tx-list" id="txList"><div class="loading">Loading...</div></div>
+  </div>
+
+  <div id="panel-recurring" class="panel">
+    <div class="card">
+      <h3>Add recurring transaction</h3>
+      <div class="rec-form-grid">
+        <div class="fg"><label>Description</label><input type="text" id="recDesc" placeholder="e.g. Netflix"/></div>
+        <div class="fg"><label>Amount ($)</label><input type="number" id="recAmt" placeholder="0.00" min="0" step="0.01"/></div>
+        <div class="fg"><label>Category</label><select id="recCat"></select></div>
+        <div class="fg"><label>Type</label>
+          <div class="ttype">
+            <button id="recBtnExp" class="ae" onclick="setRecType('expense')">Expense</button>
+            <button id="recBtnInc" onclick="setRecType('income')">Income</button>
+          </div>
+        </div>
+        <div class="fg"><label>Frequency</label>
+          <select id="recFreq">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly" selected>Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
+        </div>
+        <button class="add-btn" onclick="addRecurring()">+ Add</button>
+      </div>
+    </div>
+    <div class="sec-hdr" style="margin-top:0.5rem">
+      <span class="sec-ttl">Pending approval</span>
+      <span id="pendingCount" style="font-size:12px;color:var(--muted)"></span>
+    </div>
+    <div class="tx-list" id="pendingList"><div class="loading">Loading...</div></div>
+    <div class="sec-hdr" style="margin-top:1.5rem">
+      <span class="sec-ttl">Recurring rules</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px" id="recRules"><div class="loading">Loading...</div></div>
+  </div>
+
+  <div id="panel-charts" class="panel">
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">Income vs expenses</div>
+        <div style="position:relative;height:200px"><canvas id="cBar" role="img" aria-label="Income vs expenses bar chart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Expenses by category</div>
+        <div style="position:relative;height:200px"><canvas id="cDonut" role="img" aria-label="Expenses by category doughnut chart"></canvas></div>
+      </div>
+      <div class="chart-card chart-full">
+        <div class="chart-title">Cumulative balance</div>
+        <div style="position:relative;height:200px"><canvas id="cLine" role="img" aria-label="Cumulative balance line chart"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel-categories" class="panel">
+    <div class="cat-grid" id="catGrid"><div class="loading">Loading...</div></div>
+    <div class="card" style="padding:12px 14px">
+      <div class="add-cat-row">
+        <input type="text" id="newCatName" placeholder="Category name..." style="flex:1"/>
+        <input type="text" id="newCatIcon" placeholder="emoji" style="width:60px"/>
+        <button onclick="addCategory()">+ Add category</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'http://localhost:3000/api';
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const COLORS = ['#1D9E75','#378ADD','#D85A30','#BA7517','#534AB7','#D4537E','#639922','#E24B4A','#5DCAA5','#F09595'];
+
+const S = {
+  categories: [],
+  transactions: [],
+  pending: [],
+  recurring: [],
+  tab: 'overview',
+  period: 'monthly',
+  curDate: new Date(),
+  txType: 'expense',
+  recType: 'expense',
+  charts: {}
+};
+
+// ── API helpers ──────────────────────────────────────────
+async function api(method, path, body) {
+  try {
+    const res = await fetch(API + path, {
+      method,
+      headers: body ? { 'Content-Type': 'application/json' } : {},
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return res.json();
+  } catch (e) {
+    console.error(method, path, e);
+    throw e;
+  }
+}
+
+const get = path => api('GET', path);
+const post = (path, body) => api('POST', path, body);
+const del = path => api('DELETE', path);
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function fmt(n) { return '$' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function catById(id) { return S.categories.find(c => c.id === id) || {name:'Other', icon:'📦', budget:null}; }
+function catColor(id) { const i = S.categories.findIndex(c => c.id === id); return COLORS[i >= 0 ? i % COLORS.length : 0]; }
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+// ── Connection check ──────────────────────────────────────
+async function checkConnection() {
+  try {
+    await get('/categories');
+    document.getElementById('statusDot').className = 'status-dot ok';
+    document.getElementById('statusTxt').textContent = 'Connected · finance.db';
+    return true;
+  } catch {
+    document.getElementById('statusDot').className = 'status-dot err';
+    document.getElementById('statusTxt').textContent = 'Server offline — run: node server.js';
+    return false;
+  }
+}
+
+// ── Load data ─────────────────────────────────────────────
+async function loadCategories() {
+  S.categories = await get('/categories');
+  populateCatSelects();
+}
+
+async function loadTransactions() {
+  let url = '/transactions';
+  const params = new URLSearchParams();
+  if (S.period === 'monthly') {
+    params.set('year', S.curDate.getFullYear());
+    params.set('month', String(S.curDate.getMonth() + 1).padStart(2, '0'));
+  }
+  const qs = params.toString();
+  S.transactions = await get('/transactions' + (qs ? '?' + qs : ''));
+  renderList();
+  updateSummary();
+}
+
+async function loadPending() {
+  S.pending = await get('/pending');
+  renderPending();
+}
+
+async function loadRecurring() {
+  S.recurring = await get('/recurring');
+  renderRecRules();
+}
+
+async function loadAll() {
+  await loadCategories();
+  await Promise.all([loadTransactions(), loadPending(), loadRecurring()]);
+}
+
+// ── Summary ───────────────────────────────────────────────
+function updateSummary() {
+  const inc = S.transactions.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0);
+  const exp = S.transactions.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
+  document.getElementById('sInc').textContent = fmt(inc);
+  document.getElementById('sExp').textContent = fmt(exp);
+  const bal = inc - exp;
+  const el = document.getElementById('sBal');
+  el.textContent = (bal < 0 ? '-' : '') + fmt(bal);
+  el.style.color = bal < 0 ? 'var(--exp)' : 'var(--inc)';
+}
+
+// ── Render: Transactions ──────────────────────────────────
+function renderList() {
+  let tx = S.transactions;
+  const fc = document.getElementById('filterCat')?.value;
+  if (fc && fc !== 'all') tx = tx.filter(t => t.category_id === fc);
+
+  const el = document.getElementById('txList');
+  if (!tx.length) { el.innerHTML = '<div class="empty">No transactions found.</div>'; return; }
+
+  el.innerHTML = tx.map(t => {
+    const c = catById(t.category_id);
+    const d = new Date(t.date).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+    return `<div class="txi">
+      <div class="txi-icon" style="background:${catColor(t.category_id)}22">${c.icon}</div>
+      <div class="txi-info">
+        <div class="txi-desc">${t.description}</div>
+        <div class="txi-meta">${c.name} · ${d}</div>
+      </div>
+      <div class="txi-amt ${t.type === 'income' ? 'i' : 'e'}">${t.type === 'income' ? '+' : '-'}${fmt(t.amount)}</div>
+      <button class="del-btn" onclick="deleteTx('${t.id}')">×</button>
+    </div>`;
+  }).join('');
+}
+
+// ── Render: Pending ───────────────────────────────────────
+function renderPending() {
+  const el = document.getElementById('pendingList');
+  const cnt = document.getElementById('pendingCount');
+  const banner = document.getElementById('pendingBanner');
+  const bannerTxt = document.getElementById('pendingBannerText');
+
+  cnt.textContent = S.pending.length ? `${S.pending.length} awaiting approval` : 'None pending';
+
+  if (S.pending.length) {
+    banner.style.display = 'flex';
+    bannerTxt.textContent = `${S.pending.length} recurring transaction${S.pending.length > 1 ? 's' : ''} waiting for your approval`;
+  } else {
+    banner.style.display = 'none';
+  }
+
+  if (!S.pending.length) { el.innerHTML = '<div class="empty">No pending transactions — all caught up.</div>'; return; }
+
+  el.innerHTML = S.pending.map(p => {
+    const c = catById(p.category_id);
+    const d = new Date(p.due_date).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+    return `<div class="txi">
+      <div class="txi-icon" style="background:${catColor(p.category_id)}22">${c.icon}</div>
+      <div class="txi-info">
+        <div class="txi-desc">${p.description}</div>
+        <div class="txi-meta">${c.name} · due ${d} · <span class="badge badge-pend">pending</span></div>
+      </div>
+      <div class="txi-amt ${p.type === 'income' ? 'i' : 'e'}" style="margin-right:8px">${p.type === 'income' ? '+' : '-'}${fmt(p.amount)}</div>
+      <div class="rec-actions">
+        <button class="approve-btn" onclick="approvePending('${p.id}')">✓ Approve</button>
+        <button class="skip-btn" onclick="skipPending('${p.id}')">Skip</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Render: Recurring rules ───────────────────────────────
+function renderRecRules() {
+  const el = document.getElementById('recRules');
+  if (!S.recurring.length) { el.innerHTML = '<div class="empty">No recurring rules yet.</div>'; return; }
+  const freqLabel = {daily:'Daily', weekly:'Weekly', monthly:'Monthly', yearly:'Yearly'};
+  el.innerHTML = S.recurring.map(r => {
+    const c = catById(r.category_id);
+    return `<div class="rec-item">
+      <div class="txi-icon" style="background:${catColor(r.category_id)}22;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${c.icon}</div>
+      <div class="rec-info">
+        <div class="rec-desc">${r.description}</div>
+        <div class="rec-meta">${c.name} · ${freqLabel[r.frequency]} · requires approval each time</div>
+      </div>
+      <div class="rec-amt ${r.type === 'income' ? 'i' : 'e'}">${r.type === 'income' ? '+' : '-'}${fmt(r.amount)}</div>
+      <div class="rec-actions">
+        <button class="del-rec-btn" onclick="deleteRec('${r.id}')">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Render: Categories ────────────────────────────────────
+async function renderCategories() {
+  const allTx = await get('/transactions');
+  const expenses = allTx.filter(t => {
+    if (t.type !== 'expense') return false;
+    if (S.period === 'monthly') {
+      const d = new Date(t.date);
+      return d.getFullYear() === S.curDate.getFullYear() && d.getMonth() === S.curDate.getMonth();
+    }
+    return true;
+  });
+  const total = expenses.reduce((s,t) => s + t.amount, 0);
+
+  document.getElementById('catGrid').innerHTML = S.categories.map((c, i) => {
+    const spent = expenses.filter(t => t.category_id === c.id).reduce((s,t) => s + t.amount, 0);
+    const color = COLORS[i % COLORS.length];
+    const hasBudget = c.budget != null && c.budget > 0;
+    const pct = hasBudget ? Math.min(spent / c.budget * 100, 100) : (total > 0 ? spent / total * 100 : 0);
+    const over = hasBudget && spent > c.budget;
+    const warn = hasBudget && !over && spent / c.budget > 0.8;
+    const barColor = over ? '#D85A30' : warn ? '#BA7517' : color;
+    const statusBadge = over ? '<span class="badge badge-over">over budget</span>' : warn ? '<span class="badge badge-warn">near limit</span>' : '';
+    const txCount = expenses.filter(t => t.category_id === c.id).length;
+    return `<div class="cat-card">
+      <div class="cat-hdr">
+        <span style="font-size:16px">${c.icon}</span>
+        <span class="cat-name">${c.name}</span>
+        <div class="cat-act">
+          <button onclick="editCat('${c.id}','${c.name}','${c.icon}')">rename</button>
+          <button class="danger" onclick="deleteCat('${c.id}')">×</button>
+        </div>
+      </div>
+      <div class="bar-wrap"><div class="bar-fill" style="width:${pct.toFixed(1)}%;background:${barColor}"></div></div>
+      <div class="cat-stats">
+        <span>${hasBudget ? fmt(spent)+' / '+fmt(c.budget) : fmt(spent)+' spent'} ${statusBadge}</span>
+        <span>${pct.toFixed(0)}%</span>
+      </div>
+      <div class="budget-row">
+        <label>Budget:</label>
+        <input type="number" id="bgt-${c.id}" value="${c.budget || ''}" placeholder="optional" min="0" step="1"/>
+        <button onclick="saveBudget('${c.id}','${c.name}','${c.icon}')">Save</button>
+        ${hasBudget ? `<button onclick="clearBudget('${c.id}','${c.name}','${c.icon}')">Clear</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Render: Charts ────────────────────────────────────────
+async function renderCharts() {
+  const allTx = await get('/transactions');
+  const periodTx = S.period === 'monthly' ? allTx.filter(t => {
+    const d = new Date(t.date);
+    return d.getFullYear() === S.curDate.getFullYear() && d.getMonth() === S.curDate.getMonth();
+  }) : allTx;
+
+  const inc = periodTx.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0);
+  const exp = periodTx.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
+
+  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const tickColor = isDark ? '#9a9894' : '#888';
+  const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+  if (S.charts.bar) S.charts.bar.destroy();
+  S.charts.bar = new Chart(document.getElementById('cBar'), {
+    type: 'bar',
+    data: { labels: ['Income','Expenses'], datasets: [{ data: [inc, exp], backgroundColor: ['#1D9E75','#D85A30'], borderRadius: 6, borderSkipped: false }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: {
+      x: { grid: { display: false }, ticks: { color: tickColor, font: { size: 12 } } },
+      y: { grid: { color: gridColor }, ticks: { color: tickColor, callback: v => '$'+v } }
+    }}
+  });
+
+  const catExp = S.categories.map((c, i) => ({
+    name: c.name + ' ' + c.icon,
+    val: periodTx.filter(t => t.type === 'expense' && t.category_id === c.id).reduce((s,t) => s + t.amount, 0),
+    color: COLORS[i % COLORS.length]
+  })).filter(c => c.val > 0);
+
+  if (S.charts.donut) S.charts.donut.destroy();
+  S.charts.donut = new Chart(document.getElementById('cDonut'), {
+    type: 'doughnut',
+    data: { labels: catExp.map(c => c.name), datasets: [{ data: catExp.map(c => c.val), backgroundColor: catExp.map(c => c.color), borderWidth: 2, borderColor: 'transparent' }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right', labels: { color: tickColor, font: { size: 11 }, boxWidth: 10, padding: 8 } } } }
+  });
+
+  const sorted = [...allTx].sort((a,b) => new Date(a.date) - new Date(b.date));
+  let run = 0; const lls = [], ld = [];
+  sorted.forEach(t => {
+    run += t.type === 'income' ? t.amount : -t.amount;
+    lls.push(new Date(t.date).toLocaleDateString('en-US', {month:'short', day:'numeric'}));
+    ld.push(parseFloat(run.toFixed(2)));
+  });
+
+  if (S.charts.line) S.charts.line.destroy();
+  S.charts.line = new Chart(document.getElementById('cLine'), {
+    type: 'line',
+    data: { labels: lls.length ? lls : ['—'], datasets: [{ label: 'Balance', data: ld.length ? ld : [0], borderColor: '#378ADD', backgroundColor: 'rgba(55,138,221,0.08)', fill: true, tension: 0.4, pointRadius: 3, borderWidth: 2 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: {
+      x: { grid: { display: false }, ticks: { color: tickColor, maxTicksLimit: 8 } },
+      y: { grid: { color: gridColor }, ticks: { color: tickColor, callback: v => '$'+v } }
+    }}
+  });
+}
+
+// ── Populate selects ──────────────────────────────────────
+function populateCatSelects() {
+  ['txCat','recCat','filterCat'].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    const prev = el.value;
+    el.innerHTML = (id === 'filterCat' ? '<option value="all">All categories</option>' : '') +
+      S.categories.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+    if (prev) el.value = prev;
+  });
+}
+
+// ── Actions ───────────────────────────────────────────────
+function setType(t) {
+  S.txType = t;
+  document.getElementById('btnExp').className = t === 'expense' ? 'ae' : '';
+  document.getElementById('btnInc').className = t === 'income' ? 'ai' : '';
+}
+function setRecType(t) {
+  S.recType = t;
+  document.getElementById('recBtnExp').className = t === 'expense' ? 'ae' : '';
+  document.getElementById('recBtnInc').className = t === 'income' ? 'ai' : '';
+}
+
+async function addTx() {
+  const desc = document.getElementById('txDesc').value.trim();
+  const amt = parseFloat(document.getElementById('txAmt').value);
+  const category_id = document.getElementById('txCat').value;
+  if (!desc || !amt || amt <= 0) { alert('Please fill in description and a valid amount.'); return; }
+  await post('/transactions', { id: uid(), description: desc, amount: amt, category_id, type: S.txType, date: todayStr() });
+  document.getElementById('txDesc').value = '';
+  document.getElementById('txAmt').value = '';
+  await loadTransactions();
+}
+
+async function deleteTx(id) {
+  if (!confirm('Delete this transaction?')) return;
+  await del('/transactions/' + id);
+  await loadTransactions();
+}
+
+async function addRecurring() {
+  const desc = document.getElementById('recDesc').value.trim();
+  const amt = parseFloat(document.getElementById('recAmt').value);
+  const category_id = document.getElementById('recCat').value;
+  const frequency = document.getElementById('recFreq').value;
+  if (!desc || !amt || amt <= 0) { alert('Please fill in description and amount.'); return; }
+  const recId = uid();
+  await post('/recurring', { id: recId, description: desc, amount: amt, category_id, type: S.recType, frequency });
+  await post('/pending', { id: uid(), description: desc, amount: amt, category_id, type: S.recType, recurring_rule_id: recId, due_date: todayStr() });
+  document.getElementById('recDesc').value = '';
+  document.getElementById('recAmt').value = '';
+  await loadRecurring();
+  await loadPending();
+}
+
+async function deleteRec(id) {
+  if (!confirm('Remove this recurring rule and its pending transactions?')) return;
+  await del('/recurring/' + id);
+  await loadRecurring();
+  await loadPending();
+}
+
+async function approvePending(id) {
+  await post('/pending/' + id + '/approve');
+  await loadPending();
+  await loadTransactions();
+}
+
+async function skipPending(id) {
+  await del('/pending/' + id);
+  await loadPending();
+}
+
+async function addCategory() {
+  const name = document.getElementById('newCatName').value.trim();
+  const icon = document.getElementById('newCatIcon').value.trim() || '📁';
+  if (!name) return;
+  await post('/categories', { id: uid(), name, icon, budget: null });
+  document.getElementById('newCatName').value = '';
+  document.getElementById('newCatIcon').value = '';
+  await loadCategories();
+  renderCategories();
+}
+
+async function editCat(id, currentName, currentIcon) {
+  const newName = prompt('Rename category:', currentName);
+  if (!newName || !newName.trim()) return;
+  const c = S.categories.find(x => x.id === id);
+  await api('PUT', '/categories/' + id, { name: newName.trim(), icon: c.icon, budget: c.budget });
+  await loadCategories();
+  renderCategories();
+}
+
+async function deleteCat(id) {
+  if (!confirm('Delete this category?')) return;
+  await del('/categories/' + id);
+  await loadCategories();
+  renderCategories();
+}
+
+async function saveBudget(id, name, icon) {
+  const val = parseFloat(document.getElementById('bgt-' + id).value);
+  const c = S.categories.find(x => x.id === id);
+  await api('PUT', '/categories/' + id, { name: c.name, icon: c.icon, budget: isNaN(val) || val <= 0 ? null : val });
+  await loadCategories();
+  renderCategories();
+}
+
+async function clearBudget(id, name, icon) {
+  const c = S.categories.find(x => x.id === id);
+  await api('PUT', '/categories/' + id, { name: c.name, icon: c.icon, budget: null });
+  await loadCategories();
+  renderCategories();
+}
+
+// ── Navigation ────────────────────────────────────────────
+function switchTab(t) {
+  S.tab = t;
+  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', ['overview','recurring','charts','categories'][i] === t));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + t).classList.add('active');
+  if (t === 'overview') { loadTransactions(); loadPending(); }
+  if (t === 'recurring') { loadPending(); loadRecurring(); }
+  if (t === 'charts') renderCharts();
+  if (t === 'categories') renderCategories();
+}
+
+function setPeriod(p, btn) {
+  S.period = p;
+  document.querySelectorAll('.pbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadTransactions();
+  updateMonthLabel();
+}
+
+function shiftMonth(d) {
+  const c = S.curDate;
+  S.curDate = new Date(c.getFullYear(), c.getMonth() + d, 1);
+  loadTransactions();
+  updateMonthLabel();
+}
+
+function updateMonthLabel() {
+  const l = document.getElementById('mLabel'), n = document.getElementById('mNav');
+  if (S.period === 'monthly') {
+    l.textContent = MONTHS[S.curDate.getMonth()] + ' ' + S.curDate.getFullYear();
+    n.style.display = 'flex';
+  } else {
+    n.style.display = 'none';
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────
+(async () => {
+  updateMonthLabel();
+  const ok = await checkConnection();
+  if (ok) await loadAll();
+})();
+</script>
+</body>
+</html>
