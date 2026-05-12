@@ -34,13 +34,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .status-dot.ok{background:var(--inc)}
 .status-dot.err{background:var(--exp)}
 .status-txt{font-size:12px;color:var(--muted)}
-.tabs{display:flex;gap:3px;background:rgba(0,0,0,0.06);border-radius:8px;padding:3px;width:fit-content}
+.tabs{display:flex;gap:3px;background:rgba(0,0,0,0.06);border-radius:8px;padding:3px;width:fit-content;flex-wrap:wrap}
 @media(prefers-color-scheme:dark){.tabs{background:rgba(255,255,255,0.07)}}
 .tab{padding:6px 14px;font-size:13px;border:none;border-radius:6px;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;font-family:inherit}
 .tab.active{background:var(--surface);color:var(--text);font-weight:500;box-shadow:0 1px 4px rgba(0,0,0,.1)}
 .period-row{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
 .pbtn{padding:5px 13px;font-size:12px;border:1px solid var(--border);border-radius:20px;cursor:pointer;background:transparent;color:var(--muted);transition:all .15s;font-family:inherit}
 .pbtn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+.range-pick{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.range-pick input{height:28px;border:1px solid var(--border);border-radius:6px;padding:0 8px;font-size:12px;background:var(--surface);color:var(--text);font-family:inherit}
 .mnav{display:flex;align-items:center;gap:6px;margin-left:auto}
 .mnav button{width:28px;height:28px;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;color:var(--muted);font-size:15px;display:flex;align-items:center;justify-content:center;font-family:inherit}
 .mnav button:hover{background:rgba(0,0,0,0.05)}
@@ -52,14 +54,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sc-val{font-size:22px;font-weight:600}
 .sc-val.i{color:var(--inc)}.sc-val.e{color:var(--exp)}.sc-val.b{color:var(--text)}
 .panel{display:none}.panel.active{display:block}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1rem;min-width:0;overflow:hidden}
 .card h3{font-size:14px;font-weight:600;margin-bottom:12px;color:var(--text)}
-.fg{display:flex;flex-direction:column;gap:4px}
+.fg{display:flex;flex-direction:column;gap:4px;min-width:0}
 .fg label{font-size:11px;color:var(--muted);font-weight:500}
-.fg input,.fg select{height:34px;border:1px solid var(--border);border-radius:var(--rs);padding:0 10px;font-size:13px;background:var(--surface);color:var(--text);font-family:inherit}
-.fg input:focus,.fg select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(55,138,221,.15)}
-.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:8px;align-items:end}
-.rec-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr auto;gap:8px;align-items:end}
+.fg input,.fg select,.fg textarea{height:34px;width:100%;min-width:0;border:1px solid var(--border);border-radius:var(--rs);padding:0 10px;font-size:13px;background:var(--surface);color:var(--text);font-family:inherit}
+.fg textarea{height:auto;padding:8px 10px;min-height:60px;resize:vertical}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px rgba(55,138,221,.15)}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;align-items:end}
+.form-grid > .fg.wide{grid-column:span 2}
+.form-grid > .add-btn{align-self:end}
+.rec-form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;align-items:end}
+.rec-form-grid > .fg.wide{grid-column:span 2}
+.rec-form-grid > .add-btn{align-self:end}
 .ttype{display:flex;border:1px solid var(--border);border-radius:var(--rs);overflow:hidden;height:34px}
 .ttype button{flex:1;border:none;background:transparent;font-size:12px;font-weight:500;cursor:pointer;padding:0 10px;transition:all .15s;color:var(--muted);font-family:inherit}
 .ttype button.ae{background:var(--exp-bg);color:var(--exp-t)}
@@ -67,9 +74,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .add-btn{height:34px;padding:0 16px;background:var(--text);color:var(--bg);border:none;border-radius:var(--rs);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:opacity .15s;font-family:inherit}
 .add-btn:hover{opacity:.8}
 .add-btn:disabled{opacity:.4;cursor:not-allowed}
-.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap}
 .sec-ttl{font-size:14px;font-weight:600;color:var(--text)}
 .fsel{height:28px;border:1px solid var(--border);border-radius:var(--rs);padding:0 8px;font-size:12px;background:var(--surface);color:var(--muted);font-family:inherit}
+.search-input{height:28px;border:1px solid var(--border);border-radius:var(--rs);padding:0 10px;font-size:12px;background:var(--surface);color:var(--text);font-family:inherit;width:160px}
 .tx-list{display:flex;flex-direction:column;gap:4px}
 .txi{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);transition:background .1s}
 .txi:hover{background:rgba(0,0,0,0.02)}
@@ -80,9 +88,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .txi-meta{font-size:11px;color:var(--muted);margin-top:1px}
 .txi-amt{font-size:14px;font-weight:600;white-space:nowrap}
 .txi-amt.i{color:var(--inc)}.txi-amt.e{color:var(--exp)}
-.del-btn{width:24px;height:24px;border:none;background:none;cursor:pointer;color:var(--muted);border-radius:4px;font-size:16px;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;font-family:inherit}
-.txi:hover .del-btn{opacity:1}
-.del-btn:hover{background:var(--exp-bg);color:var(--exp-t)}
+.row-actions{display:flex;align-items:center;gap:2px;opacity:0;transition:opacity .15s}
+.txi:hover .row-actions{opacity:1}
+.icon-btn{width:26px;height:26px;border:none;background:none;cursor:pointer;color:var(--muted);border-radius:4px;font-size:13px;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.icon-btn:hover{background:rgba(0,0,0,0.05);color:var(--text)}
+.icon-btn.danger:hover{background:var(--exp-bg);color:var(--exp-t)}
 .empty{text-align:center;padding:2rem 1rem;color:var(--muted);font-size:13px}
 .badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:20px;font-size:10px;font-weight:600}
 .badge-warn{background:var(--warn-bg);color:var(--warn-t)}
@@ -107,7 +117,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .budget-row input{width:90px;height:26px;border:1px solid var(--border);border-radius:4px;padding:0 8px;font-size:12px;background:var(--surface);color:var(--text);font-family:inherit}
 .budget-row button{height:26px;padding:0 10px;font-size:11px;background:rgba(0,0,0,0.05);border:1px solid var(--border);border-radius:4px;cursor:pointer;color:var(--muted);font-family:inherit}
 .budget-row button:hover{color:var(--text)}
-.add-cat-row{display:flex;gap:8px;align-items:center}
+.add-cat-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .add-cat-row input{height:34px;border:1px solid var(--border);border-radius:var(--rs);padding:0 10px;font-size:13px;background:var(--surface);color:var(--text);font-family:inherit}
 .add-cat-row input:focus{outline:none;border-color:var(--blue)}
 .add-cat-row button{height:34px;padding:0 14px;background:var(--blue-bg);color:var(--blue-t);border:none;border-radius:var(--rs);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;font-family:inherit}
@@ -131,11 +141,76 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .chart-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px}
 .chart-full{grid-column:1/-1}
 .loading{text-align:center;padding:3rem;color:var(--muted);font-size:14px}
+.toolbar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+
+/* Improved add-transaction card */
+.add-card{padding:1.25rem 1.5rem}
+.add-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap}
+.ttype-big{display:flex;gap:3px;background:rgba(0,0,0,0.05);padding:3px;border-radius:8px}
+@media(prefers-color-scheme:dark){.ttype-big{background:rgba(255,255,255,0.05)}}
+.ttype-big button{padding:7px 20px;font-size:13px;font-weight:500;background:transparent;border:none;border-radius:6px;cursor:pointer;color:var(--muted);font-family:inherit;transition:all .15s}
+.ttype-big button.ae{background:var(--exp-bg);color:var(--exp-t)}
+.ttype-big button.ai{background:var(--inc-bg);color:var(--inc-t)}
+.date-tag-wrap{position:relative}
+.date-tag{padding:7px 14px;font-size:12px;background:rgba(0,0,0,0.05);border:none;border-radius:20px;cursor:pointer;color:var(--text);display:inline-flex;align-items:center;gap:6px;font-family:inherit;transition:background .15s}
+.date-tag:hover{background:rgba(0,0,0,0.1)}
+@media(prefers-color-scheme:dark){.date-tag{background:rgba(255,255,255,0.06)}.date-tag:hover{background:rgba(255,255,255,0.12)}}
+.date-tag-wrap input[type="date"]{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;pointer-events:none;border:none}
+.amount-wrap{display:flex;align-items:baseline;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.amount-prefix{font-size:24px;color:var(--muted);font-weight:500}
+.amount-wrap input{font-size:30px;font-weight:600;border:none;outline:none;background:transparent;color:var(--text);width:100%;min-width:0;padding:0;font-family:inherit}
+.amount-wrap input::-webkit-outer-spin-button,.amount-wrap input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.amount-wrap input[type=number]{-moz-appearance:textfield}
+.desc-wrap{position:relative;margin-bottom:1.25rem}
+.desc-input{font-size:15px;border:none;outline:none;background:transparent;color:var(--text);width:100%;min-width:0;padding:6px 0;border-bottom:1px solid var(--border);font-family:inherit;transition:border-color .15s}
+.desc-input:focus{border-bottom-color:var(--blue)}
+.desc-input::placeholder{color:var(--muted)}
+.suggestions{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);box-shadow:0 4px 12px rgba(0,0,0,0.12);z-index:5;max-height:240px;overflow-y:auto}
+.suggestion{padding:8px 12px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.suggestion:last-child{border-bottom:none}
+.suggestion:hover,.suggestion.active{background:rgba(0,0,0,0.04)}
+@media(prefers-color-scheme:dark){.suggestion:hover,.suggestion.active{background:rgba(255,255,255,0.05)}}
+.suggestion-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;background:rgba(0,0,0,0.05)}
+.suggestion-text{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.suggestion-amt{font-size:12px;color:var(--muted);font-weight:500;white-space:nowrap}
+.add-section{margin-bottom:1rem}
+.add-label{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.cat-chips{display:flex;flex-wrap:wrap;gap:6px}
+.cat-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text);font-size:12px;cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap}
+.cat-chip:hover{background:rgba(0,0,0,0.03);border-color:var(--muted)}
+@media(prefers-color-scheme:dark){.cat-chip:hover{background:rgba(255,255,255,0.04)}}
+.cat-chip.active{background:var(--blue-bg);border-color:var(--blue);color:var(--blue-t);font-weight:500}
+.add-bottom{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.acc-select{height:38px;border:1px solid var(--border);border-radius:var(--rs);padding:0 10px;font-size:13px;background:var(--surface);color:var(--text);font-family:inherit;flex:1;min-width:140px}
+.primary-add{height:38px;padding:0 24px;font-size:14px;font-weight:600}
+.toolbar button{height:30px;padding:0 12px;font-size:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rs);color:var(--text);cursor:pointer;font-family:inherit}
+.toolbar button:hover{background:rgba(0,0,0,0.04)}
+@media(prefers-color-scheme:dark){.toolbar button:hover{background:rgba(255,255,255,0.04)}}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;z-index:50;padding:1rem}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2)}
+.modal h3{font-size:15px;font-weight:600;color:var(--text);margin-bottom:14px}
+.modal-body{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.modal-body .full{grid-column:1/-1}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px}
+.modal-actions button{height:34px;padding:0 16px;font-size:13px;border-radius:var(--rs);border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-family:inherit}
+.modal-actions button.primary{background:var(--text);color:var(--bg);border-color:var(--text)}
+.modal-actions button.primary:hover{opacity:.85}
+.modal-actions button.danger{background:var(--exp);color:#fff;border-color:var(--exp)}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--text);color:var(--bg);padding:10px 18px;border-radius:8px;font-size:13px;z-index:60;opacity:0;transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--exp);color:#fff}
+
 @media(max-width:640px){
-  .form-grid,.rec-form-grid{grid-template-columns:1fr 1fr}
   .summary{grid-template-columns:1fr}
   .charts-grid,.cat-grid{grid-template-columns:1fr}
   .hdr{flex-direction:column;align-items:flex-start;gap:12px}
+  .modal-body{grid-template-columns:1fr}
+  .form-grid > .add-btn,.rec-form-grid > .add-btn{grid-column:1/-1}
 }
 </style>
 </head>
@@ -147,20 +222,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <p><span class="status-dot" id="statusDot"></span><span class="status-txt" id="statusTxt">Connecting...</span></p>
     </div>
     <div class="tabs">
-      <button class="tab active" onclick="switchTab('overview')">Overview</button>
-      <button class="tab" onclick="switchTab('recurring')">Recurring</button>
-      <button class="tab" onclick="switchTab('charts')">Charts</button>
-      <button class="tab" onclick="switchTab('categories')">Categories</button>
+      <button class="tab active" data-tab="overview">Overview</button>
+      <button class="tab" data-tab="recurring">Recurring</button>
+      <button class="tab" data-tab="charts">Charts</button>
+      <button class="tab" data-tab="categories">Categories</button>
+      <button class="tab" data-tab="accounts">Accounts</button>
     </div>
   </div>
 
   <div class="period-row">
-    <button class="pbtn active" onclick="setPeriod('monthly',this)">Monthly</button>
-    <button class="pbtn" onclick="setPeriod('all',this)">All time</button>
+    <button class="pbtn active" data-period="monthly">Monthly</button>
+    <button class="pbtn" data-period="all">All time</button>
+    <button class="pbtn" data-period="range">Date range</button>
+    <div class="range-pick" id="rangePick" style="display:none">
+      <input type="date" id="rangeFrom"/> <span>to</span> <input type="date" id="rangeTo"/>
+      <button class="pbtn" id="rangeApply">Apply</button>
+    </div>
     <div class="mnav" id="mNav">
-      <button onclick="shiftMonth(-1)">&#8249;</button>
+      <button id="mPrev">&#8249;</button>
       <span id="mLabel"></span>
-      <button onclick="shiftMonth(1)">&#8250;</button>
+      <button id="mNext">&#8250;</button>
     </div>
   </div>
 
@@ -171,29 +252,61 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 
   <div id="panel-overview" class="panel active">
-    <div id="pendingBanner" style="display:none" class="pending-banner" onclick="switchTab('recurring')">
+    <div id="pendingBanner" style="display:none" class="pending-banner">
       <span>⏳</span><span id="pendingBannerText"></span><span style="margin-left:auto;font-size:11px">Review →</span>
     </div>
-    <div class="card">
-      <h3>Add transaction</h3>
-      <div class="form-grid">
-        <div class="fg"><label>Description</label><input type="text" id="txDesc" placeholder="e.g. Groceries"/></div>
-        <div class="fg"><label>Amount ($)</label><input type="number" id="txAmt" placeholder="0.00" min="0" step="0.01"/></div>
-        <div class="fg"><label>Category</label><select id="txCat"></select></div>
-        <div class="fg"><label>Type</label>
-          <div class="ttype">
-            <button id="btnExp" class="ae" onclick="setType('expense')">Expense</button>
-            <button id="btnInc" onclick="setType('income')">Income</button>
-          </div>
+    <div class="card add-card">
+      <div class="add-top">
+        <div class="ttype-big">
+          <button id="btnExp" class="ae" type="button">Expense</button>
+          <button id="btnInc" type="button">Income</button>
         </div>
-        <button class="add-btn" onclick="addTx()">+ Add</button>
+        <div class="date-tag-wrap">
+          <button type="button" class="date-tag" id="txDateBtn" title="Change date">
+            <span>📅</span><span id="txDateLabel">Today</span>
+          </button>
+          <input type="date" id="txDate"/>
+        </div>
+      </div>
+
+      <div class="amount-wrap">
+        <span class="amount-prefix">$</span>
+        <input type="number" id="txAmt" placeholder="0.00" min="0" step="0.01" inputmode="decimal"/>
+      </div>
+
+      <div class="desc-wrap">
+        <input class="desc-input" type="text" id="txDesc" placeholder="What's it for?" autocomplete="off"/>
+        <div class="suggestions" id="txSuggestions" hidden></div>
+      </div>
+
+      <div class="add-section">
+        <div class="add-label">Category</div>
+        <div class="cat-chips" id="txCatChips"></div>
+      </div>
+
+      <div class="add-bottom">
+        <select id="txAcc" class="acc-select" title="Account"></select>
+        <button class="add-btn primary-add" id="addTxBtn">Add transaction</button>
       </div>
     </div>
+
+    <div class="toolbar">
+      <input class="search-input" id="searchInput" placeholder="Search description..."/>
+      <button id="exportCsvBtn">↓ Export CSV</button>
+      <button id="importCsvBtn">↑ Import CSV</button>
+    </div>
+
     <div class="sec-hdr">
       <span class="sec-ttl" id="listTitle">Transactions</span>
-      <select class="fsel" id="filterCat" onchange="loadTransactions()">
-        <option value="all">All categories</option>
-      </select>
+      <div style="display:flex;gap:6px">
+        <select class="fsel" id="filterCat"><option value="all">All categories</option></select>
+        <select class="fsel" id="filterAcc"><option value="all">All accounts</option></select>
+        <select class="fsel" id="filterType">
+          <option value="all">All types</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+      </div>
     </div>
     <div class="tx-list" id="txList"><div class="loading">Loading...</div></div>
   </div>
@@ -202,13 +315,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="card">
       <h3>Add recurring transaction</h3>
       <div class="rec-form-grid">
-        <div class="fg"><label>Description</label><input type="text" id="recDesc" placeholder="e.g. Netflix"/></div>
+        <div class="fg wide"><label>Description</label><input type="text" id="recDesc" placeholder="e.g. Netflix"/></div>
         <div class="fg"><label>Amount ($)</label><input type="number" id="recAmt" placeholder="0.00" min="0" step="0.01"/></div>
         <div class="fg"><label>Category</label><select id="recCat"></select></div>
+        <div class="fg"><label>Account</label><select id="recAcc"></select></div>
         <div class="fg"><label>Type</label>
           <div class="ttype">
-            <button id="recBtnExp" class="ae" onclick="setRecType('expense')">Expense</button>
-            <button id="recBtnInc" onclick="setRecType('income')">Income</button>
+            <button id="recBtnExp" class="ae" type="button">Expense</button>
+            <button id="recBtnInc" type="button">Income</button>
           </div>
         </div>
         <div class="fg"><label>Frequency</label>
@@ -219,7 +333,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             <option value="yearly">Yearly</option>
           </select>
         </div>
-        <button class="add-btn" onclick="addRecurring()">+ Add</button>
+        <button class="add-btn" id="addRecBtn">+ Add</button>
       </div>
     </div>
     <div class="sec-hdr" style="margin-top:0.5rem">
@@ -229,6 +343,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="tx-list" id="pendingList"><div class="loading">Loading...</div></div>
     <div class="sec-hdr" style="margin-top:1.5rem">
       <span class="sec-ttl">Recurring rules</span>
+      <button class="pbtn" id="runSchedulerBtn">Catch up now</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:8px" id="recRules"><div class="loading">Loading...</div></div>
   </div>
@@ -255,61 +370,168 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="card" style="padding:12px 14px">
       <div class="add-cat-row">
         <input type="text" id="newCatName" placeholder="Category name..." style="flex:1"/>
-        <input type="text" id="newCatIcon" placeholder="emoji" style="width:60px"/>
-        <button onclick="addCategory()">+ Add category</button>
+        <input type="text" id="newCatIcon" placeholder="emoji" style="width:60px" maxlength="2"/>
+        <button id="addCatBtn">+ Add category</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel-accounts" class="panel">
+    <div id="accList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:1rem"><div class="loading">Loading...</div></div>
+    <div class="card" style="padding:12px 14px">
+      <div class="add-cat-row">
+        <input type="text" id="newAccName" placeholder="Account name..." style="flex:1"/>
+        <input type="text" id="newAccIcon" placeholder="emoji" style="width:60px" maxlength="2"/>
+        <select id="newAccType" style="height:34px;border:1px solid var(--border);border-radius:var(--rs);padding:0 10px;background:var(--surface);color:var(--text);font-family:inherit;font-size:13px">
+          <option value="cash">Cash</option>
+          <option value="checking">Checking</option>
+          <option value="savings">Savings</option>
+          <option value="credit">Credit card</option>
+        </select>
+        <button id="addAccBtn">+ Add account</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modalTitle">Edit</h3>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Hidden file input for CSV import -->
+<input type="file" id="csvFileInput" accept=".csv,text/csv" style="display:none"/>
+
 <script>
+'use strict';
 const API = 'http://localhost:3000/api';
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const COLORS = ['#1D9E75','#378ADD','#D85A30','#BA7517','#534AB7','#D4537E','#639922','#E24B4A','#5DCAA5','#F09595'];
 
 const S = {
-  categories: [],
-  transactions: [],
-  pending: [],
-  recurring: [],
-  tab: 'overview',
-  period: 'monthly',
-  curDate: new Date(),
-  txType: 'expense',
-  recType: 'expense',
+  categories: [], accounts: [], transactions: [], pending: [], recurring: [],
+  tab: 'overview', period: 'monthly', curDate: new Date(),
+  rangeFrom: null, rangeTo: null,
+  txType: 'expense', recType: 'expense',
+  searchTerm: '', filterCat: 'all', filterAcc: 'all', filterType: 'all',
   charts: {}
 };
 
-// ── API helpers ──────────────────────────────────────────
-async function api(method, path, body) {
-  try {
-    const res = await fetch(API + path, {
-      method,
-      headers: body ? { 'Content-Type': 'application/json' } : {},
-      body: body ? JSON.stringify(body) : undefined
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
-  } catch (e) {
-    console.error(method, path, e);
-    throw e;
-  }
+// ── HTML escaping (XSS-safe rendering) ────────────────────────
+function esc(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
-const get = path => api('GET', path);
+// ── API helpers ──────────────────────────────────────────────
+async function api(method, path, body) {
+  const res = await fetch(API + path, {
+    method,
+    headers: body !== undefined ? { 'Content-Type': 'application/json' } : {},
+    body: body !== undefined ? JSON.stringify(body) : undefined
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    let msg = txt;
+    try { msg = JSON.parse(txt).error || txt; } catch (_) {}
+    throw new Error(msg || ('HTTP ' + res.status));
+  }
+  return res.json();
+}
+const get  = (path)       => api('GET', path);
 const post = (path, body) => api('POST', path, body);
-const del = path => api('DELETE', path);
+const put  = (path, body) => api('PUT', path, body);
+const del  = (path)       => api('DELETE', path);
 
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 function fmt(n) { return '$' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
-function catById(id) { return S.categories.find(c => c.id === id) || {name:'Other', icon:'📦', budget:null}; }
-function catColor(id) { const i = S.categories.findIndex(c => c.id === id); return COLORS[i >= 0 ? i % COLORS.length : 0]; }
 function todayStr() { return new Date().toISOString().split('T')[0]; }
+function catById(id) { return S.categories.find(c => c.id === id) || {name:'Unknown', icon:'📦'}; }
+function accById(id) { return S.accounts.find(a => a.id === id) || {name:'Main', icon:'💰'}; }
+function catColor(id) { const i = S.categories.findIndex(c => c.id === id); return COLORS[i >= 0 ? i % COLORS.length : 0]; }
 
-// ── Connection check ──────────────────────────────────────
+// ── Toast ────────────────────────────────────────────────────
+function toast(msg, isErr = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (isErr ? ' err' : '');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── Modal ────────────────────────────────────────────────────
+const modal = {
+  el: document.getElementById('modal'),
+  open(title, fields, onConfirm, opts = {}) {
+    document.getElementById('modalTitle').textContent = title;
+    const body = document.getElementById('modalBody');
+    body.innerHTML = fields.map(f => {
+      const id = 'mf-' + f.key;
+      const cls = f.full ? 'full' : '';
+      if (f.kind === 'select') {
+        const opts2 = (f.options || []).map(o =>
+          `<option value="${esc(o.value)}"${o.value == f.value ? ' selected' : ''}>${esc(o.label)}</option>`
+        ).join('');
+        return `<div class="fg ${cls}"><label>${esc(f.label)}</label><select id="${id}">${opts2}</select></div>`;
+      }
+      if (f.kind === 'textarea') {
+        return `<div class="fg ${cls}"><label>${esc(f.label)}</label><textarea id="${id}">${esc(f.value || '')}</textarea></div>`;
+      }
+      const type = f.kind || 'text';
+      return `<div class="fg ${cls}"><label>${esc(f.label)}</label><input type="${type}" id="${id}" value="${esc(f.value ?? '')}" ${f.attrs || ''}/></div>`;
+    }).join('');
+    const actions = document.getElementById('modalActions');
+    actions.innerHTML = `
+      <button id="mCancel">${esc(opts.cancelLabel || 'Cancel')}</button>
+      <button class="${opts.danger ? 'danger' : 'primary'}" id="mConfirm">${esc(opts.confirmLabel || 'Save')}</button>
+    `;
+    document.getElementById('mCancel').onclick = () => modal.close();
+    document.getElementById('mConfirm').onclick = async () => {
+      const data = {};
+      for (const f of fields) data[f.key] = document.getElementById('mf-' + f.key).value;
+      try {
+        await onConfirm(data);
+        modal.close();
+      } catch (e) { toast(e.message || 'Failed', true); }
+    };
+    this.el.classList.add('show');
+  },
+  close() { this.el.classList.remove('show'); }
+};
+modal.el.addEventListener('click', e => { if (e.target === modal.el) modal.close(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') modal.close(); });
+
+function confirmModal(message, opts = {}) {
+  return new Promise(resolve => {
+    document.getElementById('modalTitle').textContent = opts.title || 'Confirm';
+    document.getElementById('modalBody').innerHTML =
+      `<div class="full" style="font-size:13px;color:var(--text);line-height:1.5">${esc(message)}</div>`;
+    document.getElementById('modalActions').innerHTML = `
+      <button id="mCancel">Cancel</button>
+      <button class="${opts.danger ? 'danger' : 'primary'}" id="mConfirm">${esc(opts.confirmLabel || 'OK')}</button>
+    `;
+    document.getElementById('mCancel').onclick = () => { modal.close(); resolve(false); };
+    document.getElementById('mConfirm').onclick = () => { modal.close(); resolve(true); };
+    modal.el.classList.add('show');
+  });
+}
+
+// ── Connection check ─────────────────────────────────────────
 async function checkConnection() {
   try {
-    await get('/categories');
+    await get('/health');
     document.getElementById('statusDot').className = 'status-dot ok';
     document.getElementById('statusTxt').textContent = 'Connected · finance.db';
     return true;
@@ -320,23 +542,49 @@ async function checkConnection() {
   }
 }
 
-// ── Load data ─────────────────────────────────────────────
+// ── Loading data ─────────────────────────────────────────────
+async function loadAll() {
+  await loadCategories();
+  await loadAccounts();
+  await Promise.all([loadTransactions(), loadPending(), loadRecurring()]);
+}
+
 async function loadCategories() {
   S.categories = await get('/categories');
   populateCatSelects();
+  renderCatChips();
+}
+
+async function loadAccounts() {
+  S.accounts = await get('/accounts');
+  populateAccSelects();
+}
+
+function buildQueryParams() {
+  const p = new URLSearchParams();
+  if (S.period === 'monthly') {
+    p.set('year', S.curDate.getFullYear());
+    p.set('month', String(S.curDate.getMonth() + 1).padStart(2, '0'));
+  } else if (S.period === 'range' && S.rangeFrom && S.rangeTo) {
+    p.set('from', S.rangeFrom);
+    p.set('to', S.rangeTo);
+  }
+  if (S.filterCat !== 'all') p.set('category', S.filterCat);
+  if (S.filterAcc !== 'all') p.set('account', S.filterAcc);
+  if (S.filterType !== 'all') p.set('type', S.filterType);
+  if (S.searchTerm) p.set('q', S.searchTerm);
+  return p;
 }
 
 async function loadTransactions() {
-  let url = '/transactions';
-  const params = new URLSearchParams();
-  if (S.period === 'monthly') {
-    params.set('year', S.curDate.getFullYear());
-    params.set('month', String(S.curDate.getMonth() + 1).padStart(2, '0'));
-  }
-  const qs = params.toString();
+  const qs = buildQueryParams().toString();
   S.transactions = await get('/transactions' + (qs ? '?' + qs : ''));
   renderList();
   updateSummary();
+  // Re-render the active panel that depends on this data
+  if (S.tab === 'charts') renderCharts();
+  else if (S.tab === 'categories') renderCategories();
+  else if (S.tab === 'accounts') renderAccounts();
 }
 
 async function loadPending() {
@@ -349,12 +597,7 @@ async function loadRecurring() {
   renderRecRules();
 }
 
-async function loadAll() {
-  await loadCategories();
-  await Promise.all([loadTransactions(), loadPending(), loadRecurring()]);
-}
-
-// ── Summary ───────────────────────────────────────────────
+// ── Summary ──────────────────────────────────────────────────
 function updateSummary() {
   const inc = S.transactions.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0);
   const exp = S.transactions.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
@@ -366,31 +609,33 @@ function updateSummary() {
   el.style.color = bal < 0 ? 'var(--exp)' : 'var(--inc)';
 }
 
-// ── Render: Transactions ──────────────────────────────────
+// ── Render: Transactions ─────────────────────────────────────
 function renderList() {
-  let tx = S.transactions;
-  const fc = document.getElementById('filterCat')?.value;
-  if (fc && fc !== 'all') tx = tx.filter(t => t.category_id === fc);
-
   const el = document.getElementById('txList');
-  if (!tx.length) { el.innerHTML = '<div class="empty">No transactions found.</div>'; return; }
-
-  el.innerHTML = tx.map(t => {
+  if (!S.transactions.length) {
+    el.innerHTML = '<div class="empty">No transactions found.</div>';
+    return;
+  }
+  el.innerHTML = S.transactions.map(t => {
     const c = catById(t.category_id);
-    const d = new Date(t.date).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+    const a = accById(t.account_id);
+    const d = new Date(t.date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
     return `<div class="txi">
-      <div class="txi-icon" style="background:${catColor(t.category_id)}22">${c.icon}</div>
+      <div class="txi-icon" style="background:${catColor(t.category_id)}22">${esc(c.icon)}</div>
       <div class="txi-info">
-        <div class="txi-desc">${t.description}</div>
-        <div class="txi-meta">${c.name} · ${d}</div>
+        <div class="txi-desc">${esc(t.description)}</div>
+        <div class="txi-meta">${esc(c.name)} · ${esc(a.name)} · ${esc(d)}</div>
       </div>
       <div class="txi-amt ${t.type === 'income' ? 'i' : 'e'}">${t.type === 'income' ? '+' : '-'}${fmt(t.amount)}</div>
-      <button class="del-btn" onclick="deleteTx('${t.id}')">×</button>
+      <div class="row-actions">
+        <button class="icon-btn" data-act="edit-tx" data-id="${esc(t.id)}" title="Edit">✎</button>
+        <button class="icon-btn danger" data-act="del-tx" data-id="${esc(t.id)}" title="Delete">×</button>
+      </div>
     </div>`;
   }).join('');
 }
 
-// ── Render: Pending ───────────────────────────────────────
+// ── Render: Pending ──────────────────────────────────────────
 function renderPending() {
   const el = document.getElementById('pendingList');
   const cnt = document.getElementById('pendingCount');
@@ -406,48 +651,55 @@ function renderPending() {
     banner.style.display = 'none';
   }
 
-  if (!S.pending.length) { el.innerHTML = '<div class="empty">No pending transactions — all caught up.</div>'; return; }
+  if (!S.pending.length) {
+    el.innerHTML = '<div class="empty">No pending transactions — all caught up.</div>';
+    return;
+  }
 
   el.innerHTML = S.pending.map(p => {
     const c = catById(p.category_id);
-    const d = new Date(p.due_date).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+    const d = new Date(p.due_date).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
     return `<div class="txi">
-      <div class="txi-icon" style="background:${catColor(p.category_id)}22">${c.icon}</div>
+      <div class="txi-icon" style="background:${catColor(p.category_id)}22">${esc(c.icon)}</div>
       <div class="txi-info">
-        <div class="txi-desc">${p.description}</div>
-        <div class="txi-meta">${c.name} · due ${d} · <span class="badge badge-pend">pending</span></div>
+        <div class="txi-desc">${esc(p.description)}</div>
+        <div class="txi-meta">${esc(c.name)} · due ${esc(d)} · <span class="badge badge-pend">pending</span></div>
       </div>
       <div class="txi-amt ${p.type === 'income' ? 'i' : 'e'}" style="margin-right:8px">${p.type === 'income' ? '+' : '-'}${fmt(p.amount)}</div>
       <div class="rec-actions">
-        <button class="approve-btn" onclick="approvePending('${p.id}')">✓ Approve</button>
-        <button class="skip-btn" onclick="skipPending('${p.id}')">Skip</button>
+        <button class="approve-btn" data-act="approve" data-id="${esc(p.id)}">✓ Approve</button>
+        <button class="skip-btn" data-act="skip" data-id="${esc(p.id)}">Skip</button>
       </div>
     </div>`;
   }).join('');
 }
 
-// ── Render: Recurring rules ───────────────────────────────
+// ── Render: Recurring rules ──────────────────────────────────
 function renderRecRules() {
   const el = document.getElementById('recRules');
-  if (!S.recurring.length) { el.innerHTML = '<div class="empty">No recurring rules yet.</div>'; return; }
+  if (!S.recurring.length) {
+    el.innerHTML = '<div class="empty">No recurring rules yet.</div>';
+    return;
+  }
   const freqLabel = {daily:'Daily', weekly:'Weekly', monthly:'Monthly', yearly:'Yearly'};
   el.innerHTML = S.recurring.map(r => {
     const c = catById(r.category_id);
+    const a = accById(r.account_id);
     return `<div class="rec-item">
-      <div class="txi-icon" style="background:${catColor(r.category_id)}22;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${c.icon}</div>
+      <div class="txi-icon" style="background:${catColor(r.category_id)}22">${esc(c.icon)}</div>
       <div class="rec-info">
-        <div class="rec-desc">${r.description}</div>
-        <div class="rec-meta">${c.name} · ${freqLabel[r.frequency]} · requires approval each time</div>
+        <div class="rec-desc">${esc(r.description)}</div>
+        <div class="rec-meta">${esc(c.name)} · ${esc(a.name)} · ${esc(freqLabel[r.frequency] || r.frequency)}${r.last_generated ? ' · last: ' + esc(r.last_generated) : ''}</div>
       </div>
       <div class="rec-amt ${r.type === 'income' ? 'i' : 'e'}">${r.type === 'income' ? '+' : '-'}${fmt(r.amount)}</div>
       <div class="rec-actions">
-        <button class="del-rec-btn" onclick="deleteRec('${r.id}')">Remove</button>
+        <button class="del-rec-btn" data-act="del-rec" data-id="${esc(r.id)}">Remove</button>
       </div>
     </div>`;
   }).join('');
 }
 
-// ── Render: Categories ────────────────────────────────────
+// ── Render: Categories ───────────────────────────────────────
 async function renderCategories() {
   const allTx = await get('/transactions');
   const expenses = allTx.filter(t => {
@@ -455,6 +707,9 @@ async function renderCategories() {
     if (S.period === 'monthly') {
       const d = new Date(t.date);
       return d.getFullYear() === S.curDate.getFullYear() && d.getMonth() === S.curDate.getMonth();
+    }
+    if (S.period === 'range' && S.rangeFrom && S.rangeTo) {
+      return t.date >= S.rangeFrom && t.date <= S.rangeTo;
     }
     return true;
   });
@@ -469,14 +724,13 @@ async function renderCategories() {
     const warn = hasBudget && !over && spent / c.budget > 0.8;
     const barColor = over ? '#D85A30' : warn ? '#BA7517' : color;
     const statusBadge = over ? '<span class="badge badge-over">over budget</span>' : warn ? '<span class="badge badge-warn">near limit</span>' : '';
-    const txCount = expenses.filter(t => t.category_id === c.id).length;
     return `<div class="cat-card">
       <div class="cat-hdr">
-        <span style="font-size:16px">${c.icon}</span>
-        <span class="cat-name">${c.name}</span>
+        <span style="font-size:16px">${esc(c.icon)}</span>
+        <span class="cat-name">${esc(c.name)}</span>
         <div class="cat-act">
-          <button onclick="editCat('${c.id}','${c.name}','${c.icon}')">rename</button>
-          <button class="danger" onclick="deleteCat('${c.id}')">×</button>
+          <button data-act="edit-cat" data-id="${esc(c.id)}">edit</button>
+          <button class="danger" data-act="del-cat" data-id="${esc(c.id)}">×</button>
         </div>
       </div>
       <div class="bar-wrap"><div class="bar-fill" style="width:${pct.toFixed(1)}%;background:${barColor}"></div></div>
@@ -486,25 +740,41 @@ async function renderCategories() {
       </div>
       <div class="budget-row">
         <label>Budget:</label>
-        <input type="number" id="bgt-${c.id}" value="${c.budget || ''}" placeholder="optional" min="0" step="1"/>
-        <button onclick="saveBudget('${c.id}','${c.name}','${c.icon}')">Save</button>
-        ${hasBudget ? `<button onclick="clearBudget('${c.id}','${c.name}','${c.icon}')">Clear</button>` : ''}
+        <input type="number" id="bgt-${esc(c.id)}" value="${c.budget || ''}" placeholder="optional" min="0" step="1"/>
+        <button data-act="save-bgt" data-id="${esc(c.id)}">Save</button>
+        ${hasBudget ? `<button data-act="clear-bgt" data-id="${esc(c.id)}">Clear</button>` : ''}
       </div>
     </div>`;
   }).join('');
 }
 
-// ── Render: Charts ────────────────────────────────────────
-async function renderCharts() {
-  const allTx = await get('/transactions');
-  const periodTx = S.period === 'monthly' ? allTx.filter(t => {
-    const d = new Date(t.date);
-    return d.getFullYear() === S.curDate.getFullYear() && d.getMonth() === S.curDate.getMonth();
-  }) : allTx;
+// ── Render: Accounts ─────────────────────────────────────────
+function renderAccounts() {
+  const el = document.getElementById('accList');
+  if (!S.accounts.length) { el.innerHTML = '<div class="empty">No accounts.</div>'; return; }
+  el.innerHTML = S.accounts.map(a => {
+    const txs = S.transactions.filter(t => t.account_id === a.id);
+    const inc = txs.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0);
+    const exp = txs.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
+    return `<div class="rec-item">
+      <div class="txi-icon" style="background:rgba(55,138,221,0.15)">${esc(a.icon || '💰')}</div>
+      <div class="rec-info">
+        <div class="rec-desc">${esc(a.name)}</div>
+        <div class="rec-meta">${esc(a.type)} · ${txs.length} transactions · net ${fmt(inc - exp)}</div>
+      </div>
+      <div class="rec-actions">
+        <button class="del-rec-btn" data-act="edit-acc" data-id="${esc(a.id)}">edit</button>
+        ${a.id !== 'default' ? `<button class="del-rec-btn" data-act="del-acc" data-id="${esc(a.id)}">remove</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
 
+// ── Render: Charts ───────────────────────────────────────────
+async function renderCharts() {
+  const periodTx = S.transactions; // server-filtered already
   const inc = periodTx.filter(t => t.type === 'income').reduce((s,t) => s + t.amount, 0);
   const exp = periodTx.filter(t => t.type === 'expense').reduce((s,t) => s + t.amount, 0);
-
   const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const tickColor = isDark ? '#9a9894' : '#888';
   const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
@@ -532,6 +802,8 @@ async function renderCharts() {
     options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right', labels: { color: tickColor, font: { size: 11 }, boxWidth: 10, padding: 8 } } } }
   });
 
+  // cumulative balance always uses full history
+  const allTx = await get('/transactions');
   const sorted = [...allTx].sort((a,b) => new Date(a.date) - new Date(b.date));
   let run = 0; const lls = [], ld = [];
   sorted.forEach(t => {
@@ -551,22 +823,39 @@ async function renderCharts() {
   });
 }
 
-// ── Populate selects ──────────────────────────────────────
+// ── Populate selects ─────────────────────────────────────────
 function populateCatSelects() {
   ['txCat','recCat','filterCat'].forEach(id => {
     const el = document.getElementById(id); if (!el) return;
     const prev = el.value;
     el.innerHTML = (id === 'filterCat' ? '<option value="all">All categories</option>' : '') +
-      S.categories.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+      S.categories.map(c => `<option value="${esc(c.id)}">${esc(c.icon)} ${esc(c.name)}</option>`).join('');
     if (prev) el.value = prev;
   });
 }
 
-// ── Actions ───────────────────────────────────────────────
+function populateAccSelects() {
+  ['txAcc','recAcc','filterAcc'].forEach(id => {
+    const el = document.getElementById(id); if (!el) return;
+    const prev = el.value;
+    el.innerHTML = (id === 'filterAcc' ? '<option value="all">All accounts</option>' : '') +
+      S.accounts.map(a => `<option value="${esc(a.id)}">${esc(a.icon)} ${esc(a.name)}</option>`).join('');
+    if (prev) el.value = prev;
+    else if (id !== 'filterAcc') el.value = 'default';
+  });
+}
+
+// ── Type toggles ─────────────────────────────────────────────
 function setType(t) {
   S.txType = t;
   document.getElementById('btnExp').className = t === 'expense' ? 'ae' : '';
   document.getElementById('btnInc').className = t === 'income' ? 'ai' : '';
+  // Restore last-used category for this type
+  try {
+    const last = localStorage.getItem('lastCat-' + t);
+    if (last && S.categories.find(c => c.id === last)) S.txCatId = last;
+  } catch (_) {}
+  renderCatChips();
 }
 function setRecType(t) {
   S.recType = t;
@@ -574,49 +863,173 @@ function setRecType(t) {
   document.getElementById('recBtnInc').className = t === 'income' ? 'ai' : '';
 }
 
+// ── Add transaction ──────────────────────────────────────────
+function renderCatChips() {
+  const el = document.getElementById('txCatChips');
+  if (!el) return;
+  // Default selection: last-used category for current type, else first
+  if (!S.txCatId || !S.categories.find(c => c.id === S.txCatId)) {
+    const last = (typeof localStorage !== 'undefined') && localStorage.getItem('lastCat-' + S.txType);
+    S.txCatId = (last && S.categories.find(c => c.id === last))
+      ? last
+      : (S.categories[0] && S.categories[0].id);
+  }
+  el.innerHTML = S.categories.map(c =>
+    `<button type="button" class="cat-chip${S.txCatId === c.id ? ' active' : ''}" data-act="pick-cat" data-id="${esc(c.id)}">
+      <span>${esc(c.icon)}</span><span>${esc(c.name)}</span>
+    </button>`
+  ).join('');
+}
+
+function pickCat(id) {
+  S.txCatId = id;
+  try { localStorage.setItem('lastCat-' + S.txType, id); } catch (_) {}
+  renderCatChips();
+}
+
+function updateDateLabel() {
+  const v = document.getElementById('txDate').value;
+  const lbl = document.getElementById('txDateLabel');
+  if (!v || v === todayStr()) { lbl.textContent = 'Today'; return; }
+  lbl.textContent = new Date(v + 'T00:00:00').toLocaleDateString('en-US',
+    { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// Description autocomplete (server-side search, debounced)
+let suggestTimer;
+let suggestActive = -1;
+let suggestList = [];
+
+async function fetchSuggestions(value) {
+  const el = document.getElementById('txSuggestions');
+  if (!value || value.length < 2) { el.hidden = true; suggestList = []; return; }
+  let rows;
+  try { rows = await get('/transactions?q=' + encodeURIComponent(value) + '&type=' + S.txType); }
+  catch (_) { rows = []; }
+  // Dedupe by description (case-insensitive); keep most recent first (rows already DESC)
+  const seen = new Set();
+  suggestList = [];
+  for (const r of rows) {
+    const key = r.description.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    suggestList.push(r);
+    if (suggestList.length >= 5) break;
+  }
+  if (!suggestList.length) { el.hidden = true; return; }
+  suggestActive = -1;
+  el.innerHTML = suggestList.map((t, i) => {
+    const c = catById(t.category_id);
+    return `<div class="suggestion${i === suggestActive ? ' active' : ''}" data-act="pick-sug" data-idx="${i}">
+      <span class="suggestion-icon">${esc(c.icon)}</span>
+      <span class="suggestion-text">${esc(t.description)}</span>
+      <span class="suggestion-amt">${fmt(t.amount)}</span>
+    </div>`;
+  }).join('');
+  el.hidden = false;
+}
+
+function applySuggestion(idx) {
+  const t = suggestList[idx];
+  if (!t) return;
+  document.getElementById('txDesc').value = t.description;
+  document.getElementById('txAmt').value = t.amount.toFixed(2);
+  S.txCatId = t.category_id;
+  if (t.type !== S.txType) setType(t.type);
+  if (t.account_id) document.getElementById('txAcc').value = t.account_id;
+  renderCatChips();
+  document.getElementById('txSuggestions').hidden = true;
+  document.getElementById('txAmt').focus();
+  document.getElementById('txAmt').select();
+}
+
 async function addTx() {
   const desc = document.getElementById('txDesc').value.trim();
   const amt = parseFloat(document.getElementById('txAmt').value);
-  const category_id = document.getElementById('txCat').value;
-  if (!desc || !amt || amt <= 0) { alert('Please fill in description and a valid amount.'); return; }
-  await post('/transactions', { id: uid(), description: desc, amount: amt, category_id, type: S.txType, date: todayStr() });
-  document.getElementById('txDesc').value = '';
-  document.getElementById('txAmt').value = '';
-  await loadTransactions();
+  const date = document.getElementById('txDate').value || todayStr();
+  const category_id = S.txCatId;
+  const account_id = document.getElementById('txAcc').value;
+  if (!desc) return toast('Description required', true);
+  if (!amt || amt <= 0) return toast('Enter a valid amount', true);
+  if (!category_id) return toast('Pick a category', true);
+  try {
+    await post('/transactions', { id: uid(), description: desc, amount: amt, category_id, account_id, type: S.txType, date });
+    document.getElementById('txDesc').value = '';
+    document.getElementById('txAmt').value = '';
+    document.getElementById('txDate').value = '';
+    updateDateLabel();
+    document.getElementById('txSuggestions').hidden = true;
+    document.getElementById('txAmt').focus();
+    await loadTransactions();
+    toast('Added');
+  } catch (e) { toast(e.message || 'Failed to add', true); }
+}
+
+async function editTx(id) {
+  const t = S.transactions.find(x => x.id === id);
+  if (!t) return;
+  modal.open('Edit transaction', [
+    { key: 'description', label: 'Description', value: t.description, full: true },
+    { key: 'amount', label: 'Amount', kind: 'number', value: t.amount, attrs: 'min="0" step="0.01"' },
+    { key: 'date', label: 'Date', kind: 'date', value: t.date },
+    { key: 'category_id', label: 'Category', kind: 'select', value: t.category_id,
+      options: S.categories.map(c => ({ value: c.id, label: c.icon + ' ' + c.name })) },
+    { key: 'account_id', label: 'Account', kind: 'select', value: t.account_id || 'default',
+      options: S.accounts.map(a => ({ value: a.id, label: a.icon + ' ' + a.name })) },
+    { key: 'type', label: 'Type', kind: 'select', value: t.type,
+      options: [{ value: 'expense', label: 'Expense' }, { value: 'income', label: 'Income' }] },
+    { key: 'notes', label: 'Notes', kind: 'textarea', value: t.notes || '', full: true },
+  ], async data => {
+    const amt = parseFloat(data.amount);
+    if (!data.description.trim() || !isFinite(amt) || amt <= 0) throw new Error('Invalid input');
+    await put('/transactions/' + id, {
+      description: data.description.trim(), amount: amt,
+      category_id: data.category_id, account_id: data.account_id,
+      type: data.type, date: data.date, notes: data.notes || null
+    });
+    await loadTransactions();
+    toast('Saved');
+  });
 }
 
 async function deleteTx(id) {
-  if (!confirm('Delete this transaction?')) return;
+  if (!await confirmModal('Delete this transaction?', { danger: true, confirmLabel: 'Delete' })) return;
   await del('/transactions/' + id);
   await loadTransactions();
+  toast('Deleted');
 }
 
+// ── Recurring ────────────────────────────────────────────────
 async function addRecurring() {
   const desc = document.getElementById('recDesc').value.trim();
   const amt = parseFloat(document.getElementById('recAmt').value);
   const category_id = document.getElementById('recCat').value;
+  const account_id = document.getElementById('recAcc').value;
   const frequency = document.getElementById('recFreq').value;
-  if (!desc || !amt || amt <= 0) { alert('Please fill in description and amount.'); return; }
-  const recId = uid();
-  await post('/recurring', { id: recId, description: desc, amount: amt, category_id, type: S.recType, frequency });
-  await post('/pending', { id: uid(), description: desc, amount: amt, category_id, type: S.recType, recurring_rule_id: recId, due_date: todayStr() });
-  document.getElementById('recDesc').value = '';
-  document.getElementById('recAmt').value = '';
-  await loadRecurring();
-  await loadPending();
+  if (!desc || !amt || amt <= 0) return toast('Description and amount are required', true);
+  try {
+    await post('/recurring', { id: uid(), description: desc, amount: amt, category_id, account_id, type: S.recType, frequency, start_date: todayStr() });
+    document.getElementById('recDesc').value = '';
+    document.getElementById('recAmt').value = '';
+    await loadRecurring();
+    await loadPending();
+    toast('Recurring rule added');
+  } catch (e) { toast(e.message || 'Failed', true); }
 }
 
 async function deleteRec(id) {
-  if (!confirm('Remove this recurring rule and its pending transactions?')) return;
+  if (!await confirmModal('Remove this recurring rule and its pending transactions?', { danger: true, confirmLabel: 'Remove' })) return;
   await del('/recurring/' + id);
   await loadRecurring();
   await loadPending();
+  toast('Removed');
 }
 
 async function approvePending(id) {
   await post('/pending/' + id + '/approve');
   await loadPending();
   await loadTransactions();
+  toast('Approved');
 }
 
 async function skipPending(id) {
@@ -624,64 +1037,164 @@ async function skipPending(id) {
   await loadPending();
 }
 
+async function runScheduler() {
+  await post('/recurring/run', {});
+  await loadPending();
+  toast('Scheduler ran');
+}
+
+// ── Categories ───────────────────────────────────────────────
 async function addCategory() {
   const name = document.getElementById('newCatName').value.trim();
   const icon = document.getElementById('newCatIcon').value.trim() || '📁';
-  if (!name) return;
-  await post('/categories', { id: uid(), name, icon, budget: null });
-  document.getElementById('newCatName').value = '';
-  document.getElementById('newCatIcon').value = '';
-  await loadCategories();
-  renderCategories();
+  if (!name) return toast('Name required', true);
+  try {
+    await post('/categories', { id: uid(), name, icon, budget: null });
+    document.getElementById('newCatName').value = '';
+    document.getElementById('newCatIcon').value = '';
+    await loadCategories();
+    renderCategories();
+    toast('Category added');
+  } catch (e) { toast(e.message || 'Failed', true); }
 }
 
-async function editCat(id, currentName, currentIcon) {
-  const newName = prompt('Rename category:', currentName);
-  if (!newName || !newName.trim()) return;
-  const c = S.categories.find(x => x.id === id);
-  await api('PUT', '/categories/' + id, { name: newName.trim(), icon: c.icon, budget: c.budget });
-  await loadCategories();
-  renderCategories();
+async function editCat(id) {
+  const c = S.categories.find(x => x.id === id); if (!c) return;
+  modal.open('Edit category', [
+    { key: 'name', label: 'Name', value: c.name, full: true },
+    { key: 'icon', label: 'Icon (emoji)', value: c.icon, attrs: 'maxlength="2"' },
+    { key: 'budget', label: 'Monthly budget', kind: 'number', value: c.budget || '', attrs: 'min="0" step="1"' },
+  ], async data => {
+    const name = data.name.trim(); if (!name) throw new Error('Name required');
+    const budget = data.budget ? parseFloat(data.budget) : null;
+    await put('/categories/' + id, { name, icon: data.icon || '📁', budget: budget && budget > 0 ? budget : null });
+    await loadCategories();
+    renderCategories();
+    toast('Saved');
+  });
 }
 
 async function deleteCat(id) {
-  if (!confirm('Delete this category?')) return;
-  await del('/categories/' + id);
+  if (!await confirmModal('Delete this category? Transactions in it must be reassigned first.', { danger: true, confirmLabel: 'Delete' })) return;
+  try { await del('/categories/' + id); }
+  catch (e) { return toast(e.message || 'Cannot delete', true); }
   await loadCategories();
   renderCategories();
+  toast('Deleted');
 }
 
-async function saveBudget(id, name, icon) {
+async function saveBudget(id) {
   const val = parseFloat(document.getElementById('bgt-' + id).value);
   const c = S.categories.find(x => x.id === id);
-  await api('PUT', '/categories/' + id, { name: c.name, icon: c.icon, budget: isNaN(val) || val <= 0 ? null : val });
+  await put('/categories/' + id, { name: c.name, icon: c.icon, budget: isNaN(val) || val <= 0 ? null : val });
   await loadCategories();
   renderCategories();
+  toast('Budget saved');
 }
 
-async function clearBudget(id, name, icon) {
+async function clearBudget(id) {
   const c = S.categories.find(x => x.id === id);
-  await api('PUT', '/categories/' + id, { name: c.name, icon: c.icon, budget: null });
+  await put('/categories/' + id, { name: c.name, icon: c.icon, budget: null });
   await loadCategories();
   renderCategories();
+  toast('Budget cleared');
 }
 
-// ── Navigation ────────────────────────────────────────────
+// ── Accounts ─────────────────────────────────────────────────
+async function addAccount() {
+  const name = document.getElementById('newAccName').value.trim();
+  const icon = document.getElementById('newAccIcon').value.trim() || '💰';
+  const type = document.getElementById('newAccType').value;
+  if (!name) return toast('Name required', true);
+  try {
+    await post('/accounts', { id: uid(), name, icon, type });
+    document.getElementById('newAccName').value = '';
+    document.getElementById('newAccIcon').value = '';
+    await loadAccounts();
+    renderAccounts();
+    toast('Account added');
+  } catch (e) { toast(e.message || 'Failed', true); }
+}
+
+async function editAcc(id) {
+  const a = S.accounts.find(x => x.id === id); if (!a) return;
+  modal.open('Edit account', [
+    { key: 'name', label: 'Name', value: a.name, full: true },
+    { key: 'icon', label: 'Icon (emoji)', value: a.icon, attrs: 'maxlength="2"' },
+    { key: 'type', label: 'Type', kind: 'select', value: a.type,
+      options: [
+        { value: 'cash', label: 'Cash' },
+        { value: 'checking', label: 'Checking' },
+        { value: 'savings', label: 'Savings' },
+        { value: 'credit', label: 'Credit card' },
+      ] },
+  ], async data => {
+    if (!data.name.trim()) throw new Error('Name required');
+    await put('/accounts/' + id, { name: data.name.trim(), icon: data.icon || '💰', type: data.type });
+    await loadAccounts();
+    renderAccounts();
+    toast('Saved');
+  });
+}
+
+async function deleteAcc(id) {
+  if (!await confirmModal('Delete this account? It must have no transactions.', { danger: true, confirmLabel: 'Delete' })) return;
+  try { await del('/accounts/' + id); }
+  catch (e) { return toast(e.message || 'Cannot delete', true); }
+  await loadAccounts();
+  renderAccounts();
+  toast('Deleted');
+}
+
+// ── CSV import / export ──────────────────────────────────────
+function exportCsv() {
+  // Use a direct link so the browser handles download dialog
+  const a = document.createElement('a');
+  a.href = API + '/export/csv';
+  a.download = '';
+  a.click();
+}
+
+function importCsv() {
+  document.getElementById('csvFileInput').click();
+}
+
+async function handleCsvFile(file) {
+  const text = await file.text();
+  try {
+    const r = await post('/import/csv', { csv: text });
+    toast(`Imported ${r.imported}, skipped ${r.skipped}`);
+    if (r.errors && r.errors.length) console.warn('CSV import warnings:', r.errors);
+    await loadTransactions();
+  } catch (e) { toast(e.message || 'Import failed', true); }
+}
+
+// ── Navigation ───────────────────────────────────────────────
 function switchTab(t) {
   S.tab = t;
-  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', ['overview','recurring','charts','categories'][i] === t));
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.tab === t));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + t).classList.add('active');
   if (t === 'overview') { loadTransactions(); loadPending(); }
   if (t === 'recurring') { loadPending(); loadRecurring(); }
   if (t === 'charts') renderCharts();
   if (t === 'categories') renderCategories();
+  if (t === 'accounts') renderAccounts();
 }
 
-function setPeriod(p, btn) {
+function setPeriod(p) {
   S.period = p;
-  document.querySelectorAll('.pbtn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  document.querySelectorAll('.pbtn[data-period]').forEach(b => b.classList.toggle('active', b.dataset.period === p));
+  document.getElementById('rangePick').style.display = p === 'range' ? 'flex' : 'none';
+  document.getElementById('mNav').style.display = p === 'monthly' ? 'flex' : 'none';
+  if (p === 'range' && (!S.rangeFrom || !S.rangeTo)) {
+    const today = todayStr();
+    const monthAgo = new Date(); monthAgo.setMonth(monthAgo.getMonth() - 1);
+    S.rangeFrom = monthAgo.toISOString().split('T')[0];
+    S.rangeTo = today;
+    document.getElementById('rangeFrom').value = S.rangeFrom;
+    document.getElementById('rangeTo').value = S.rangeTo;
+  }
   loadTransactions();
   updateMonthLabel();
 }
@@ -694,17 +1207,125 @@ function shiftMonth(d) {
 }
 
 function updateMonthLabel() {
-  const l = document.getElementById('mLabel'), n = document.getElementById('mNav');
+  const l = document.getElementById('mLabel');
   if (S.period === 'monthly') {
     l.textContent = MONTHS[S.curDate.getMonth()] + ' ' + S.curDate.getFullYear();
-    n.style.display = 'flex';
-  } else {
-    n.style.display = 'none';
   }
 }
 
-// ── Init ──────────────────────────────────────────────────
+// ── Wire up event listeners (no inline onclick) ──────────────
+document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+document.querySelectorAll('.pbtn[data-period]').forEach(b => b.addEventListener('click', () => setPeriod(b.dataset.period)));
+document.getElementById('mPrev').onclick = () => shiftMonth(-1);
+document.getElementById('mNext').onclick = () => shiftMonth(1);
+document.getElementById('rangeApply').onclick = () => {
+  S.rangeFrom = document.getElementById('rangeFrom').value;
+  S.rangeTo   = document.getElementById('rangeTo').value;
+  if (!S.rangeFrom || !S.rangeTo) return toast('Pick both dates', true);
+  loadTransactions();
+};
+document.getElementById('btnExp').onclick = () => setType('expense');
+document.getElementById('btnInc').onclick = () => setType('income');
+
+// Date tag → trigger native date picker
+document.getElementById('txDateBtn').onclick = () => {
+  const di = document.getElementById('txDate');
+  if (typeof di.showPicker === 'function') {
+    try { di.showPicker(); return; } catch (_) {}
+  }
+  di.focus();
+  di.click();
+};
+document.getElementById('txDate').addEventListener('change', updateDateLabel);
+
+// Description autocomplete (debounced)
+const txDescEl = document.getElementById('txDesc');
+txDescEl.addEventListener('input', e => {
+  clearTimeout(suggestTimer);
+  const v = e.target.value;
+  suggestTimer = setTimeout(() => fetchSuggestions(v), 200);
+});
+txDescEl.addEventListener('focus', e => {
+  if (e.target.value.length >= 2) fetchSuggestions(e.target.value);
+});
+txDescEl.addEventListener('blur', () => {
+  setTimeout(() => { document.getElementById('txSuggestions').hidden = true; }, 180);
+});
+txDescEl.addEventListener('keydown', e => {
+  const list = document.getElementById('txSuggestions');
+  const visible = !list.hidden && suggestList.length;
+  if (e.key === 'ArrowDown' && visible) {
+    e.preventDefault();
+    suggestActive = (suggestActive + 1) % suggestList.length;
+    list.querySelectorAll('.suggestion').forEach((n, i) => n.classList.toggle('active', i === suggestActive));
+  } else if (e.key === 'ArrowUp' && visible) {
+    e.preventDefault();
+    suggestActive = (suggestActive - 1 + suggestList.length) % suggestList.length;
+    list.querySelectorAll('.suggestion').forEach((n, i) => n.classList.toggle('active', i === suggestActive));
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (visible && suggestActive >= 0) applySuggestion(suggestActive);
+    else document.getElementById('txAmt').focus();
+  } else if (e.key === 'Escape' && visible) {
+    list.hidden = true;
+  }
+});
+
+// Amount: Enter submits
+document.getElementById('txAmt').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); addTx(); }
+});
+document.getElementById('recBtnExp').onclick = () => setRecType('expense');
+document.getElementById('recBtnInc').onclick = () => setRecType('income');
+document.getElementById('addTxBtn').onclick = addTx;
+document.getElementById('addRecBtn').onclick = addRecurring;
+document.getElementById('addCatBtn').onclick = addCategory;
+document.getElementById('addAccBtn').onclick = addAccount;
+document.getElementById('runSchedulerBtn').onclick = runScheduler;
+document.getElementById('exportCsvBtn').onclick = exportCsv;
+document.getElementById('importCsvBtn').onclick = importCsv;
+document.getElementById('csvFileInput').addEventListener('change', e => {
+  if (e.target.files[0]) handleCsvFile(e.target.files[0]);
+  e.target.value = '';
+});
+document.getElementById('pendingBanner').onclick = () => switchTab('recurring');
+
+// Filters
+document.getElementById('filterCat').addEventListener('change', e => { S.filterCat = e.target.value; loadTransactions(); });
+document.getElementById('filterAcc').addEventListener('change', e => { S.filterAcc = e.target.value; loadTransactions(); });
+document.getElementById('filterType').addEventListener('change', e => { S.filterType = e.target.value; loadTransactions(); });
+
+// Debounced search
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', e => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => { S.searchTerm = e.target.value.trim(); loadTransactions(); }, 250);
+});
+
+// Delegated row actions
+document.body.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-act]');
+  if (!btn) return;
+  const id = btn.dataset.id;
+  const act = btn.dataset.act;
+  if (act === 'edit-tx') editTx(id);
+  else if (act === 'del-tx') deleteTx(id);
+  else if (act === 'approve') approvePending(id);
+  else if (act === 'skip') skipPending(id);
+  else if (act === 'del-rec') deleteRec(id);
+  else if (act === 'edit-cat') editCat(id);
+  else if (act === 'del-cat') deleteCat(id);
+  else if (act === 'save-bgt') saveBudget(id);
+  else if (act === 'clear-bgt') clearBudget(id);
+  else if (act === 'edit-acc') editAcc(id);
+  else if (act === 'del-acc') deleteAcc(id);
+  else if (act === 'pick-cat') pickCat(id);
+  else if (act === 'pick-sug') applySuggestion(parseInt(btn.dataset.idx, 10));
+});
+
+// ── Init ─────────────────────────────────────────────────────
 (async () => {
+  updateDateLabel();
   updateMonthLabel();
   const ok = await checkConnection();
   if (ok) await loadAll();

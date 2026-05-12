@@ -1,0 +1,11 @@
+node_modules/
+finance.db
+finance.db-journal
+*.log
+.DS_Store
+.env
+.env.*
+coverage/
+dist/
+.vscode/
+.idea/

@@ -1,17 +1,31 @@
 {
   "name": "finance-tracker",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "2.0.0",
+  "description": "Lightweight self-hosted personal finance tracker (Express + sql.js, single binary, zero cloud).",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write \"**/*.{js,html,md,json}\""
   },
-  "keywords": [],
+  "keywords": ["finance", "budget", "tracker", "self-hosted", "sqlite", "express"],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "sql.js": "^1.14.1"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "supertest": "^7.0.0",
+    "vitest": "^2.0.0"
   }
 }
