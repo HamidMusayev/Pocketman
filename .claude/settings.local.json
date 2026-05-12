@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr create --title 'Improve README with description, features, and screenshots' --body ':*)"
+    ]
+  }
+}
