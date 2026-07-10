@@ -1,0 +1,97 @@
+/* Design tokens ported from `UI Design/uploads/DESIGN-binance.md` and the
+   `Pocketman.dc.html` prototype. The accent color is applied at runtime via
+   the --yellow custom property (see themeVars() in src/lib/density.ts). */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  font-family: inherit;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  outline: none;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2b3139;
+  border-radius: 8px;
+}
+
+@keyframes pmPop {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+:root {
+  --canvas: #0b0e11;
+  --card: #1e2329;
+  --elev: #2b3139;
+  --yellow2: #f0b90b;
+  --onyellow: #181a20;
+  --body: #eaecef;
+  --muted: #707a8a;
+  --muted2: #929aa5;
+  --up: #0ecb81;
+  --down: #f6465d;
+  --line: #2b3139;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* overridden per-request from Settings; fallback matches the prototype default */
+  --yellow: #fcd535;
+
+  /* The app's fixed (editorial) spacing scale. Defined here so the shell and
+     the unauthenticated screens render correctly; themeVars() re-applies the
+     same values alongside the live accent color. */
+  --px: 36px;
+  --scp: 16px;
+  --cpad: 18px;
+  --gap: 14px;
+  --rowpad: 11px 16px;
+  --statnum: 26px;
+  --statlabel: 11px;
+  --chippad: 7px 13px;
+  --secgap: 20px;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--canvas);
+  color: var(--body);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: var(--yellow);
+}

@@ -1,0 +1,151 @@
+/** Category / form types — categories and recurring rules are only income or expense. */
+export type TxnType = 'income' | 'expense'
+/** A transaction can also be a transfer between accounts. */
+export type TransactionType = 'income' | 'expense' | 'transfer'
+export type Frequency = 'Daily' | 'Weekly' | 'Monthly' | 'Yearly'
+export type Period = 'monthly' | 'all' | 'range'
+
+export interface Settings {
+  accent_color: string
+  currency_symbol: string
+  show_cents: boolean
+}
+
+export interface Account {
+  id: number
+  name: string
+  type: string
+  icon: string
+  removable: boolean
+  net: number
+  transaction_count: number
+}
+
+export interface Category {
+  id: number
+  name: string
+  type: TxnType
+  icon: string
+  budget: number | null
+}
+
+export interface CategoryBudgetItem {
+  category_id: number
+  name: string
+  icon: string
+  spent: number
+  budget: number | null
+  pct_used: number | null
+}
+
+export interface CategoryBudgetSummary {
+  categories: CategoryBudgetItem[]
+  spent_total: number
+  budget_total: number
+  pct: number
+  budgeted_count: number
+}
+
+export interface Transaction {
+  id: number
+  type: TransactionType
+  amount: number
+  description: string
+  category_id: number | null
+  category_name: string | null
+  account_id: number
+  account_name: string
+  transfer_account_id: number | null
+  transfer_account_name: string | null
+  date: string
+}
+
+export interface ImportResult {
+  created: number
+  skipped: number
+  errors: { row: number; reason: string }[]
+}
+
+export interface RecurringRule {
+  id: number
+  description: string
+  amount: number
+  category_id: number
+  category_name: string
+  account_id: number
+  account_name: string
+  type: TxnType
+  frequency: Frequency
+  next_due_date: string
+}
+
+export interface PendingApproval {
+  id: number
+  recurring_rule_id: number
+  description: string
+  amount: number
+  category_id: number
+  category_name: string
+  account_id: number
+  account_name: string
+  type: TxnType
+  due_date: string
+}
+
+export interface CatchUpResult {
+  generated: number
+  pending: PendingApproval[]
+}
+
+export interface Summary {
+  income: number
+  expense: number
+  balance: number
+  savings_rate: number
+}
+
+export interface TrendPoint {
+  label: string
+  year: number
+  month: number
+  income: number
+  expense: number
+}
+
+export interface CategoryBreakdownItem {
+  category_id: number
+  name: string
+  amount: number
+  pct: number
+}
+
+export interface CumulativePoint {
+  date: string
+  balance: number
+}
+
+export interface TopCategoryItem {
+  category_id: number
+  name: string
+  amount: number
+  pct: number
+}
+
+export interface NetWorthAccount {
+  id: number
+  name: string
+  net: number
+  transaction_count: number
+}
+
+export interface NetWorth {
+  total: number
+  accounts: NetWorthAccount[]
+}
+
+/** Shared query params every list/stat endpoint accepts for the current period selection. */
+export interface PeriodParams {
+  period: Period
+  year?: number
+  month?: number
+}

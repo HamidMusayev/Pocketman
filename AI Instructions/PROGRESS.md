@@ -1,0 +1,72 @@
+# Pocketman — Progress
+
+Live status tracker. Update the relevant row the moment a phase finishes — don't batch updates. See [`PLAN.md`](PLAN.md) for what each phase means and [`STRUCTURE.md`](STRUCTURE.md) for where things live.
+
+Last updated: 2026-07-04 (frontend + Docker complete — full stack verified end-to-end in a browser)
+
+## Status legend
+- ⬜ Not started
+- 🟨 In progress
+- ✅ Done
+
+## Phases
+
+| # | Phase | Status | Notes |
+|---|---|---|---|
+| 0 | Scaffolding (repo, docs) | ✅ | `Front/`, `Backend/`, `Setup/`, `AI Instructions/` created; STRUCTURE.md, PLAN.md, PROGRESS.md written |
+| 1 | Backend skeleton | ✅ | FastAPI + SQLAlchemy 2.0 + Alembic (initial migration `0574c4050417`), config via pydantic-settings, Dockerfile. Dropped `passlib` (broken with bcrypt>=4.1), calls `bcrypt` directly instead. |
+| 2 | Auth + Settings module | ✅ | Password setup/login/JWT (HS256, 7-day expiry), settings singleton (accent/currency/showCents; `density` later removed) |
+| 3 | Accounts module | ✅ | CRUD + net/txn-count computed fields; delete blocked on non-removable, last-account, or in-use |
+| 4 | Categories module | ✅ | CRUD + budget-summary ring endpoint; delete blocked when referenced by transactions/recurring |
+| 5 | Transactions module | ✅ | Filtered list (period/search/category/account/type), CSV export + import (per-row error reporting, auto-creates unknown category/account) |
+| 6 | Recurring rules + pending approvals | ✅ | Due-date engine in `services/recurring.py` (dateutil relativedelta), idempotent catch-up, approve/dismiss |
+| 7 | Stats/Charts aggregation | ✅ | summary, trend, category-breakdown, cumulative-balance, top-categories, net-worth — all pure functions in `services/stats.py` |
+| 8 | Backend test suite | ✅ | 46/46 passing (`pytest -q`) — auth, accounts, categories, transactions, recurring engine edge cases, stats fixtures |
+| 9 | Frontend skeleton | ✅ | Vite+React+TS wired (main.tsx providers, App.tsx router), theme tokens + accent/spacing vars, axios client, TanStack Query hooks, ported `icons.ts`/`colorRamp.ts`/`money.ts` |
+| 10 | Auth + Settings pages | ✅ | Setup/Login screens, AuthContext (localStorage token), route guards, Settings page (accent/currency/show-cents/change-password) |
+| 11 | Shared shell (TopBar + period controls) | ✅ | TopBar (tabs, settings gear, lock), PeriodControls, SummaryCards (hero band), shared `PeriodProvider` state |
+| 12 | Accounts tab | ✅ | Net-worth header, account rows with working inline edit (name/type/icon) + remove, add-account form |
+| 13 | Categories tab | ✅ | Budget ring header, expense cards (inline budget save, colored bars), income category list, add/edit via modal (`CategoryFormModal` + icon picker) |
+| 14 | Overview tab (transactions) | ✅ | Add-txn card (type/amount/desc/category chips/account), search+filters, working Export **and** Import CSV (with summary), txn list with edit modal + delete |
+| 15 | Recurring tab | ✅ | Add-rule form, pending approval list (Approve/Skip), rules list with remove, "Catch up now" |
+| 16 | Charts tab | ✅ | Stat strip + 4 hand-rolled SVG charts (trend bars, category donut, cumulative area line, top-category ranking), math in `lib/charts.ts` |
+| 17 | Frontend test suite | ✅ | 27 vitest tests: `money`/`colorRamp`/`charts`/`dates` unit tests + RTL tests for the auth gate and the add-transaction form |
+| 18 | Docker Compose / Setup | ✅ | `Front/Dockerfile` (multi-stage node→nginx) + `nginx.conf` (SPA fallback + `/api` proxy), `Setup/docker-compose.yml` (named volume), `.env.example`, `Setup/README.md` |
+| 19 | End-to-end verification | ✅ | `docker compose up --build` → full stack live; browser-verified golden path (setup→login→Overview/Charts/Categories/Recurring/Accounts, approve pending, live data across tabs); no console errors |
+
+## Decisions log
+
+- **2026-07-04** — Stakeholder Q&A locked: single-user password-lock auth (not multi-user, not open); recurring engine uses manual "Catch up" trigger with real per-rule due-date tracking (not a scheduler); Docker Compose ships two containers (FastAPI backend + nginx-served React frontend, nginx proxies `/api`); scope = full CRUD parity + real persistence everywhere the UI implies it, including things the prototype only stubbed (account edit, CSV import).
+- **2026-07-04** — No demo transactions are seeded on first run; only a default `Main` account and the prototype's 16 default categories (budgets left unset). A real product shouldn't start with fabricated financial history.
+- **2026-07-04** — "Today" is the real server date everywhere in the backend, never the prototype's hardcoded `2026-07-04`.
+- **2026-07-04** — Dropped `passlib` from the backend: it's unmaintained and crashes against `bcrypt>=4.1` (removed `__about__`). `app/security.py` calls the `bcrypt` package directly instead. Password length is capped at 72 bytes (bcrypt's hard limit) in the Pydantic schemas.
+- **2026-07-04** — Pydantic schema fields must never be named exactly `date` with type `date` (e.g. avoid `date: date`) — under Python 3.14's deferred annotation evaluation this self-shadows and raises `TypeError: unsupported operand type(s) for |: 'NoneType' and 'NoneType'`. Fixed by importing `from datetime import date as Date` in `schemas/transaction.py` and `schemas/stats.py`. Keep this pattern for any future schema with a `date` field.
+- **2026-07-04** — Local dev/test venv runs Python 3.14 (only version readily available in this environment); Docker image pins `python:3.12-slim`. `requirements.txt` versions were resolved against 3.14 wheel availability (fastapi 0.139.0, sqlalchemy 2.0.51, pydantic 2.13.4, etc.) — all also support 3.12, so this doesn't constrain the Docker build.
+- **2026-07-04** — Frontend theming: static color tokens + the fixed (editorial) spacing scale live in `theme.css :root`; the live accent (`--yellow`) is applied at runtime via `themeVars()` on a wrapper `<div>` in `Layout`/`SettingsLayout`. (Originally the spacing scale was density-dependent and re-applied by `themeVars()`; after terminal density was removed the scale is constant and `themeVars()` only carries the accent.)
+- **2026-07-04** — Chart math (donut segments, cumulative area/line geometry, trend bars, ranking widths, budget/ring colors) is ported verbatim from the prototype's `renderVals()` into pure functions in `lib/charts.ts`, returning plain data; the SVG components only format money/colors. This keeps the ported math unit-testable (see `charts.test.ts`).
+- **2026-07-04** — Scope additions the prototype only stubbed, now real: transaction **edit** (modal), account **edit** (inline row), category add/**edit** (modal + icon picker), and CSV **Import** (multipart upload showing the `{created, skipped, errors}` summary). Income categories (hidden entirely in the prototype's Categories tab) get a compact manageable list so they aren't orphaned.
+- **2026-07-04** — `Front/Dockerfile` uses `npm install` (not `npm ci`): a Windows-generated `package-lock.json` omits Linux-only optional native deps (`@emnapi/*` pulled in by oxlint/rollup binaries), which makes `npm ci` fail inside the Linux build. `npm install` resolves them in-container. Local dev can still use `npm ci`/`npm install` normally.
+- **2026-07-04** — Docker topology confirmed working: nginx serves the built SPA and proxies `/api/*` to the backend over the compose network (browser only talks to one origin, so CORS isn't exercised in the packaged app). Backend port is `expose`d (internal) not published. Frontend host port is `${FRONTEND_PORT:-3000}` — 3000 was occupied on the verification host, hence the override knob.
+- **2026-07-04** — **Terminal density removed** (per user request): the app is now permanently in editorial density. Dropped the `density` column from the settings model + initial migration, removed it from the settings schema/router and `DENSITIES` from `constants.py`; on the frontend removed the TopBar Terminal/Editorial toggle, the `Density` type, `SummaryCards`' 3-up branch (always the hero band now), and the dead `.density-toggle` / `.summary-grid` CSS. `themeVars()` now takes only the accent color; the editorial spacing scale is constant (baked into `theme.css :root`). Since no DB existed yet (greenfield, volume wiped), the initial migration was edited in place rather than adding a drop-column migration. Re-verified: backend 46/46, frontend `tsc`/`vitest` 27/27, and a fresh browser run shows no toggle and settings API returning only `{accent_color, currency_symbol, show_cents}`.
+- **2026-07-09** — **README illustrated**: added a branded banner + real app screenshots (Overview, Charts, Accounts, Categories, Recurring, login) under `assets/`. Generated by driving the live dev server with Playwright (headless Chromium, injected auth token, `deviceScaleFactor: 2`); the banner is a small HTML page rendered to PNG. Seeded realistic multi-month demo data (3 accounts, budgets, transfers, pending) only for the capture, then torn down. Playwright lives in the scratchpad, not the project.
+- **2026-07-09** — **Added transfers between accounts** (feature request: a function "near income and expense" that doesn't count as either). New transaction `type: "transfer"` with `account_id` = source, `transfer_account_id` = destination, `category_id` = null. Backend: model + schema cross-field validation (transfer needs a distinct destination; income/expense needs a category), `compute_net` now handles −source/+destination (and `account_in_use` protects transfer destinations from deletion), `get_cumulative_balance` skips transfers, CSV gains an optional trailing `To Account` column (old 6-column CSVs still import). Alembic migration `b2f1a3c4d5e6` (batch mode: adds `transfer_account_id`, makes `category_id` nullable) — **verified it preserves existing rows** by upgrading a seeded old-revision DB. Frontend: 3-way Expense/Income/Transfer toggle in the Overview add card + edit modal (transfer shows From/To account selects, no category chips), neutral "⇄" transfer rows (`Main → Savings`), a `transfer` filter option, and a new swap icon; the calendar's `groupByDay` skips transfers. Backend 51/51, frontend 32/32. Browser-verified: a $300 Main→Savings transfer left Income/Expenses/savings-rate untouched, moved Main $3000→$2700 and Savings $0→$300, total net worth unchanged at $3000.
+- **2026-07-04** — **Added a monthly calendar heat-grid to the Charts tab** (feature request: "see expense and incomes over days"). New `components/charts/MonthCalendar.tsx` renders a Sun-first month grid; each day shows income (green) / expense (red) in compact form (`$3k`, `$1.4k`) with a faint net-based background tint (heatmap) and a yellow ring on today. It follows the shared period month and its own `‹ › ` nav drives the same `usePeriod()` state; data comes from `useTransactions({period:'monthly', year, month})` grouped client-side. Pure math in `lib/calendar.ts` (`groupByDay`, `buildMonthGrid`) + `formatCompactMoney` in `lib/money.ts`, both unit-tested (frontend now 31 tests). No backend change. Browser-verified with multi-day July data: correct per-day totals, tint intensity scales with amount, month nav works.
+
+## Known open questions / risks
+
+- None blocking. Revisit CSV import de-duplication behavior (currently: no dedup, every import row becomes a new transaction) if the user wants idempotent re-imports later.
+- Transaction search filter hits the backend per keystroke (new query key). Fine for a single-user local app; add debounce if it ever feels chatty.
+- The verification host had port 3000 in use — set `FRONTEND_PORT` in `Setup/.env` if 3000 is taken.
+
+## Verification snapshot (2026-07-04)
+
+- Backend: `pytest -q` → **51 passed** (46 core + 5 transfer tests).
+- Frontend: `tsc -b` clean, `vite build` clean, `vitest run` → **32 passed**.
+- Full stack: `docker compose -f Setup/docker-compose.yml up --build` → both images build, containers healthy. Browser-driven golden path passed: fresh setup seeds Main + 16 categories (no demo txns), login works, added income/expense reflected in the hero + Charts, recurring rule caught up (Apr→Jul = 4 pending), approving a pending posted a real transaction and updated net worth across every tab. No console errors.
+
+## How to resume this project cold
+
+1. Read `STRUCTURE.md`.
+2. Read this file to see the last completed phase.
+3. Open `PLAN.md` at the next unchecked phase and continue.
+4. Update this file's table + decisions log as you go.

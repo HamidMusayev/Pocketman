@@ -1,0 +1,35 @@
+# Pocketman — full stack. Run from the repo root or the Setup/ folder:
+#   docker compose -f Setup/docker-compose.yml up --build
+# then open http://localhost:3000
+#
+# Data (the SQLite file) lives in the named volume `pocketman-data` and
+# survives `docker compose down` + `up`.
+
+services:
+  backend:
+    build:
+      context: ../Backend
+    environment:
+      # Override SECRET_KEY in a real deployment (see .env.example).
+      SECRET_KEY: ${SECRET_KEY:-dev-secret-key-change-me}
+      DATABASE_URL: sqlite:////app/data/pocketman.db
+      # The browser only ever talks to the frontend origin (nginx proxies
+      # /api), so CORS is mostly a dev-mode concern. Kept configurable anyway.
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+    volumes:
+      - pocketman-data:/app/data
+    expose:
+      - "8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../Front
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    restart: unless-stopped
+
+volumes:
+  pocketman-data:

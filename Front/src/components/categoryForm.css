@@ -1,0 +1,33 @@
+.icon-picker {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+}
+
+.icon-picker-btn {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--elev);
+  color: var(--muted2);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: 0.12s;
+}
+
+.icon-picker-btn:hover {
+  color: var(--body);
+}
+
+.icon-picker-btn.active {
+  border-color: var(--yellow);
+  background: var(--yellow);
+  color: var(--onyellow);
+}
+
+@media (max-width: 480px) {
+  .icon-picker {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
