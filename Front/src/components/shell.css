@@ -161,11 +161,6 @@
   color: var(--body);
 }
 
-.seg-density .seg-btn.active {
-  background: var(--yellow);
-  color: var(--onyellow);
-}
-
 .seg-period .seg-btn {
   padding: 8px 18px;
   font-size: 13px;
@@ -419,38 +414,125 @@
   }
 }
 
+/* Below this the top bar becomes two rows: brand + controls, then the tab
+   strip on its own full-bleed scrolling line. */
 @media (max-width: 860px) {
   .topbar-inner {
     flex-wrap: wrap;
-    gap: 16px;
-    padding-top: 12px;
+    align-items: center;
+    gap: 10px 14px;
+    padding-top: 10px;
+    padding-bottom: 0;
+    min-height: 0;
   }
 
   .topbar-right {
     margin-left: auto;
   }
 
+  /* Full-bleed: cancel the shell gutter with negative margins and give it back
+     as padding + scroll-padding. Without this the first and last tabs come to
+     rest underneath the gutter, where a tap lands on the bar instead of the
+     link — which is why Overview and Accounts were unreachable on a phone. */
   .topbar-tabs {
     order: 3;
+    flex: none;
+    width: calc(100% + var(--px) * 2);
+    margin-inline: calc(var(--px) * -1);
+    padding-inline: var(--px);
+    scroll-padding-inline: var(--px);
+    gap: 2px;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .topbar-tab {
+    flex: none;
+    min-height: 46px;
+    padding: 0 12px;
+    font-size: 15px;
+    scroll-snap-align: center;
+  }
+
+  /* Touch devices get no hover, so the tapped tab needs to feel pressed. */
+  .topbar-tab:active {
+    background: var(--card);
+    border-radius: 8px 8px 0 0;
+  }
+}
+
+@media (max-width: 720px) {
+  .period-row {
+    padding-top: 11px;
+    padding-bottom: 11px;
+    gap: 10px;
+  }
+
+  .period-right {
     width: 100%;
-    gap: 20px;
+    gap: 12px;
+  }
+
+  .month-nav {
+    flex: 1;
+  }
+
+  .month-nav button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .month-nav-label {
+    flex: 1;
+  }
+
+  .seg-period {
+    width: 100%;
+  }
+
+  .seg-period .seg-btn {
+    flex: 1;
+    min-height: 40px;
+    padding: 8px 10px;
   }
 }
 
 @media (max-width: 560px) {
-  .period-row {
-    justify-content: flex-start;
-  }
-
-  .seg-period .seg-btn {
-    padding: 8px 12px;
-  }
-
-  /* --px is applied inline by themeVars(), so trim the gutters directly */
+  /* --px is applied inline by themeVars(). Re-declaring it on these subtrees
+     (rather than hardcoding padding) keeps the tab strip's full-bleed calc in
+     step with the gutter it cancels — otherwise the strip overhangs and the
+     page picks up a phantom horizontal scroll. */
   .topbar-inner,
   .period-row,
   .page-container {
-    padding-left: 18px;
-    padding-right: 18px;
+    --px: 16px;
+  }
+
+  .topbar-brand-mark {
+    width: 32px;
+    height: 32px;
+  }
+
+  .topbar-brand-name {
+    font-size: 19px;
+  }
+
+  .settings-link {
+    width: 40px;
+    height: 40px;
+  }
+
+  .logout-link {
+    min-height: 40px;
+    padding: 8px 14px;
+  }
+
+  .db-chip {
+    display: none;
+  }
+
+  .sum-row {
+    padding-inline: 16px;
   }
 }

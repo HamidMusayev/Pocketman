@@ -356,3 +356,80 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+@media (max-width: 620px) {
+  /* The donut and its legend stop fitting side by side well before the legend
+     columns do; stack them so neither gets squeezed. */
+  .donut-body {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .donut-wrap {
+    align-self: center;
+  }
+  .donut-legend {
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* Give the bar its share back: the fixed name/amount/pct columns were
+     eating almost everything on a phone. */
+  .ranking-name {
+    width: 82px;
+    font-size: 12.5px;
+  }
+  .ranking-amount {
+    width: 70px;
+    font-size: 12px;
+  }
+  .ranking-pct {
+    display: none;
+  }
+  .ranking-row {
+    gap: 9px;
+  }
+
+  .line-yaxis {
+    width: 44px;
+  }
+  .line-yaxis span {
+    font-size: 9px;
+  }
+
+  /* A month has to read as a month: fit all seven columns instead of hiding
+     Thu–Sat behind a horizontal scroll nobody discovers. */
+  .cal-scroll {
+    overflow-x: visible;
+  }
+  .cal-grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    min-width: 0;
+    gap: 4px;
+  }
+  .cal-cell {
+    min-height: 52px;
+    padding: 4px 3px;
+    border-radius: 6px;
+    align-items: center;
+  }
+  .cal-weekday {
+    font-size: 9px;
+    letter-spacing: 0.3px;
+  }
+  .cal-day {
+    font-size: 11px;
+  }
+  .cal-amt {
+    font-size: 9px;
+    letter-spacing: -0.3px;
+  }
+  .cal-nav-label {
+    min-width: 78px;
+    font-size: 13px;
+  }
+  .cal-nav button {
+    width: 40px;
+    height: 40px;
+  }
+}

@@ -888,7 +888,9 @@
 /* ---- card faces ---- */
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(316px, 1fr));
+  /* min() keeps the track from insisting on 316px when the container is
+     narrower than that — otherwise the cards overhang on small phones. */
+  grid-template-columns: repeat(auto-fill, minmax(min(316px, 100%), 1fr));
   gap: var(--gap);
 }
 .acc-card {
@@ -1137,5 +1139,158 @@
     width: calc(100% - 36px);
     border-radius: 10px;
     padding: 14px 20px;
+  }
+}
+
+/* Phones. Two themes here: give every control a thumb-sized hit area (the
+   44px floor), and stop rows from collapsing into ragged wrapped stacks. */
+@media (max-width: 560px) {
+  .pm-section-head {
+    flex-wrap: wrap;
+    gap: 4px 10px;
+  }
+  .pm-section-note {
+    flex-basis: 100%;
+  }
+
+  .pm-input,
+  .pm-select,
+  .pm-btn {
+    min-height: 44px;
+  }
+
+  /* Search and the CSV buttons: search gets its own full-width row, the two
+     buttons share the next one instead of being squeezed beside it. */
+  .ov-toolbar {
+    flex-wrap: wrap;
+  }
+  .ov-search-wrap {
+    flex-basis: 100%;
+  }
+  .ov-search {
+    min-height: 44px;
+  }
+  .ov-tool-btn {
+    flex: 1;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .txn-filters {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .txn-filter {
+    min-height: 40px;
+    width: 100%;
+    padding-inline: 8px;
+    font-size: 12px;
+  }
+
+  .cat-chip {
+    min-height: 44px;
+  }
+  .type-btn {
+    min-height: 44px;
+  }
+
+  /* Delete/edit are 12px glyphs on desktop — far too small to hit reliably. */
+  .row-icon-btn,
+  .row-edit-btn {
+    min-width: 40px;
+    min-height: 40px;
+  }
+
+  /* Two tidy lines beside the icon — name + meta, then balance and actions —
+     instead of five items competing for one 358px row. */
+  .acc-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 8px;
+    padding: 14px 16px;
+  }
+  .acc-row .icon-badge {
+    grid-row: span 2;
+  }
+  .acc-main {
+    grid-column: 2 / -1;
+    min-width: 0;
+  }
+  .acc-net {
+    grid-column: 2;
+    justify-self: start;
+    font-size: 15px;
+  }
+  .acc-row .row-edit-btn {
+    grid-column: 3;
+  }
+  .acc-remove {
+    grid-column: 4;
+  }
+  .acc-row .row-edit-btn,
+  .acc-remove {
+    min-height: 40px;
+    padding-inline: 10px;
+  }
+  .acc-add input,
+  .acc-add .pm-select,
+  .acc-add .pm-btn {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .card-grid {
+    gap: 12px;
+  }
+
+  /* Approve/Skip are the whole point of the Recurring tab — they were the
+     smallest targets on the page. */
+  .btn-approve,
+  .btn-skip,
+  .rec-type-toggle button,
+  .type-toggle button {
+    min-height: 42px;
+    padding-inline: 16px;
+  }
+
+  .cat-budget-input,
+  .cat-budget-save {
+    min-height: 42px;
+  }
+
+  /* The × on an account card sat at 28px inside a large tap-friendly card. */
+  .acc-card-remove {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* Very narrow phones (iPhone SE and friends). Rows that merely looked tight at
+   390px actually overflow here, so let them wrap. */
+@media (max-width: 380px) {
+  .pending-row {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+  .pending-amount {
+    margin-left: auto;
+  }
+  .btn-approve,
+  .btn-skip {
+    flex: 1;
+  }
+
+  .cat-budget-row {
+    flex-wrap: wrap;
+  }
+  .cat-budget-input {
+    flex: 1 1 100%;
+  }
+  .cat-budget-save {
+    flex: 1;
   }
 }

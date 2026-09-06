@@ -19,7 +19,7 @@ Read [`STRUCTURE.md`](STRUCTURE.md) first for repo layout and conventions. This 
 
 | Table | Columns |
 |---|---|
-| `settings` | id=1 singleton · password_hash · accent_color (default `#FCD535`) · currency_symbol (default `$`) · show_cents (bool, default true) · setup_complete (bool) — **note:** the `density` column was removed post-build (terminal mode dropped; see 2026-07-04 decision), app is always editorial |
+| `settings` | id=1 singleton · password_hash · accent_color (default `#FCD535`) · currency_symbol (default `$`) · show_cents (bool, default true) · setup_complete (bool) — **note:** the `density` column was removed post-build (see the 2026-07-04 decision), app is always terminal density (2026-09-06) |
 | `accounts` | id · name (unique) · type (`cash`\|`savings`\|`card`\|`investment`) · icon (`wallet`\|`bank`\|`card`) · removable (bool, default true) |
 | `categories` | id · name (unique) · type (`income`\|`expense`) · icon (one of the 18 icon keys) · budget (nullable float) |
 | `transactions` | id · type (`income`\|`expense`\|`transfer`) · amount (float > 0) · description · category_id FK (**nullable** — null for transfers) · account_id FK (source) · transfer_account_id FK (**nullable** — destination, set only for transfers) · date |
@@ -133,12 +133,12 @@ Note: dropped `passlib` (unmaintained, incompatible with bcrypt>=4.1) in favor o
 - [x] `Setup.tsx` (first-run password creation, only reachable when `/auth/status` says not set up).
 - [x] `Login.tsx`.
 - [x] `AuthContext` (token in `localStorage`, `useAuth()` hook), `ProtectedRoute`.
-- [x] `Settings.tsx` — accent color picker (from the prototype's option list: yellow/turquoise/green/blue), currency symbol input, show-cents toggle, change-password form. (Density toggle was built then removed — see the 2026-07-04 "terminal density removed" decision; app is always editorial.)
+- [x] `Settings.tsx` — accent color picker (from the prototype's option list: yellow/turquoise/green/blue), currency symbol input, show-cents toggle, change-password form. (Density toggle was built, removed, briefly reinstated by the 2026-09-06 UI redesign, then removed for good — app is always terminal density.)
 
 **Acceptance**: cold start forces `/setup`; after setup, reload lands on `/login`; wrong password shows inline error; changing accent updates the whole app live.
 
 ## Phase 11 — Shared shell: TopBar + period controls ✅
-- [x] `TopBar` — logo, "Connected · pocketman.db" status dot, 5 tabs, settings gear + Lock. (The density toggle that lived here was removed — see the 2026-07-04 decision.)
+- [x] `TopBar` — logo, "Connected · pocketman.db" status dot, 5 tabs, settings gear + Lock. (The density toggle that lived here was removed — see the 2026-07-04 and 2026-09-06 decisions.)
 - [x] `PeriodControls` — Monthly / All time / Date range pills + month `‹ Jul 2026 ›` nav (only shown for Monthly).
 - [x] `SummaryCards` — single hero band with net balance + inline income/expenses/savings-rate (the prototype's editorial `d.hero` branch; the terminal 3-up branch was removed with terminal density).
 - [x] A shared "current period" state (query params) that every page's data hooks read from, so switching Monthly month or All-time/Date-range instantly refetches every tab's data.

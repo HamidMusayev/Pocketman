@@ -79,7 +79,7 @@ Front/
 │   ├── icons.ts                  # ported ICON path map (one SVG path array per icon key; keep in sync w/ constants.py)
 │   ├── pages/                    # Overview, Recurring, Charts, Categories, Accounts, Settings (+ *.test.tsx)
 │   ├── hooks/                    # TanStack Query hooks per resource + queryKeys.ts + useCategoryIcons.ts
-│   └── lib/                      # pure helpers, unit-tested: money.ts, dates.ts, charts.ts, calendar.ts, colorRamp.ts, density.ts, constants.ts
+│   └── lib/                      # pure helpers, unit-tested: money.ts, dates.ts, charts.ts, calendar.ts, colorRamp.ts, theme.ts, constants.ts
 ├── index.html
 ├── package.json
 ├── vite.config.ts                # dev server proxies /api -> localhost:8000; also holds the vitest config

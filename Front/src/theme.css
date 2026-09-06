@@ -1,6 +1,6 @@
 /* Design tokens ported from `UI Design/uploads/DESIGN-binance.md` and the
    `Pocketman.dc.html` prototype. The accent color is applied at runtime via
-   the --yellow custom property (see themeVars() in src/lib/density.ts). */
+   the --yellow custom property (see themeVars() in src/lib/theme.ts). */
 
 * {
   box-sizing: border-box;
@@ -68,19 +68,18 @@ textarea {
   /* overridden per-request from Settings; fallback matches the prototype default */
   --yellow: #fcd535;
 
-  /* Editorial spacing scale (the default direction). Defined here so the shell
-     and the unauthenticated screens render correctly; themeVars() re-applies
-     these — or the tighter terminal set — alongside the live accent color. */
-  --px: 32px;
-  --scp: 16px;
-  --cpad: 20px;
-  --gap: 18px;
-  --rowpad: 14px 18px;
-  --statnum: 26px;
-  --statlabel: 11px;
-  --chippad: 11px 14px;
-  --secgap: 22px;
-  --heroh: 196px;
+  /* The spacing scale. Constant: the app is always terminal density, so these
+     are the single source of truth and themeVars() only carries the accent. */
+  --px: 20px;
+  --scp: 12px;
+  --cpad: 14px;
+  --gap: 12px;
+  --rowpad: 9px 13px;
+  --statnum: 21px;
+  --statlabel: 10px;
+  --chippad: 8px 11px;
+  --secgap: 14px;
+  --heroh: 150px;
 
   --shell: 1320px;
 }

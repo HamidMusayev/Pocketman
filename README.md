@@ -35,8 +35,8 @@ cumulative-balance line, and a top-categories ranking.
 ## Features
 
 - **Password lock** — one-time setup, then JWT-authenticated (no accounts, no multi-user).
-- **Every tab** — a period bar (step through months, or switch to all-time / a custom
-  date range) and an Editorial ⇄ Terminal density toggle that retunes the app's spacing.
+- **Every tab** — a period bar: step through months, or switch to all-time or a
+  custom date range.
 - **Overview** — add income/expense with category chips **or transfer money between
   accounts** (transfers don't count as income or expense), search + filter, edit/delete,
   and working **CSV export & import** (per-row error reporting on import).
@@ -61,9 +61,17 @@ docker compose -f Setup/docker-compose.yml up --build
 # then open http://localhost:3000  (set FRONTEND_PORT in Setup/.env if 3000 is taken)
 ```
 
-First launch shows a one-time password setup screen. See
-[`Setup/README.md`](Setup/README.md) for configuration, local dev (hot reload), and
-how to run the tests.
+To pick up code changes later, run that same command again — `--build` is what
+rebuilds the images; your data lives in a volume and survives.
+
+First launch shows a one-time password setup screen.
+
+Other devices on the same network can reach it at `http://<host-ip>:3000` — the port
+is published on all interfaces, so no extra config is needed beyond letting it
+through the host firewall. See
+[`Setup/README.md`](Setup/README.md#access-from-other-devices-on-your-network) for
+that, plus configuration, how to update a running stack, local dev (hot reload),
+and how to run the tests.
 
 ## Layout
 

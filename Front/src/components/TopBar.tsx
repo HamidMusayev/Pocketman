@@ -1,6 +1,6 @@
-import { NavLink } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { useDensity, type Density } from '../lib/density'
 import { LogoMark } from './Logo'
 import './shell.css'
 
@@ -12,14 +12,18 @@ const TABS: { to: string; label: string }[] = [
   { to: '/accounts', label: 'Accounts' },
 ]
 
-const DIRECTIONS: { key: Density; label: string }[] = [
-  { key: 'terminal', label: 'Terminal' },
-  { key: 'editorial', label: 'Editorial' },
-]
-
 export function TopBar() {
   const { logout } = useAuth()
-  const [density, setDensity] = useDensity()
+  const tabsRef = useRef<HTMLElement>(null)
+  const { pathname } = useLocation()
+
+  // On narrow screens the tabs are a horizontally scrolling strip, so the
+  // current one can sit off-screen after a route change (or a reload deep in
+  // the app). Pull it back into view.
+  useEffect(() => {
+    const active = tabsRef.current?.querySelector('.topbar-tab.active')
+    active?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })
+  }, [pathname])
 
   return (
     <header className="topbar">
@@ -33,7 +37,7 @@ export function TopBar() {
           </div>
         </div>
 
-        <nav className="topbar-tabs">
+        <nav className="topbar-tabs" ref={tabsRef} aria-label="Sections">
           {TABS.map((tab) => (
             <NavLink
               key={tab.to}
@@ -46,18 +50,6 @@ export function TopBar() {
         </nav>
 
         <div className="topbar-right">
-          <div className="seg seg-density" role="group" aria-label="Layout direction">
-            {DIRECTIONS.map((d) => (
-              <button
-                key={d.key}
-                className={'seg-btn' + (density === d.key ? ' active' : '')}
-                aria-pressed={density === d.key}
-                onClick={() => setDensity(d.key)}
-              >
-                {d.label}
-              </button>
-            ))}
-          </div>
           <NavLink to="/settings" className="settings-link" title="Settings" aria-label="Settings">
             <svg
               width="16"
