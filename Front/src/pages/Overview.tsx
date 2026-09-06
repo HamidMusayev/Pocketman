@@ -15,9 +15,49 @@ import {
   useImportTransactions,
   useTransactions,
 } from '../hooks/useTransactions'
-import { formatDateLabel, newTransactionDate } from '../lib/dates'
+import { formatDayShort, formatWeekday, newTransactionDate } from '../lib/dates'
 import { formatMoney, formatTransactionAmount } from '../lib/money'
 import './pages.css'
+
+const TYPES: { key: TransactionType; label: string }[] = [
+  { key: 'expense', label: 'Expense' },
+  { key: 'income', label: 'Income' },
+  { key: 'transfer', label: 'Transfer' },
+]
+
+function TypeIcon({ type }: { type: TransactionType }) {
+  if (type === 'transfer') return <CategoryIcon iconKey="transfer" size={14} strokeWidth={1.9} />
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {type === 'income' ? <path d="M12 19V5m0 0-6 6m6-6 6 6" /> : <path d="M12 5v14m0 0 6-6m-6 6-6-6" />}
+    </svg>
+  )
+}
+
+/** One calendar day's worth of rows, plus that day's net (transfers move money
+ * between accounts, so they don't count toward it). */
+interface DayGroup {
+  date: string
+  items: Transaction[]
+  net: number
+}
+
+function groupByDay(list: Transaction[]): DayGroup[] {
+  const groups: DayGroup[] = []
+  const byDate = new Map<string, DayGroup>()
+  for (const t of list) {
+    let group = byDate.get(t.date)
+    if (!group) {
+      group = { date: t.date, items: [], net: 0 }
+      byDate.set(t.date, group)
+      groups.push(group)
+    }
+    group.items.push(t)
+    if (t.type === 'income') group.net += t.amount
+    else if (t.type === 'expense') group.net -= t.amount
+  }
+  return groups
+}
 
 export function Overview() {
   const params = usePeriodParams()
@@ -137,112 +177,146 @@ export function Overview() {
   }
 
   const list = transactions ?? []
+  const days = useMemo(() => groupByDay(transactions ?? []), [transactions])
 
   return (
     <div>
-      {/* add transaction */}
-      <div className="ov-add">
-        <div className="ov-add-top">
-          <div className="type-toggle">
-            <button className={type === 'expense' ? 'exp-active' : ''} onClick={() => onTypeChange('expense')}>
-              Expense
-            </button>
-            <button className={type === 'income' ? 'inc-active' : ''} onClick={() => onTypeChange('income')}>
-              Income
-            </button>
-            <button className={type === 'transfer' ? 'xfer-active' : ''} onClick={() => onTypeChange('transfer')}>
-              Transfer
-            </button>
-          </div>
-          <span className="ov-adding-note">Adding to {monthLabel}</span>
-        </div>
-
-        <div className="ov-add-row">
-          <div className="ov-amount">
-            <span>{currency}</span>
+      {/* ---------------------------- composer ---------------------------- */}
+      <div className="composer">
+        <div className="composer-main">
+          <div className="composer-amount">
+            <span className="composer-currency">{currency}</span>
             <input
               type="number"
               placeholder="0.00"
+              aria-label="Amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && onAdd()}
             />
           </div>
+
           <input
-            className="ov-desc"
+            className="composer-desc"
             type="text"
+            aria-label="Description"
             placeholder={isTransfer ? 'Note (optional)' : "What's it for?"}
             value={desc}
             onChange={(e) => setDesc(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && onAdd()}
           />
-          {isTransfer ? (
-            <>
+
+          <span className="composer-note">Adding to {monthLabel}</span>
+
+          <div className="composer-accounts">
+            {isTransfer ? (
+              <>
+                <select
+                  className="pm-select composer-select"
+                  title="From account"
+                  aria-label="From account"
+                  value={effectiveAccountId ?? ''}
+                  onChange={(e) => setAccountId(Number(e.target.value))}
+                >
+                  {(accounts ?? []).map((a) => (
+                    <option key={a.id} value={a.id}>
+                      From: {a.name}
+                    </option>
+                  ))}
+                </select>
+                <span className="composer-xfer-arrow">→</span>
+                <select
+                  className="pm-select composer-select"
+                  title="To account"
+                  aria-label="To account"
+                  value={effectiveTransferId ?? ''}
+                  onChange={(e) => setTransferAccountId(Number(e.target.value))}
+                >
+                  {(accounts ?? []).map((a) => (
+                    <option key={a.id} value={a.id}>
+                      To: {a.name}
+                    </option>
+                  ))}
+                </select>
+              </>
+            ) : (
               <select
-                className="pm-select ov-add-select"
-                title="From account"
+                className="pm-select composer-select"
+                aria-label="Account"
                 value={effectiveAccountId ?? ''}
                 onChange={(e) => setAccountId(Number(e.target.value))}
               >
                 {(accounts ?? []).map((a) => (
                   <option key={a.id} value={a.id}>
-                    From: {a.name}
+                    {a.name}
                   </option>
                 ))}
               </select>
-              <span className="ov-xfer-arrow">→</span>
-              <select
-                className="pm-select ov-add-select"
-                title="To account"
-                value={effectiveTransferId ?? ''}
-                onChange={(e) => setTransferAccountId(Number(e.target.value))}
-              >
-                {(accounts ?? []).map((a) => (
-                  <option key={a.id} value={a.id}>
-                    To: {a.name}
-                  </option>
-                ))}
-              </select>
-            </>
-          ) : (
-            <select
-              className="pm-select ov-add-select"
-              value={effectiveAccountId ?? ''}
-              onChange={(e) => setAccountId(Number(e.target.value))}
-            >
-              {(accounts ?? []).map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.name}
-                </option>
-              ))}
-            </select>
-          )}
-          <button className="pm-btn pm-btn-primary ov-add-btn" onClick={onAdd} disabled={createTransaction.isPending}>
+            )}
+          </div>
+
+          <button className="composer-add" onClick={onAdd} disabled={createTransaction.isPending}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
             Add
           </button>
         </div>
 
-        {!isTransfer && (
-          <div className="ov-chips">
-            {formCategories.map((c) => (
-              <button
-                key={c.id}
-                className={'ov-chip' + (categoryId === c.id ? ' active' : '')}
-                onClick={() => setCategoryId(c.id)}
-              >
-                <CategoryIcon iconKey={c.icon} size={14} strokeWidth={1.8} />
-                {c.name}
-              </button>
-            ))}
+        <div className="composer-detail">
+          <div className="composer-col composer-col-type">
+            <div className="composer-legend">Type</div>
+            <div className="composer-types">
+              {TYPES.map((t) => (
+                <button
+                  key={t.key}
+                  className={'type-btn ' + t.key + (type === t.key ? ' active' : '')}
+                  aria-pressed={type === t.key}
+                  onClick={() => onTypeChange(t.key)}
+                >
+                  <TypeIcon type={t.key} />
+                  {t.label}
+                </button>
+              ))}
+            </div>
           </div>
-        )}
+
+          <div className="composer-col composer-col-cat">
+            <div className="composer-legend">{isTransfer ? 'Accounts' : 'Category'}</div>
+            {isTransfer ? (
+              <p className="composer-hint">
+                Transfers move money between your own accounts — pick the source and destination
+                above. No category needed.
+              </p>
+            ) : (
+              <div className="cat-chips">
+                {formCategories.map((c) => (
+                  <button
+                    key={c.id}
+                    className={'cat-chip' + (categoryId === c.id ? ' active' : '')}
+                    aria-pressed={categoryId === c.id}
+                    onClick={() => setCategoryId(c.id)}
+                  >
+                    <CategoryIcon iconKey={c.icon} size={15} strokeWidth={1.8} />
+                    <span>{c.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {error && <div className="pm-inline-error" style={{ marginBottom: 12 }}>{error}</div>}
+      {error && (
+        <div className="pm-inline-error" style={{ marginBottom: 12 }}>
+          {error}
+        </div>
+      )}
 
-      {/* search + export/import */}
+      {/* ------------------------ search + csv tools ----------------------- */}
       <div className="ov-toolbar">
         <div className="ov-search-wrap">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
           </svg>
@@ -255,13 +329,17 @@ export function Overview() {
           />
         </div>
         <button className="ov-tool-btn" onClick={onExport}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
           </svg>
           Export CSV
         </button>
-        <button className="ov-tool-btn" onClick={() => fileInput.current?.click()} disabled={importTransactions.isPending}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <button
+          className="ov-tool-btn"
+          onClick={() => fileInput.current?.click()}
+          disabled={importTransactions.isPending}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M12 21V9m0 0 4 4m-4-4-4 4M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2" />
           </svg>
           {importTransactions.isPending ? 'Importing…' : 'Import CSV'}
@@ -295,13 +373,18 @@ export function Overview() {
         </div>
       )}
 
-      {/* header + filters */}
+      {/* -------------------------- header + filters ----------------------- */}
       <div className="pm-section-head">
         <div className="pm-section-title">
           Transactions <span className="txn-count">· {list.length}</span>
         </div>
         <div className="txn-filters">
-          <select className="txn-filter" value={filterCat} onChange={(e) => setFilterCat(e.target.value)}>
+          <select
+            className="txn-filter"
+            aria-label="Filter by category"
+            value={filterCat}
+            onChange={(e) => setFilterCat(e.target.value)}
+          >
             <option value="all">All categories</option>
             {(categories ?? []).map((c) => (
               <option key={c.id} value={c.id}>
@@ -309,7 +392,12 @@ export function Overview() {
               </option>
             ))}
           </select>
-          <select className="txn-filter" value={filterAcc} onChange={(e) => setFilterAcc(e.target.value)}>
+          <select
+            className="txn-filter"
+            aria-label="Filter by account"
+            value={filterAcc}
+            onChange={(e) => setFilterAcc(e.target.value)}
+          >
             <option value="all">All accounts</option>
             {(accounts ?? []).map((a) => (
               <option key={a.id} value={a.id}>
@@ -317,7 +405,12 @@ export function Overview() {
               </option>
             ))}
           </select>
-          <select className="txn-filter" value={filterType} onChange={(e) => setFilterType(e.target.value)}>
+          <select
+            className="txn-filter"
+            aria-label="Filter by type"
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+          >
             <option value="all">All types</option>
             <option value="income">Income</option>
             <option value="expense">Expense</option>
@@ -326,53 +419,90 @@ export function Overview() {
         </div>
       </div>
 
-      <div className="txn-list">
-        {list.map((t) =>
-          t.type === 'transfer' ? (
-            <div className="txn-row" key={t.id}>
-              <span className="icon-badge">
-                <CategoryIcon iconKey="transfer" size={18} />
+      {/* ---------------------- transactions, by day ----------------------- */}
+      <div className="txn-days">
+        {days.map((day) => (
+          <section className="txn-day" key={day.date}>
+            <header className="day-head">
+              <span className="day-head-date">{formatDayShort(day.date)}</span>
+              <span className="day-head-sub">
+                {formatWeekday(day.date)} · {day.items.length} item
+                {day.items.length === 1 ? '' : 's'}
               </span>
-              <div className="txn-main">
-                <div className="txn-desc">{t.description}</div>
-                <div className="txn-meta">
-                  {t.account_name} → {t.transfer_account_name} · {formatDateLabel(t.date)}
-                </div>
-              </div>
-              <div className="txn-amount txn-transfer">⇄ {formatMoney(t.amount, currency, showCents)}</div>
-              <button className="row-edit-btn" onClick={() => setEditing(t)}>
-                edit
-              </button>
-              <button className="row-icon-btn" onClick={() => deleteTransaction.mutate(t.id)} aria-label="Remove">
-                ×
-              </button>
-            </div>
-          ) : (
-            <div className="txn-row" key={t.id}>
-              <span className="icon-badge">
-                <CategoryIcon iconKey={iconById(t.category_id)} size={18} />
+              <span className="day-head-rule" />
+              <span className={'day-head-net' + (day.net > 0 ? ' pos' : '')}>
+                {day.net >= 0 ? '+' : '−'}
+                {formatMoney(day.net, currency, showCents)}
               </span>
-              <div className="txn-main">
-                <div className="txn-desc">{t.description}</div>
-                <div className="txn-meta">
-                  {t.category_name} · {t.account_name} · {formatDateLabel(t.date)}
+            </header>
+
+            <div className="txn-group">
+              {day.items.map((t) => (
+                <div className="txn-row" key={t.id} onClick={() => setEditing(t)}>
+                  <span className="icon-badge">
+                    <CategoryIcon
+                      iconKey={t.type === 'transfer' ? 'transfer' : iconById(t.category_id)}
+                      size={18}
+                    />
+                  </span>
+                  <div className="txn-main">
+                    <div className="txn-desc">{t.description}</div>
+                    <div className="txn-tags">
+                      {t.type === 'transfer' ? (
+                        <>
+                          <span className="txn-tag">Transfer</span>
+                          <span className="txn-account">
+                            {t.account_name} → {t.transfer_account_name}
+                          </span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="txn-tag">{t.category_name}</span>
+                          <span className="txn-account">{t.account_name}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div
+                    className={'txn-amount' + (t.type === 'transfer' ? ' txn-transfer' : '')}
+                    style={
+                      t.type === 'transfer'
+                        ? undefined
+                        : { color: t.type === 'income' ? 'var(--up)' : 'var(--down)' }
+                    }
+                  >
+                    {t.type === 'transfer'
+                      ? `⇄ ${formatMoney(t.amount, currency, showCents)}`
+                      : formatTransactionAmount(t.type, t.amount, currency, showCents)}
+                  </div>
+                  <button
+                    className="row-edit-btn"
+                    aria-label={`Edit ${t.description}`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setEditing(t)
+                    }}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M12 20h9" />
+                      <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                    </svg>
+                  </button>
+                  <button
+                    className="row-icon-btn"
+                    aria-label={`Remove ${t.description}`}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      deleteTransaction.mutate(t.id)
+                    }}
+                  >
+                    ×
+                  </button>
                 </div>
-              </div>
-              <div
-                className="txn-amount"
-                style={{ color: t.type === 'income' ? 'var(--up)' : 'var(--down)' }}
-              >
-                {formatTransactionAmount(t.type, t.amount, currency, showCents)}
-              </div>
-              <button className="row-edit-btn" onClick={() => setEditing(t)}>
-                edit
-              </button>
-              <button className="row-icon-btn" onClick={() => deleteTransaction.mutate(t.id)} aria-label="Remove">
-                ×
-              </button>
+              ))}
             </div>
-          ),
-        )}
+          </section>
+        ))}
         {list.length === 0 && <div className="pm-empty">No transactions match this view.</div>}
       </div>
 

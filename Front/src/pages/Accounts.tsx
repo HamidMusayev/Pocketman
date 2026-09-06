@@ -4,9 +4,20 @@ import type { Account } from '../api/types'
 import { CategoryIcon } from '../components/CategoryIcon'
 import { useAccounts, useCreateAccount, useDeleteAccount, useUpdateAccount } from '../hooks/useAccounts'
 import { useSettings } from '../hooks/useSettings'
+import { cardDigits, cardExpiry } from '../lib/cards'
 import { ACCOUNT_ICON_KEYS, ACCOUNT_ICON_LABELS, ACCOUNT_TYPES } from '../lib/constants'
 import { formatSignedMoney } from '../lib/money'
 import './pages.css'
+
+/** EMV-style contact plate on the card face. */
+function ChipGlyph() {
+  return (
+    <svg width="30" height="23" viewBox="0 0 30 23" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
+      <rect x="0.65" y="0.65" width="28.7" height="21.7" rx="4.5" />
+      <path d="M0.65 7.5h9.6M19.75 7.5h9.6M0.65 15.5h9.6M19.75 15.5h9.6M10.25 0.65v21.7M19.75 0.65v21.7" />
+    </svg>
+  )
+}
 
 export function Accounts() {
   const { data: accounts } = useAccounts()
@@ -50,6 +61,13 @@ export function Accounts() {
     }
   }
 
+  /** The card's × is a much smaller target than the list's "remove", so it
+   * asks first. */
+  function onRemoveFromCard(account: Account) {
+    if (!window.confirm(`Remove the "${account.name}" account?`)) return
+    onRemove(account.id)
+  }
+
   return (
     <div>
       <div className="networth-header">
@@ -60,6 +78,27 @@ export function Accounts() {
         <div className="networth-sub">
           {accountCount} accounts · {totalTxns} transactions
         </div>
+      </div>
+
+      <div className="pm-section-head">
+        <div className="pm-section-title">Cards</div>
+      </div>
+      <div className="card-grid">
+        {(accounts ?? []).map((a) => (
+          <AccountCard
+            key={a.id}
+            account={a}
+            currency={currency}
+            showCents={showCents}
+            onRemove={onRemoveFromCard}
+          />
+        ))}
+        {(accounts ?? []).length === 0 && <div className="pm-empty">No accounts yet.</div>}
+      </div>
+
+      <div className="pm-section-head section-gap">
+        <div className="pm-section-title">Accounts</div>
+        <div className="pm-section-note">Rename, recategorize, add or remove</div>
       </div>
 
       <div className="acc-list">
@@ -130,6 +169,76 @@ export function Accounts() {
 
       {error && <div className="pm-inline-error">{error}</div>}
     </div>
+  )
+}
+
+function AccountCard({
+  account,
+  currency,
+  showCents,
+  onRemove,
+}: {
+  account: Account
+  currency: string
+  showCents: boolean
+  onRemove: (account: Account) => void
+}) {
+  // The seeded account can't be deleted; it reads as the primary card.
+  const isPrimary = !account.removable
+  const balanceColor =
+    account.net < 0 ? 'var(--down)' : isPrimary ? 'var(--yellow)' : '#fff'
+
+  return (
+    <article className={'acc-card' + (isPrimary ? ' primary' : '')}>
+      {isPrimary && <span className="acc-card-glow" aria-hidden="true" />}
+
+      <div className="acc-card-top">
+        <div>
+          <div className="acc-card-name">{account.name}</div>
+          <div className="acc-card-type">{account.type}</div>
+        </div>
+        <div className="acc-card-actions">
+          {account.removable && (
+            <button
+              className="acc-card-remove"
+              title="Remove account"
+              aria-label={`Remove ${account.name}`}
+              onClick={() => onRemove(account)}
+            >
+              ×
+            </button>
+          )}
+          <span className="acc-card-chip">
+            <ChipGlyph />
+          </span>
+        </div>
+      </div>
+
+      {/* decorative card face — see lib/cards.ts */}
+      <div className="acc-card-number" aria-hidden="true">
+        <span>••••</span>
+        <span>••••</span>
+        <span>••••</span>
+        <span className="acc-card-last">{cardDigits(account)}</span>
+      </div>
+
+      <div className="acc-card-bottom">
+        <div>
+          <div className="acc-card-label">Balance</div>
+          <div className="acc-card-balance" style={{ color: balanceColor }}>
+            {formatSignedMoney(account.net, currency, showCents)}
+          </div>
+        </div>
+        <div className="acc-card-meta">
+          <div className="acc-card-exp" aria-hidden="true">
+            {cardExpiry(account)}
+          </div>
+          <div>
+            {account.transaction_count} transaction{account.transaction_count === 1 ? '' : 's'}
+          </div>
+        </div>
+      </div>
+    </article>
   )
 }
 

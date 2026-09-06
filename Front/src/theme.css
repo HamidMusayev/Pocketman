@@ -33,7 +33,7 @@ textarea {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2b3139;
+  background: var(--elev);
   border-radius: 8px;
 }
 
@@ -50,34 +50,39 @@ textarea {
 
 :root {
   --canvas: #0b0e11;
-  --card: #1e2329;
-  --elev: #2b3139;
+  --card: #14171d;
+  --card2: #1a1e25;
+  --elev: #21262f;
   --yellow2: #f0b90b;
   --onyellow: #181a20;
   --body: #eaecef;
-  --muted: #707a8a;
-  --muted2: #929aa5;
+  --muted: #6b7484;
+  --muted2: #9aa3b0;
   --up: #0ecb81;
   --down: #f6465d;
-  --line: #2b3139;
+  --line: #22262e;
+  --line2: #2c313b;
   --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* overridden per-request from Settings; fallback matches the prototype default */
   --yellow: #fcd535;
 
-  /* The app's fixed (editorial) spacing scale. Defined here so the shell and
-     the unauthenticated screens render correctly; themeVars() re-applies the
-     same values alongside the live accent color. */
-  --px: 36px;
+  /* Editorial spacing scale (the default direction). Defined here so the shell
+     and the unauthenticated screens render correctly; themeVars() re-applies
+     these — or the tighter terminal set — alongside the live accent color. */
+  --px: 32px;
   --scp: 16px;
-  --cpad: 18px;
-  --gap: 14px;
-  --rowpad: 11px 16px;
+  --cpad: 20px;
+  --gap: 18px;
+  --rowpad: 14px 18px;
   --statnum: 26px;
   --statlabel: 11px;
-  --chippad: 7px 13px;
-  --secgap: 20px;
+  --chippad: 11px 14px;
+  --secgap: 22px;
+  --heroh: 196px;
+
+  --shell: 1320px;
 }
 
 body {

@@ -1,12 +1,13 @@
 import { Outlet } from 'react-router-dom'
 import { useSettings } from '../hooks/useSettings'
-import { themeVars } from '../lib/density'
+import { themeVars, useDensity } from '../lib/density'
 import { TopBar } from './TopBar'
 import './shell.css'
 
 export function SettingsLayout() {
   const { data: settings } = useSettings()
-  const style = themeVars(settings?.accent_color ?? '#FCD535')
+  const [density] = useDensity()
+  const style = themeVars(settings?.accent_color ?? '#FCD535', density)
 
   return (
     <div style={style}>

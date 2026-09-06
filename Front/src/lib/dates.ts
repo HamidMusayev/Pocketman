@@ -7,6 +7,19 @@ export function formatDateLabel(iso: string): string {
   })
 }
 
+/** Short day label used by the transaction list's day headers, e.g. "Jul 4". */
+export function formatDayShort(iso: string): string {
+  return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+/** Full weekday name for a day header, e.g. "Saturday". */
+export function formatWeekday(iso: string): string {
+  return new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' })
+}
+
 function pad(n: number): string {
   return String(n).padStart(2, '0')
 }

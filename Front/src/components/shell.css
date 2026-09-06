@@ -1,27 +1,37 @@
+/* ============================================================================
+   App shell — top bar, period band, summary hero.
+   ========================================================================== */
+
+/* ---------------------------------- top bar ------------------------------ */
 .topbar {
   border-bottom: 1px solid var(--line);
+  background: var(--canvas);
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
 .topbar-inner {
-  max-width: 1200px;
+  max-width: var(--shell);
   margin: 0 auto;
-  padding: 16px var(--px);
+  padding: 0 var(--px);
   display: flex;
-  align-items: center;
-  gap: 24px;
+  align-items: stretch;
+  gap: 30px;
+  min-height: 62px;
 }
 
 .topbar-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 11px;
   flex: none;
 }
 
 .topbar-brand-mark {
-  width: 38px;
-  height: 38px;
-  border-radius: 9px;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
   background: var(--yellow);
   display: grid;
   place-items: center;
@@ -29,8 +39,8 @@
 }
 
 .topbar-brand-name {
-  font: 700 19px var(--sans);
-  letter-spacing: -0.4px;
+  font: 800 21px/1 var(--sans);
+  letter-spacing: -0.6px;
   color: #fff;
 }
 
@@ -38,59 +48,55 @@
   color: var(--yellow);
 }
 
-.topbar-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 1px;
-}
-
-.topbar-status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--up);
-  display: inline-block;
-}
-
-.topbar-status-text {
-  font: 500 11px var(--sans);
-  color: var(--muted);
-}
-
 .topbar-tabs {
-  flex: 1;
   display: flex;
-  justify-content: center;
+  align-items: stretch;
+  gap: 26px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
-.topbar-tabs-inner {
-  display: flex;
-  gap: 2px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 4px;
+.topbar-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .topbar-tab {
-  padding: 8px 16px;
-  border-radius: 7px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
   border: none;
-  cursor: pointer;
-  font: 500 14px var(--sans);
   background: transparent;
-  color: var(--muted);
-  transition: 0.15s;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  font: 500 14.5px var(--sans);
+  color: var(--muted2);
+  transition: color 0.15s;
+}
+
+.topbar-tab:hover {
+  color: var(--body);
 }
 
 .topbar-tab.active {
-  background: var(--elev);
   color: #fff;
+  font-weight: 600;
+}
+
+.topbar-tab.active::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--yellow);
 }
 
 .topbar-right {
   flex: none;
+  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -99,141 +105,352 @@
 .settings-link {
   width: 34px;
   height: 34px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
+  border-radius: 9px;
+  border: 1px solid var(--line2);
   background: var(--card);
-  color: var(--body);
+  color: var(--muted2);
   display: grid;
   place-items: center;
   text-decoration: none;
   flex: none;
 }
 
+.settings-link:hover {
+  color: var(--body);
+}
+
 .logout-link {
-  border: 1px solid var(--line);
+  border: 1px solid var(--line2);
   background: transparent;
   color: var(--muted2);
-  border-radius: 8px;
-  padding: 8px 12px;
+  border-radius: 9px;
+  padding: 8px 13px;
   font: 500 12px var(--sans);
   cursor: pointer;
 }
 
-.page-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 28px var(--px) 80px;
+.logout-link:hover {
+  color: var(--body);
+  border-color: var(--elev);
+}
+
+/* -------------------------- segmented controls --------------------------- */
+.seg {
+  display: flex;
+  gap: 2px;
+  background: var(--card);
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  padding: 3px;
+  flex: none;
+}
+
+.seg-btn {
+  padding: 7px 15px;
+  border-radius: 7px;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  color: var(--muted);
+  font: 600 12.5px var(--sans);
+  white-space: nowrap;
+  transition: 0.15s;
+}
+
+.seg-btn:hover {
+  color: var(--body);
+}
+
+.seg-density .seg-btn.active {
+  background: var(--yellow);
+  color: var(--onyellow);
+}
+
+.seg-period .seg-btn {
+  padding: 8px 18px;
+  font-size: 13px;
+}
+
+.seg-period .seg-btn.active {
+  background: #f2f4f7;
+  color: #12151a;
+}
+
+/* -------------------------------- period band ---------------------------- */
+.period-band {
+  border-bottom: 1px solid var(--line);
+  background: var(--canvas);
 }
 
 .period-row {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 14px var(--px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 24px;
   flex-wrap: wrap;
 }
 
-.period-pills {
+.period-right {
   display: flex;
-  gap: 8px;
-}
-
-.period-pill {
-  padding: 8px 16px;
-  border-radius: 9999px;
-  border: 1px solid var(--line);
-  cursor: pointer;
-  font: 500 13px var(--sans);
-  background: transparent;
-  color: var(--muted2);
-  transition: 0.15s;
-}
-
-.period-pill.active {
-  background: #fff;
-  border-color: #fff;
-  color: #181a20;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
 }
 
 .month-nav {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  border: 1px solid var(--line2);
+  background: var(--card);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .month-nav button {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: var(--card);
-  color: var(--body);
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: transparent;
+  color: var(--muted2);
   cursor: pointer;
-  font-size: 15px;
+  font-size: 17px;
+  line-height: 1;
+}
+
+.month-nav button:hover {
+  background: var(--elev);
+  color: var(--body);
 }
 
 .month-nav-label {
   min-width: 96px;
   text-align: center;
-  font: 600 15px var(--sans);
-  color: var(--body);
+  font: 600 14px var(--sans);
+  color: #fff;
 }
 
-.summary-hero {
+.db-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 12.5px var(--mono);
+  color: var(--muted);
+}
+
+.db-chip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--up);
+  flex: none;
+}
+
+/* ------------------------------- page shell ------------------------------ */
+.page-container {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: var(--secgap) var(--px) 80px;
+}
+
+/* ------------------------------ summary hero ----------------------------- */
+.summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 30fr) minmax(0, 70fr);
+  gap: var(--gap);
+  margin-bottom: var(--secgap);
+}
+
+.balance-card {
+  position: relative;
+  overflow: hidden;
+  min-height: var(--heroh);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(158deg, #1b2027 0%, #14171d 46%, #0f1216 100%);
+  padding: var(--cpad);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.balance-card-glow {
+  position: absolute;
+  top: -70px;
+  right: -50px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: var(--yellow);
+  opacity: 0.13;
+  filter: blur(48px);
+  pointer-events: none;
+}
+
+.balance-card-top {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 28px;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.balance-card-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font: 600 11px var(--sans);
+  letter-spacing: 2.4px;
+  text-transform: uppercase;
+  color: var(--muted2);
+}
+
+.balance-card-chip {
+  width: 21px;
+  height: 21px;
+  border-radius: 6px;
+  background: var(--yellow);
+  color: var(--onyellow);
+  display: grid;
+  place-items: center;
+  font: 800 11px var(--sans);
+  letter-spacing: 0;
+  flex: none;
+}
+
+.balance-card-wave {
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+}
+
+.balance-card-label {
+  position: relative;
+  font: 600 var(--statlabel) var(--sans);
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.balance-card-value {
+  position: relative;
+  font: 700 clamp(28px, 3vw, 40px) var(--mono);
+  color: var(--yellow);
+  letter-spacing: -1.4px;
+  line-height: 1.05;
+  margin-top: 8px;
+  word-break: break-all;
+}
+
+.sum-stack {
+  display: flex;
+  flex-direction: column;
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 18px 24px;
-  margin-bottom: var(--secgap);
-  flex-wrap: wrap;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
-.summary-hero-balance-label {
-  font: 600 10px var(--sans);
-  letter-spacing: 1px;
-  color: var(--muted);
-  text-transform: uppercase;
-}
-
-.summary-hero-balance-value {
-  font: 700 38px var(--mono);
-  color: var(--yellow);
-  letter-spacing: -1px;
-  line-height: 1.05;
-  margin-top: 4px;
-}
-
-.summary-hero-divider {
-  width: 1px;
-  align-self: stretch;
-  background: var(--line);
-}
-
-.summary-hero-stats {
-  display: flex;
-  gap: 40px;
+.sum-row {
   flex: 1;
-  flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px var(--cpad);
+  border-top: 1px solid var(--line);
+  min-height: 0;
 }
 
-.summary-hero-stat-label {
-  font: 600 10px var(--sans);
-  letter-spacing: 0.8px;
-  color: var(--muted);
+.sum-row:first-child {
+  border-top: none;
+}
+
+.sum-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: none;
+  background: var(--elev);
+  color: var(--muted2);
+}
+
+.sum-icon.up {
+  color: var(--up);
+  background: rgba(14, 203, 129, 0.11);
+}
+
+.sum-icon.down {
+  color: var(--down);
+  background: rgba(246, 70, 93, 0.11);
+}
+
+.sum-icon.accent {
+  color: var(--yellow);
+  background: rgba(252, 213, 53, 0.11);
+}
+
+.sum-label {
+  font: 600 var(--statlabel) var(--sans);
+  letter-spacing: 1.5px;
   text-transform: uppercase;
+  color: var(--muted2);
 }
 
-.summary-hero-stat-value {
-  font: 600 22px var(--mono);
-  margin-top: 5px;
+.sum-value {
+  margin-left: auto;
+  font: 600 var(--statnum) var(--mono);
+  letter-spacing: -0.5px;
+  white-space: nowrap;
 }
 
-@media (max-width: 768px) {
+/* ------------------------------- responsive ------------------------------ */
+@media (max-width: 1000px) {
+  .summary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .balance-card {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 860px) {
   .topbar-inner {
     flex-wrap: wrap;
+    gap: 16px;
+    padding-top: 12px;
+  }
+
+  .topbar-right {
+    margin-left: auto;
+  }
+
+  .topbar-tabs {
+    order: 3;
+    width: 100%;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 560px) {
+  .period-row {
+    justify-content: flex-start;
+  }
+
+  .seg-period .seg-btn {
+    padding: 8px 12px;
+  }
+
+  /* --px is applied inline by themeVars(), so trim the gutters directly */
+  .topbar-inner,
+  .period-row,
+  .page-container {
+    padding-left: 18px;
+    padding-right: 18px;
   }
 }
