@@ -13,9 +13,10 @@ import { useCategories } from '../hooks/useCategories'
 import { useCategoryIconById } from '../hooks/useCategoryIcons'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { useSettings } from '../hooks/useSettings'
-import { useSummary } from '../hooks/useStats'
+import { useCategoryBreakdown, useSummary } from '../hooks/useStats'
 import { useTags } from '../hooks/useTags'
 import { useTransactionPages } from '../hooks/useTransactions'
+import { RAMP } from '../lib/colorRamp'
 import { defaultEntryDate, formatDayShort, formatWeekday } from '../lib/dates'
 import { formatMoney, formatSignedMoney, formatTransactionAmount, sumMoney } from '../lib/money'
 import './pages.css'
@@ -49,8 +50,8 @@ function groupByDay(list: Transaction[]): DayGroup[] {
   return groups
 }
 
-const PlusIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+const PlusIcon = ({ size = 16 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
     <path d="M12 5v14M5 12h14" />
   </svg>
 )
@@ -62,6 +63,8 @@ export function Overview() {
   const { data: categories } = useCategories()
   const { data: accounts } = useAccounts()
   const { data: summary } = useSummary(params)
+  const { data: breakdown } = useCategoryBreakdown(params)
+  const topSpending = (breakdown ?? []).slice(0, 5)
   const iconById = useCategoryIconById()
 
   const currency = settings?.currency_symbol ?? '$'
@@ -106,14 +109,16 @@ export function Overview() {
         <h1 className="page-title">Overview</h1>
         <div className="page-head-actions">
           <PeriodPicker />
-          <button className="pm-btn pm-btn-primary add-btn-desktop" onClick={() => setAdding(true)}>
-            <PlusIcon /> Add
-          </button>
         </div>
       </div>
 
       <div className="split">
       <aside className="split-side">
+      {/* wide screens: the main action sits right at the top of the side column */}
+      <button className="add-btn-side" onClick={() => setAdding(true)}>
+        <PlusIcon size={20} /> Add transaction
+      </button>
+
       {/* ------------------------------ summary ------------------------------ */}
       <section className="summary" aria-label="Summary">
         <div>
@@ -144,6 +149,26 @@ export function Overview() {
 
       <BudgetAlerts currency={currency} showCents={showCents} />
 
+      {/* wide screens: where the money went, so the side column isn't empty */}
+      {topSpending.length > 0 && (
+        <section className="side-card top-spending" aria-label="Top spending">
+          <div className="side-card-title">Top spending</div>
+          {topSpending.map((c, i) => (
+            <div className="ts-row" key={c.category_id}>
+              <div className="ts-line">
+                <span className="ts-name">
+                  <span className="ts-dot" style={{ background: RAMP[i % RAMP.length] }} />
+                  {c.name}
+                </span>
+                <span className="ts-amt">{formatMoney(c.amount, currency, showCents)} <em>{c.pct}%</em></span>
+              </div>
+              <div className="ts-bar">
+                <span style={{ width: `${Math.max(3, (c.amount / topSpending[0].amount) * 100)}%`, background: RAMP[i % RAMP.length] }} />
+              </div>
+            </div>
+          ))}
+        </section>
+      )}
       </aside>
 
       <div className="split-main">
@@ -299,9 +324,10 @@ export function Overview() {
       </div>
       </div>
 
-      {/* phones: a floating add button above the bottom nav */}
-      <button className="fab" onClick={() => setAdding(true)} aria-label="Add transaction">
-        <PlusIcon />
+      {/* phones/tablets: a big floating add button above the bottom nav */}
+      <button className="fab" onClick={() => setAdding(true)} title="Add transaction">
+        <PlusIcon size={22} />
+        <span>Add</span>
       </button>
 
       {adding && (

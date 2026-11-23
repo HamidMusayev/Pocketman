@@ -7,7 +7,8 @@ import { Modal } from '../components/Modal'
 import { useAccounts, useCreateAccount, useDeleteAccount, useUpdateAccount } from '../hooks/useAccounts'
 import { useSettings } from '../hooks/useSettings'
 import { ACCOUNT_ICON_KEYS, ACCOUNT_ICON_LABELS, ACCOUNT_TYPES } from '../lib/constants'
-import { formatSignedMoney, parseAmount, sumMoney } from '../lib/money'
+import { rampColor } from '../lib/colorRamp'
+import { formatMoney, formatSignedMoney, parseAmount, sumMoney } from '../lib/money'
 import './pages.css'
 
 export function Accounts() {
@@ -22,54 +23,99 @@ export function Accounts() {
 
   const list = useMemo(() => accounts ?? [], [accounts])
   const total = useMemo(() => sumMoney(list.map((a) => a.net)), [list])
+  const assets = useMemo(() => sumMoney(list.filter((a) => a.net > 0).map((a) => a.net)), [list])
+  const debts = useMemo(() => sumMoney(list.filter((a) => a.net < 0).map((a) => -a.net)), [list])
 
   return (
     <div>
-      <div className="page-head">
+      <div className="page-head acc-page-head">
         <h1 className="page-title">Accounts</h1>
-        <div className="page-head-actions">
-          <button className="pm-btn pm-btn-ghost pm-btn-sm" onClick={() => setForm('new')}>
-            + Account
-          </button>
-        </div>
+        <button className="pm-btn pm-btn-primary acc-add-btn" onClick={() => setForm('new')}>
+          + Add account
+        </button>
       </div>
 
-      <div className="split">
-      <aside className="split-side">
-      <section className="summary">
-        <div>
-          <div className="summary-label">Net worth · all accounts</div>
-          <div className="summary-balance">{formatSignedMoney(total, currency, showCents)}</div>
+      {/* ----------------------------- net worth ----------------------------- */}
+      <section className="acc-hero" aria-label="Net worth">
+        <div className="acc-hero-top">
+          <div>
+            <div className="summary-label">Net worth</div>
+            <div className="summary-balance">{formatSignedMoney(total, currency, showCents)}</div>
+          </div>
+          <div className="acc-hero-stats">
+            <div>
+              <div className="summary-label">Assets</div>
+              <div className="summary-stat-value" style={{ color: 'var(--up)' }}>
+                {formatMoney(assets, currency, showCents)}
+              </div>
+            </div>
+            <div>
+              <div className="summary-label">Debts</div>
+              <div className="summary-stat-value" style={{ color: debts > 0 ? 'var(--down)' : 'var(--muted2)' }}>
+                {formatMoney(debts, currency, showCents)}
+              </div>
+            </div>
+            <div>
+              <div className="summary-label">Accounts</div>
+              <div className="summary-stat-value">{list.length}</div>
+            </div>
+          </div>
         </div>
+
+        {/* where the money sits: one bar, a segment per account with a positive balance */}
+        {assets > 0 && (
+          <div className="acc-share" aria-hidden="true">
+            {list
+              .filter((a) => a.net > 0)
+              .map((a) => (
+                <span
+                  key={a.id}
+                  title={a.name}
+                  style={{ width: `${(a.net / assets) * 100}%`, background: rampColor(list.indexOf(a)) }}
+                />
+              ))}
+          </div>
+        )}
+        {assets > 0 && (
+          <div className="acc-share-legend">
+            {list
+              .filter((a) => a.net > 0)
+              .map((a) => (
+                <span key={a.id}>
+                  <i style={{ background: rampColor(list.indexOf(a)) }} />
+                  {a.name} <em>{Math.round((a.net / assets) * 100)}%</em>
+                </span>
+              ))}
+          </div>
+        )}
       </section>
-      </aside>
 
-      <div className="split-main">
-
-      <div className="list-card">
-        {list.map((a) => (
-          <button className="list-row" key={a.id} onClick={() => setForm(a)}>
-            <span className="icon-badge">
-              <CategoryIcon iconKey={a.icon} size={19} />
-            </span>
-            <span className="list-main">
-              <span className="list-title">{a.name}</span>
-              <span className="list-sub">
-                {a.type[0].toUpperCase() + a.type.slice(1)} · {a.transaction_count} transaction
-                {a.transaction_count === 1 ? '' : 's'}
+      {/* ------------------------------ accounts ----------------------------- */}
+      <div className="acc-grid">
+        {list.map((a, i) => (
+          <button className="acc-card" key={a.id} onClick={() => setForm(a)} aria-label={`Edit ${a.name}`}>
+            <span className="acc-card-top">
+              <span className="icon-badge" style={{ color: rampColor(i) }}>
+                <CategoryIcon iconKey={a.icon} size={19} />
               </span>
+              <span className="acc-card-type">{a.type[0].toUpperCase() + a.type.slice(1)}</span>
             </span>
-            <span className="list-value" style={{ color: a.net < 0 ? 'var(--down)' : 'var(--strong)' }}>
+            <span className="acc-card-name">{a.name}</span>
+            <span className="acc-card-balance" style={{ color: a.net < 0 ? 'var(--down)' : 'var(--strong)' }}>
               {formatSignedMoney(a.net, currency, showCents)}
+            </span>
+            <span className="acc-card-sub">
+              {a.transaction_count} transaction{a.transaction_count === 1 ? '' : 's'}
             </span>
           </button>
         ))}
-        {list.length === 0 && <div className="pm-empty">No accounts yet.</div>}
+        <button className="acc-card acc-card-new" onClick={() => setForm('new')}>
+          <span className="acc-card-new-plus">+</span>
+          <span>New account</span>
+        </button>
       </div>
 
       <GoalsSection currency={currency} showCents={showCents} />
-      </div>
-      </div>
 
       {form && <AccountFormModal account={form === 'new' ? undefined : form} onClose={() => setForm(null)} />}
     </div>

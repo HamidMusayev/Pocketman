@@ -228,60 +228,144 @@
 
 /* ranking */
 
-/* month calendar */
-
-.cal-scroll {
-  overflow-x: auto;
-  padding-bottom: 4px;
+/* month calendar — compact spending heat-grid + selected-day detail */
+.cal-head {
+  margin-bottom: 12px;
+  align-items: center;
+}
+.cal-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 500 10.5px var(--sans);
+  color: var(--muted);
+}
+.cal-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+.cal-legend span:first-child {
+  margin-right: 2px;
+}
+.cal-legend span:last-child {
+  margin-left: 2px;
 }
 .cal-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(76px, 1fr));
-  gap: 6px;
-  min-width: 560px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
 }
 .cal-weekday {
-  font: 600 10px var(--sans);
-  letter-spacing: 0.6px;
+  font: 600 10.5px var(--sans);
   color: var(--muted);
-  text-transform: uppercase;
   text-align: center;
-  padding-bottom: 4px;
+  padding-bottom: 2px;
 }
 .cal-cell {
-  min-height: 64px;
+  position: relative;
+  height: 38px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 6px 7px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  overflow: hidden;
-}
-.cal-empty {
-  border: none;
   background: transparent;
-  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  color: var(--muted);
+  transition: border-color 0.15s;
 }
-.cal-today {
-  border-color: var(--yellow);
-  box-shadow: 0 0 0 1px var(--yellow);
+.cal-cell:hover {
+  border-color: var(--line2);
+}
+.cal-active .cal-day {
+  color: var(--strong);
 }
 .cal-day {
   font: 600 12px var(--mono);
-  color: var(--muted2);
 }
-.cal-amt {
-  font: 600 11px var(--mono);
-  white-space: nowrap;
+.cal-inc-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--up);
+}
+.cal-today {
+  border-color: var(--muted);
+}
+.cal-selected {
+  border-color: var(--yellow);
+  box-shadow: 0 0 0 1px var(--yellow);
+}
+.cal-detail {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.cal-detail-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.cal-detail-date {
+  font: 600 13px var(--sans);
+  color: var(--strong);
+}
+.cal-detail-totals {
+  display: inline-flex;
+  gap: 10px;
+  font: 600 13px var(--mono);
+}
+.cal-detail-empty {
+  font: 500 12.5px var(--sans);
+  color: var(--muted);
+}
+.cal-detail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.cal-detail-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 0;
+  font: 500 12.5px var(--sans);
+  color: var(--body);
+}
+.cal-detail-desc {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.cal-inc {
-  color: var(--up);
+.cal-detail-amt {
+  font: 600 12.5px var(--mono);
+  white-space: nowrap;
 }
-.cal-exp {
-  color: var(--down);
+.cal-detail-more {
+  color: var(--muted) !important;
+}
+
+/* Charts page layout: two columns on wide screens, one on phones */
+.charts-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+.charts-grid > .chart-card {
+  min-width: 0;
+}
+@media (max-width: 960px) {
+  .charts-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 860px) {
@@ -319,31 +403,26 @@
     font-size: 9px;
   }
 
-  /* A month has to read as a month: fit all seven columns instead of hiding
-     Thu–Sat behind a horizontal scroll nobody discovers. */
-  .cal-scroll {
-    overflow-x: visible;
+}
+
+.stat-value-text {
+  font-family: var(--sans);
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+@media (max-width: 620px) {
+  .stat-strip {
+    gap: 10px;
   }
-  .cal-grid {
-    grid-template-columns: repeat(7, minmax(0, 1fr));
-    min-width: 0;
-    gap: 4px;
+  .stat-card {
+    padding: 12px 14px;
   }
-  .cal-cell {
-    min-height: 52px;
-    padding: 4px 3px;
-    border-radius: 6px;
-    align-items: center;
+  .stat-value {
+    font-size: 17px;
+    margin-top: 5px;
   }
-  .cal-weekday {
-    font-size: 9px;
-    letter-spacing: 0.3px;
-  }
-  .cal-day {
-    font-size: 11px;
-  }
-  .cal-amt {
-    font-size: 9px;
-    letter-spacing: -0.3px;
+  .chart-card {
+    padding: 16px;
   }
 }
