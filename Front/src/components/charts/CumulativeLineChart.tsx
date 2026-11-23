@@ -42,7 +42,6 @@ export function CumulativeLineChart({ series, currency, showCents }: Props) {
                 {geo.gridLines.map((g, i) => (
                   <line key={i} x1="0" y1={g.y} x2="900" y2={g.y} stroke="var(--line)" strokeWidth="1" />
                 ))}
-                <path d={geo.lineArea} fill="url(#pmGrad)" opacity="0.16" />
                 <path
                   d={geo.linePath}
                   fill="none"
@@ -52,12 +51,6 @@ export function CumulativeLineChart({ series, currency, showCents }: Props) {
                   strokeLinecap="round"
                   vectorEffect="non-scaling-stroke"
                 />
-                <defs>
-                  <linearGradient id="pmGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stopColor="var(--yellow)" />
-                    <stop offset="1" stopColor="var(--yellow)" stopOpacity="0" />
-                  </linearGradient>
-                </defs>
               </svg>
               {geo.lineEnd && <div className="line-end-dot" style={{ left: geo.lineEnd.xPct, top: geo.lineEnd.yPct }} />}
             </div>
