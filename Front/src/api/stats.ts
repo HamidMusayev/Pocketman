@@ -2,10 +2,8 @@ import { apiClient } from './client'
 import type {
   CategoryBreakdownItem,
   CumulativePoint,
-  NetWorth,
   PeriodParams,
   Summary,
-  TopCategoryItem,
   TrendPoint,
   TxnType,
 } from './types'
@@ -29,17 +27,5 @@ export async function getCategoryBreakdown(
 
 export async function getCumulativeBalance(): Promise<CumulativePoint[]> {
   const res = await apiClient.get('/stats/cumulative-balance')
-  return res.data
-}
-
-export async function getTopCategories(
-  params: PeriodParams & { limit?: number },
-): Promise<TopCategoryItem[]> {
-  const res = await apiClient.get('/stats/top-categories', { params })
-  return res.data
-}
-
-export async function getNetWorth(): Promise<NetWorth> {
-  const res = await apiClient.get('/stats/net-worth')
   return res.data
 }

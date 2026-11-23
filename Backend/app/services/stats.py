@@ -3,10 +3,8 @@ from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 from sqlalchemy.orm import Session
 
-from app.models.account import Account
 from app.models.category import Category
 from app.models.transaction import Transaction
-from app.services.accounts import compute_net
 from app.services.periods import period_bounds
 
 
@@ -91,19 +89,3 @@ def get_cumulative_balance(db: Session) -> list[dict]:
         result.append({"date": t.date, "balance": running})
     return result
 
-
-def get_top_categories(
-    db: Session, period: str, year: int | None, month: int | None, limit: int = 7
-) -> list[dict]:
-    return get_category_breakdown(db, period, year, month, "expense")[:limit]
-
-
-def get_net_worth(db: Session) -> dict:
-    accounts = db.query(Account).order_by(Account.id).all()
-    result = []
-    total = 0.0
-    for a in accounts:
-        net, count = compute_net(db, a.id)
-        total += net
-        result.append({"id": a.id, "name": a.name, "net": net, "transaction_count": count})
-    return {"total": total, "accounts": result}

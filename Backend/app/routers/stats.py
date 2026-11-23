@@ -7,9 +7,7 @@ from app.database import get_db
 from app.schemas.stats import (
     CategoryBreakdownItem,
     CumulativePoint,
-    NetWorthResponse,
     SummaryResponse,
-    TopCategoryItem,
     TrendPoint,
 )
 from app.security import require_auth
@@ -17,9 +15,7 @@ from app.services.periods import PERIODS
 from app.services.stats import (
     get_category_breakdown,
     get_cumulative_balance,
-    get_net_worth,
     get_summary,
-    get_top_categories,
     get_trend,
 )
 
@@ -67,19 +63,3 @@ def category_breakdown(
 def cumulative_balance(db: Session = Depends(get_db)) -> list[dict]:
     return get_cumulative_balance(db)
 
-
-@router.get("/top-categories", response_model=list[TopCategoryItem])
-def top_categories(
-    period: str = Query("monthly"),
-    year: int | None = None,
-    month: int | None = None,
-    limit: int = Query(7, ge=1, le=50),
-    db: Session = Depends(get_db),
-) -> list[dict]:
-    _check_period(period)
-    return get_top_categories(db, period, year, month, limit)
-
-
-@router.get("/net-worth", response_model=NetWorthResponse)
-def net_worth(db: Session = Depends(get_db)) -> dict:
-    return get_net_worth(db)

@@ -11,44 +11,50 @@ frontend, packaged with **Docker Compose**.
 
 ## Screenshots
 
-**Overview** — add income/expense or transfer between accounts, search, filter, edit, import/export CSV.
+**Overview** — balance at a glance, recurring payments waiting for approval, and your
+transactions. One **+** button opens the add form.
 
 <p align="center"><img src="assets/screenshots/overview.png" alt="Overview tab" width="90%"></p>
 
 **Charts** — a stat strip (savings rate, top category, average per day, largest expense)
-over a daily calendar heat-grid, income-vs-expenses bars, an expenses donut, an all-time
-cumulative-balance line, and a top-categories ranking.
+over a daily calendar heat-grid, income-vs-expenses bars, an expenses donut, and an
+all-time cumulative-balance line.
 
 <p align="center"><img src="assets/screenshots/charts.png" alt="Charts tab" width="90%"></p>
 
 <table>
   <tr>
-    <td width="50%"><b>Accounts</b> — card wall + net worth<br><img src="assets/screenshots/accounts.png" alt="Accounts tab"></td>
-    <td width="50%"><b>Categories &amp; budgets</b><br><img src="assets/screenshots/categories.png" alt="Categories tab"></td>
+    <td width="50%"><b>Budget</b> — spending per category + recurring payments<br><img src="assets/screenshots/budget.png" alt="Budget tab"></td>
+    <td width="50%"><b>Accounts</b> — net worth + balances<br><img src="assets/screenshots/accounts.png" alt="Accounts tab"></td>
   </tr>
   <tr>
-    <td width="50%"><b>Recurring</b> — pending approvals<br><img src="assets/screenshots/recurring.png" alt="Recurring tab"></td>
-    <td width="50%"><b>Password lock</b><br><img src="assets/screenshots/login.png" alt="Login screen"></td>
+    <td width="50%"><b>Light mode</b><br><img src="assets/screenshots/light.png" alt="Light mode"></td>
+    <td width="50%"><b>On a phone</b> — bottom tab bar<br><img src="assets/screenshots/mobile.png" alt="Phone layout"></td>
   </tr>
 </table>
 
 ## Features
 
 - **Password lock** — one-time setup, then JWT-authenticated (no accounts, no multi-user).
-- **Every tab** — a period bar: step through months, or switch to all-time or a
-  custom date range.
-- **Overview** — add income/expense with category chips **or transfer money between
-  accounts** (transfers don't count as income or expense), search + filter, edit/delete,
-  and working **CSV export & import** (per-row error reporting on import).
-- **Recurring** — rules with real per-rule due-date tracking; "Catch up" generates only
-  the occurrences actually due, then you Approve or Skip each pending item.
+- **Four sections** — Overview, Charts, Budget, Accounts. On phones they sit in a
+  bottom tab bar; Settings, the light/dark switch and Lock are icons in the top bar.
+- **Period picker** — on Overview, Charts and Budget: step through months, or switch to
+  the last 90 days or all time.
+- **Overview** — compact balance/income/expenses summary, search with an optional filter
+  row, and transactions grouped by day. **+** opens the add form (income, expense, or a
+  **transfer between accounts**, which doesn't count as income or expense) with your
+  most-used categories first. Tap a row to edit or delete it.
+- **Recurring payments** — rules with real per-rule due-date tracking. Due items are
+  generated automatically when the app opens and wait on Overview for Approve or Skip.
+- **Budget** — total spent against your budgets, per-category progress, category
+  add/edit (budgets are set there), and the recurring-payment rules.
 - **Charts** — a monthly calendar heat-grid of daily income/expense, plus hand-rolled
-  SVG: income-vs-expenses bars, expenses-by-category donut, all-time cumulative-balance
-  area chart, and a top-categories ranking.
-- **Categories** — budget ring, per-category budgets with live progress bars, full CRUD.
-- **Accounts** — net worth, a card wall of per-account balances, inline edit, add/remove.
-- **Settings** — accent color (recolors the whole app live), currency symbol,
-  show-cents toggle, and change-password.
+  SVG: income-vs-expenses bars, expenses-by-category donut, and an all-time
+  cumulative-balance area chart.
+- **Accounts** — net worth and every account's balance; add, rename or remove in one form.
+- **Settings** — theme (dark, light, or match the device), accent color, currency
+  symbol, show-cents toggle, **CSV export & import** (per-row error reporting on
+  import), and change-password.
 
 Money and "today" are real: no demo transactions are seeded (a fresh install starts
 empty with just a `Main` account and the default categories), and dates use the real
@@ -77,7 +83,7 @@ and how to run the tests.
 
 | Folder | What |
 |---|---|
-| [`Backend/`](Backend) | FastAPI + SQLAlchemy + Alembic + SQLite (51 pytest tests) |
+| [`Backend/`](Backend) | FastAPI + SQLAlchemy + Alembic + SQLite (50 pytest tests) |
 | [`Front/`](Front) | React + TypeScript + Vite (36 vitest tests) |
 | [`Setup/`](Setup) | `docker-compose.yml`, `.env.example`, run instructions |
 | [`AI Instructions/`](AI%20Instructions) | `STRUCTURE.md`, `PLAN.md`, `PROGRESS.md` — the build map |

@@ -5,15 +5,9 @@ import { downloadCsvBlob, exportTransactionsCsv } from '../api/transactions'
 import type { ImportResult } from '../api/types'
 import { useSettings, useUpdateSettings } from '../hooks/useSettings'
 import { useImportTransactions } from '../hooks/useTransactions'
+import { ACCENT_COLORS } from '../lib/constants'
 import { getThemeMode, setThemeMode, type ThemeMode } from '../lib/themeMode'
 import './Settings.css'
-
-const ACCENTS = [
-  { value: '#FCD535', label: 'Yellow' },
-  { value: '#2dbdb6', label: 'Turquoise' },
-  { value: '#0ecb81', label: 'Green' },
-  { value: '#3b82f6', label: 'Blue' },
-]
 
 export function SettingsPage() {
   const { data: settings } = useSettings()
@@ -80,7 +74,7 @@ export function SettingsPage() {
         <div className="settings-field">
           <div className="settings-field-label">Accent color</div>
           <div className="accent-swatches">
-            {ACCENTS.map((a) => (
+            {ACCENT_COLORS.map((a) => (
               <button
                 key={a.value}
                 className={'accent-swatch' + (settings.accent_color === a.value ? ' active' : '')}

@@ -2,11 +2,9 @@ import { describe, expect, it } from 'vitest'
 import type { CategoryBreakdownItem, CumulativePoint, TrendPoint } from '../api/types'
 import {
   budgetColor,
-  categoryRanking,
   cumulativeLine,
   donutSegments,
   ringColor,
-  ringDash,
   trendBars,
 } from './charts'
 
@@ -35,16 +33,6 @@ describe('ringColor', () => {
   })
 })
 
-describe('ringDash', () => {
-  it('fills half the circumference at 50% and caps at 100%', () => {
-    expect(ringDash(50, 100, 30)).toBe('94.25 188.50')
-    expect(ringDash(200, 100, 30)).toBe('188.50 188.50')
-  })
-  it('is empty with no budget', () => {
-    expect(ringDash(50, 0, 30)).toBe('0.00 188.50')
-  })
-})
-
 describe('donutSegments', () => {
   it('sizes each arc by share and accumulates the offset', () => {
     const segs = donutSegments(breakdown([['A', 75, 75], ['B', 25, 25]]), 66)
@@ -70,16 +58,6 @@ describe('trendBars', () => {
     const bars = trendBars(trend)
     expect(bars[0]).toEqual({ label: 'Jan', incH: '50%', expH: '25%' })
     expect(bars[1]).toEqual({ label: 'Feb', incH: '0%', expH: '100%' })
-  })
-})
-
-describe('categoryRanking', () => {
-  it('normalizes bar widths against the largest and caps the count', () => {
-    const rows = categoryRanking(breakdown([['A', 100, 50], ['B', 50, 25], ['C', 25, 13]]), 2)
-    expect(rows).toHaveLength(2)
-    expect(rows[0].w).toBe('100%')
-    expect(rows[1].w).toBe('50%')
-    expect(rows[0].color).toBe('#FCD535')
   })
 })
 

@@ -57,11 +57,7 @@
   opacity: 0.55;
   cursor: default;
 }
-.pm-field-label {
-  font: 500 12px var(--sans);
-  color: var(--muted);
-  margin-bottom: 7px;
-}
+
 .pm-section-head {
   display: flex;
   align-items: center;
@@ -75,10 +71,7 @@
   letter-spacing: -0.3px;
   color: var(--strong);
 }
-.pm-section-note {
-  font: 500 12.5px var(--sans);
-  color: var(--muted);
-}
+
 .pm-empty {
   text-align: center;
   padding: 40px;
@@ -187,11 +180,7 @@
   opacity: 0.6;
   cursor: default;
 }
-.txn-count {
-  color: var(--muted);
-  font-weight: 500;
-  font-size: 16px;
-}
+
 .txn-filters {
   display: flex;
   gap: 10px;
@@ -282,24 +271,7 @@
   font: 600 14.5px var(--sans);
   color: var(--strong);
 }
-.txn-tags {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin-top: 5px;
-  flex-wrap: wrap;
-}
-.txn-tag {
-  padding: 2px 8px;
-  border-radius: 5px;
-  background: var(--elev);
-  font: 500 11px var(--sans);
-  color: var(--muted2);
-}
-.txn-account {
-  font: 500 11.5px var(--sans);
-  color: var(--muted);
-}
+
 .txn-amount {
   font: 600 15px var(--mono);
   white-space: nowrap;
@@ -320,14 +292,12 @@
   background: var(--elev);
 }
 /* Base: a plain text "edit" / "cancel" button (accounts + categories rows). */
-.pending-meta,
-.rule-meta {
+.pending-meta {
   font: 500 12px var(--sans);
   color: var(--muted);
   margin-top: 2px;
 }
-.pending-amount,
-.rule-amount {
+.pending-amount {
   font: 600 15px var(--mono);
 }
 .btn-approve {
@@ -351,7 +321,6 @@
 .section-gap {
   margin-top: 28px;
 }
-
 
 /* ============================ shared lists ============================ */
 .pm-btn-sm {
@@ -607,12 +576,12 @@ button.txn-row:hover {
     min-width: 0;
   }
   .list-row,
-  .txn-row {
+.txn-row {
     padding: 11px 13px;
     gap: 12px;
   }
   .list-row .icon-badge,
-  .txn-row .icon-badge {
+.txn-row .icon-badge {
     width: 34px;
     height: 34px;
   }
@@ -621,7 +590,7 @@ button.txn-row:hover {
   }
   /* 16px+ stops iOS zooming into the search field */
   .ov-search,
-  .txn-filter {
+.txn-filter {
     font-size: 16px;
   }
 }

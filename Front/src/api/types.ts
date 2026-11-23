@@ -124,25 +124,6 @@ export interface CumulativePoint {
   balance: number
 }
 
-export interface TopCategoryItem {
-  category_id: number
-  name: string
-  amount: number
-  pct: number
-}
-
-export interface NetWorthAccount {
-  id: number
-  name: string
-  net: number
-  transaction_count: number
-}
-
-export interface NetWorth {
-  total: number
-  accounts: NetWorthAccount[]
-}
-
 /** Shared query params every list/stat endpoint accepts for the current period selection. */
 export interface PeriodParams {
   period: Period

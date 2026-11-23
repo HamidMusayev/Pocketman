@@ -2,9 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import {
   getCategoryBreakdown,
   getCumulativeBalance,
-  getNetWorth,
   getSummary,
-  getTopCategories,
   getTrend,
 } from '../api/stats'
 import type { PeriodParams } from '../api/types'
@@ -30,15 +28,4 @@ export function useCategoryBreakdown(params: PeriodParams) {
 
 export function useCumulativeBalance() {
   return useQuery({ queryKey: [...queryKeys.stats, 'cumulative-balance'], queryFn: getCumulativeBalance })
-}
-
-export function useTopCategories(params: PeriodParams, limit = 7) {
-  return useQuery({
-    queryKey: [...queryKeys.stats, 'top-categories', params, limit],
-    queryFn: () => getTopCategories({ ...params, limit }),
-  })
-}
-
-export function useNetWorth() {
-  return useQuery({ queryKey: [...queryKeys.stats, 'net-worth'], queryFn: getNetWorth })
 }

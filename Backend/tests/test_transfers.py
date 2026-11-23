@@ -60,11 +60,11 @@ def test_transfer_moves_balance_between_accounts_but_not_total(auth_client):
         json={"type": "transfer", "amount": 300, "description": "Move", "account_id": main["id"], "transfer_account_id": savings["id"], "date": "2026-07-05"},
     )
 
-    net_worth = auth_client.get("/api/stats/net-worth").json()
-    by_id = {a["id"]: a for a in net_worth["accounts"]}
+    accounts = auth_client.get("/api/accounts").json()
+    by_id = {a["id"]: a for a in accounts}
     assert by_id[main["id"]]["net"] == 700  # 1000 income - 300 transferred out
     assert by_id[savings["id"]]["net"] == 300  # received the transfer
-    assert net_worth["total"] == 1000  # transfer nets to zero across accounts
+    assert sum(a["net"] for a in accounts) == 1000  # transfer nets to zero across accounts
 
 
 def test_transfer_requires_distinct_accounts(auth_client):
