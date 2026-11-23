@@ -16,29 +16,17 @@ def test_duplicate_account_name_rejected(auth_client):
     assert resp.status_code == 409
 
 
-def test_cannot_delete_main_account(auth_client):
-    accounts = auth_client.get("/api/accounts").json()
-    main_id = accounts[0]["id"]
+def test_main_account_can_be_deleted_when_another_exists(auth_client):
+    main_id = auth_client.get("/api/accounts").json()[0]["id"]
+    auth_client.post("/api/accounts", json={"name": "Cash", "type": "cash", "icon": "wallet"})
     resp = auth_client.delete(f"/api/accounts/{main_id}")
-    assert resp.status_code == 409
+    assert resp.status_code == 204
 
 
 def test_cannot_delete_last_account(auth_client):
-    # Main is not removable but even a removable-flagged account should be blocked
-    # if it's the only account left (create then delete Main is impossible, so
-    # this test targets the "last account" guard using two accounts then one removal).
-    accounts = auth_client.get("/api/accounts").json()
-    main_id = accounts[0]["id"]
-    create = auth_client.post("/api/accounts", json={"name": "Cash", "type": "cash", "icon": "wallet"})
-    cash_id = create.json()["id"]
-
-    # remove main should still fail (not removable) regardless of count
+    main_id = auth_client.get("/api/accounts").json()[0]["id"]
     resp = auth_client.delete(f"/api/accounts/{main_id}")
     assert resp.status_code == 409
-
-    # removing Cash (removable, no txns) should succeed leaving 1 account
-    resp2 = auth_client.delete(f"/api/accounts/{cash_id}")
-    assert resp2.status_code == 204
 
 
 def test_cannot_delete_account_with_transactions(auth_client):
@@ -84,3 +72,47 @@ def test_account_net_reflects_transactions(auth_client):
     updated = auth_client.get("/api/accounts").json()[0]
     assert updated["net"] == 800
     assert updated["transaction_count"] == 2
+
+
+def test_delete_account_moves_history_to_another_account(auth_client):
+    accounts = auth_client.get("/api/accounts").json()
+    main = accounts[0]
+    categories = auth_client.get("/api/categories").json()
+    salary_cat = next(c for c in categories if c["name"] == "Salary")
+    cash = auth_client.post(
+        "/api/accounts", json={"name": "Cash", "type": "cash", "icon": "wallet", "opening_balance": "50"}
+    ).json()
+    auth_client.post(
+        "/api/transactions",
+        json={
+            "type": "income", "amount": 100, "description": "pay",
+            "category_id": salary_cat["id"], "account_id": cash["id"], "date": "2026-07-01",
+        },
+    )
+    # a transfer between the two accounts disappears: it would be Main -> Main
+    auth_client.post(
+        "/api/transactions",
+        json={
+            "type": "transfer", "amount": 30, "description": "move",
+            "account_id": cash["id"], "transfer_account_id": main["id"], "date": "2026-07-02",
+        },
+    )
+    worth_before = sum(float(a["net"]) for a in auth_client.get("/api/accounts").json())
+
+    resp = auth_client.delete(f"/api/accounts/{cash['id']}?move_to={main['id']}")
+    assert resp.status_code == 204
+
+    after = auth_client.get("/api/accounts").json()
+    assert [a["id"] for a in after] == [main["id"]]
+    assert float(after[0]["net"]) == worth_before == 150
+    txns = auth_client.get("/api/transactions", params={"period": "all"}).json()
+    items = txns["items"] if isinstance(txns, dict) else txns
+    assert [t["description"] for t in items] == ["pay"]
+    assert items[0]["account_id"] == main["id"]
+
+
+def test_delete_account_move_to_itself_is_rejected(auth_client):
+    main_id = auth_client.get("/api/accounts").json()[0]["id"]
+    auth_client.post("/api/accounts", json={"name": "Cash", "type": "cash", "icon": "wallet"})
+    resp = auth_client.delete(f"/api/accounts/{main_id}?move_to={main_id}")
+    assert resp.status_code == 422

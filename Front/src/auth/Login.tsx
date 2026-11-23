@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { login } from '../api/auth'
 import { apiErrorMessage } from '../api/client'
 import { useAuthStatus } from '../hooks/useAuthStatus'
-import { AuthCardHeader } from './AuthCardHeader'
+import { AuthLayout } from './AuthLayout'
 import { useAuth } from './AuthContext'
 import './auth.css'
 
@@ -36,9 +36,7 @@ export function Login() {
   }
 
   return (
-    <div className="auth-screen">
-      <div className="auth-card">
-        <AuthCardHeader />
+    <AuthLayout>
         <h1 className="auth-title">Welcome back</h1>
         <p className="auth-subtitle">Sign in to your Pocketman account.</p>
         <form onSubmit={onSubmit} noValidate>
@@ -85,7 +83,6 @@ export function Login() {
             No account yet? <Link to="/register">Create one</Link>
           </p>
         )}
-      </div>
-    </div>
+    </AuthLayout>
   )
 }

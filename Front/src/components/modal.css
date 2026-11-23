@@ -64,6 +64,12 @@
   border: 1px solid var(--line);
 }
 
+.modal-danger-solid {
+  background: var(--down);
+  color: #fff;
+  border: none;
+}
+
 /* --------------------------- add-transaction form ------------------------ */
 .add-type {
   margin-bottom: 18px;

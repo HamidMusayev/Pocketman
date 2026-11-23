@@ -1039,15 +1039,11 @@ button.txn-row:hover {
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 16px 18px;
-  cursor: pointer;
   color: inherit;
-  transition: border-color 0.15s, transform 0.1s;
+  transition: border-color 0.15s;
 }
-.acc-card:hover {
-  border-color: var(--line2);
-}
-.acc-card:active {
-  transform: scale(0.99);
+.acc-card-new {
+  cursor: pointer;
 }
 .acc-card-top {
   display: flex;
@@ -1141,6 +1137,41 @@ button.txn-row:hover {
 }
 .acc-share-legend em {
   font-style: normal;
+  font-family: var(--mono);
+  color: var(--strong);
+}
+
+.acc-card-actions {
+  display: inline-flex;
+  gap: 6px;
+}
+.acc-act {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  border: 1px solid var(--line2);
+  background: transparent;
+  color: var(--muted2);
+  cursor: pointer;
+}
+.acc-act:hover {
+  color: var(--strong);
+  background: var(--elev);
+}
+.acc-act-danger:hover {
+  color: var(--down);
+  border-color: var(--down);
+  background: var(--down-soft);
+}
+.acc-del-text {
+  font: 400 14px/1.55 var(--sans);
+  color: var(--body);
+  margin: 0 0 16px;
+}
+.acc-del-text strong {
+  white-space: nowrap;
   font-family: var(--mono);
   color: var(--strong);
 }

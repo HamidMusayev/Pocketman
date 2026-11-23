@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -7,7 +7,7 @@ from app.models.user import User
 from app.ownership import get_owned, owned_query
 from app.schemas.account import AccountCreate, AccountResponse, AccountUpdate
 from app.security import get_current_user
-from app.services.accounts import account_in_use, to_response_dict
+from app.services.accounts import account_in_use, move_account_history, to_response_dict
 
 router = APIRouter(prefix="/api/accounts", tags=["accounts"])
 
@@ -68,17 +68,26 @@ def update_account(
 
 @router.delete("/{account_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_account(
-    account_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
+    account_id: int,
+    move_to: int | None = Query(default=None, description="Account that takes over this account's history"),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ) -> None:
+    """Remove an account. One that has history (transactions, recurring rules)
+    can only go if `move_to` names another account: everything is moved there,
+    together with the starting balance, so net worth stays the same."""
     account = get_owned(db, Account, account_id, user.id, "Account")
-    if not account.removable:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="This account cannot be removed")
     if owned_query(db, Account, user.id).count() <= 1:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Cannot remove the last account")
-    if account_in_use(db, account_id):
+    if move_to is not None:
+        if move_to == account_id:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Pick a different account")
+        target = get_owned(db, Account, move_to, user.id, "Account")
+        move_account_history(db, account, target)
+    elif account_in_use(db, account_id):
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="Account has transactions or recurring rules and cannot be removed",
+            detail="Account has transactions or recurring rules; choose an account to move them to",
         )
     db.delete(account)
     db.commit()

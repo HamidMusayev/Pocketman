@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { register } from '../api/auth'
 import { apiErrorMessage } from '../api/client'
-import { AuthCardHeader } from './AuthCardHeader'
+import { AuthLayout } from './AuthLayout'
 import { useAuth } from './AuthContext'
 import { PASSWORD_MIN, USERNAME_MIN, passwordError, usernameError } from './validation'
 import './auth.css'
@@ -14,6 +14,7 @@ export function Register() {
   const [touched, setTouched] = useState({ username: false, password: false })
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [savedIt, setSavedIt] = useState(false)
   const { setSession } = useAuth()
   const navigate = useNavigate()
 
@@ -29,6 +30,10 @@ export function Register() {
       setError('Passwords do not match.')
       return
     }
+    if (!savedIt) {
+      setError('Confirm that you saved your password somewhere safe.')
+      return
+    }
     setLoading(true)
     try {
       const res = await register(username, password)
@@ -42,9 +47,7 @@ export function Register() {
   }
 
   return (
-    <div className="auth-screen">
-      <div className="auth-card">
-        <AuthCardHeader />
+    <AuthLayout>
         <h1 className="auth-title">Create your account</h1>
         <p className="auth-subtitle">Your data is private to your account.</p>
         <form onSubmit={onSubmit} noValidate>
@@ -105,19 +108,35 @@ export function Register() {
               autoComplete="new-password"
             />
           </div>
+          <div className="auth-warn" role="note">
+            <div className="auth-warn-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12 3 2 20h20L12 3Z" />
+                <path d="M12 10v4M12 17.5v.01" />
+              </svg>
+              There is no password recovery
+            </div>
+            <p>
+              Pocketman doesn't ask for an email or phone number, so a forgotten password can't be reset. If you lose
+              it, you won't be able to sign in again. Keep it in a password manager or another safe place.
+            </p>
+            <label className="auth-check">
+              <input type="checkbox" checked={savedIt} onChange={(e) => setSavedIt(e.target.checked)} />
+              I've saved my password somewhere safe
+            </label>
+          </div>
           {error && (
             <div className="auth-error" role="alert">
               {error}
             </div>
           )}
-          <button className="auth-submit" type="submit" disabled={loading}>
+          <button className="auth-submit" type="submit" disabled={loading || !savedIt}>
             {loading ? 'Creating…' : 'Create account'}
           </button>
         </form>
         <p className="auth-switch">
           Already have an account? <Link to="/login">Sign in</Link>
         </p>
-      </div>
-    </div>
+    </AuthLayout>
   )
 }
