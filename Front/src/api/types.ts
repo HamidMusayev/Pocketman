@@ -197,3 +197,40 @@ export interface PeriodParams {
   year?: number
   month?: number
 }
+
+export interface MmbakPreview {
+  currency_iso: string | null
+  currency_symbol: string | null
+  date_from: string | null
+  date_to: string | null
+  income: number
+  expense: number
+  transfer: number
+  adjustments: number
+  duplicates: number
+  skipped: number
+  new_accounts: string[]
+  existing_accounts: string[]
+  new_categories: string[]
+  existing_categories: string[]
+  warnings: string[]
+  sample: {
+    date: string
+    type: 'income' | 'expense' | 'transfer'
+    amount: number
+    description: string
+    account: string
+    to_account: string | null
+    category: string | null
+  }[]
+}
+
+export interface MmbakResult {
+  transactions: number
+  adjustments: number
+  accounts: number
+  categories: number
+  duplicates: number
+  skipped: number
+  currency_symbol: string | null
+}

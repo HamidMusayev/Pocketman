@@ -28,6 +28,11 @@ class Settings(BaseSettings):
     # Largest CSV accepted by POST /api/transactions/import.
     MAX_IMPORT_BYTES: int = 5 * 1024 * 1024
 
+    # Largest Money Manager backup (.mmbak) accepted, as uploaded and once
+    # unzipped. Keep MMBAK_MAX_UPLOAD_BYTES in step with nginx.conf.
+    MMBAK_MAX_UPLOAD_BYTES: int = 20 * 1024 * 1024
+    MMBAK_MAX_DB_BYTES: int = 100 * 1024 * 1024
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]

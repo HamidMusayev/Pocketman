@@ -9,6 +9,7 @@ import {
   type TransactionFilters,
   type TransactionInput,
 } from '../api/transactions'
+import { importMmbak } from '../api/imports'
 import { queryKeys } from './queryKeys'
 
 export function useTransactions(filters: TransactionFilters) {
@@ -78,6 +79,19 @@ export function useImportTransactions() {
       // import can auto-create categories/accounts
       qc.invalidateQueries({ queryKey: queryKeys.categories })
       qc.invalidateQueries({ queryKey: queryKeys.accounts })
+    },
+  })
+}
+
+export function useImportMmbak() {
+  const invalidate = useInvalidateAfterTransactionChange()
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ file, useCurrency }: { file: File; useCurrency: boolean }) => importMmbak(file, useCurrency),
+    onSuccess: () => {
+      invalidate()
+      qc.invalidateQueries({ queryKey: queryKeys.categories })
+      qc.invalidateQueries({ queryKey: ['settings'] })
     },
   })
 }
