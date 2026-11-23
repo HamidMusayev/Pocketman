@@ -209,7 +209,6 @@
   border-radius: 50%;
   background: var(--yellow);
   border: 2px solid var(--card);
-  box-shadow: 0 0 0 1px var(--yellow);
 }
 .line-xlabels {
   display: flex;
@@ -298,7 +297,8 @@
 }
 .cal-selected {
   border-color: var(--yellow);
-  box-shadow: 0 0 0 1px var(--yellow);
+  outline: 1px solid var(--yellow);
+  outline-offset: -1px;
 }
 .cal-detail {
   margin-top: 14px;
