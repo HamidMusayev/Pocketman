@@ -458,15 +458,6 @@ button.txn-row:hover {
 .txn-days {
   margin-top: 18px;
 }
-.add-btn-desktop {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 16px;
-}
-.fab {
-  display: none;
-}
 
 /* pending recurring payments */
 .pending-panel {
@@ -534,29 +525,6 @@ button.txn-row:hover {
 
 /* ============================ phones ============================ */
 @media (max-width: 720px) {
-  .add-btn-desktop {
-    display: none;
-  }
-  .fab {
-    display: grid;
-    place-items: center;
-    position: fixed;
-    right: 16px;
-    bottom: calc(76px + env(safe-area-inset-bottom));
-    z-index: 25;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    border: none;
-    background: var(--yellow);
-    color: var(--onyellow);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-    cursor: pointer;
-  }
-  .fab svg {
-    width: 24px;
-    height: 24px;
-  }
   .page-head-actions {
     width: 100%;
   }
@@ -883,4 +851,298 @@ button.txn-row:hover {
   .report-cards {
     break-inside: avoid;
   }
+}
+
+/* ======================= add transaction (big + visible) ======================= */
+.add-btn-side {
+  display: none;
+}
+.fab {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  z-index: 25;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 56px;
+  padding: 0 28px 0 22px;
+  border-radius: 999px;
+  border: none;
+  background: var(--yellow);
+  color: var(--onyellow);
+  font: 700 16px var(--sans);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 0 4px var(--canvas);
+  cursor: pointer;
+}
+.fab:active {
+  transform: translateX(-50%) scale(0.97);
+}
+@media (max-width: 720px) {
+  .fab {
+    bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+}
+@media (min-width: 960px) {
+  .fab {
+    display: none;
+  }
+  .add-btn-side {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    height: 54px;
+    margin-bottom: 14px;
+    border: none;
+    border-radius: 14px;
+    background: var(--yellow);
+    color: var(--onyellow);
+    font: 700 16px var(--sans);
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    transition: transform 0.1s, filter 0.15s;
+  }
+  .add-btn-side:hover {
+    filter: brightness(1.05);
+  }
+  .add-btn-side:active {
+    transform: scale(0.98);
+  }
+}
+
+/* side cards (Overview "Top spending") */
+.side-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+.side-card-title {
+  font: 700 14px var(--sans);
+  color: var(--strong);
+  margin-bottom: 12px;
+}
+.top-spending {
+  display: none;
+}
+@media (min-width: 960px) {
+  .top-spending {
+    display: block;
+  }
+}
+.ts-row + .ts-row {
+  margin-top: 12px;
+}
+.ts-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font: 500 13px var(--sans);
+  color: var(--body);
+}
+.ts-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ts-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+.ts-amt {
+  font: 600 13px var(--mono);
+  color: var(--strong);
+  white-space: nowrap;
+}
+.ts-amt em {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--muted);
+  margin-left: 4px;
+}
+.ts-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--elev);
+  margin-top: 6px;
+  overflow: hidden;
+}
+.ts-bar span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+}
+
+/* ================================ accounts ================================ */
+.acc-page-head {
+  flex-wrap: nowrap;
+}
+.acc-add-btn {
+  white-space: nowrap;
+}
+.acc-hero {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px 22px;
+  margin-bottom: 16px;
+}
+.acc-hero-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px 32px;
+  flex-wrap: wrap;
+}
+.acc-hero-stats {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.acc-share {
+  display: flex;
+  gap: 3px;
+  height: 8px;
+  margin-top: 18px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.acc-share span {
+  display: block;
+  height: 100%;
+  min-width: 4px;
+}
+.acc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+  margin-bottom: 26px;
+}
+.acc-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 18px;
+  cursor: pointer;
+  color: inherit;
+  transition: border-color 0.15s, transform 0.1s;
+}
+.acc-card:hover {
+  border-color: var(--line2);
+}
+.acc-card:active {
+  transform: scale(0.99);
+}
+.acc-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 8px;
+}
+.acc-card-type {
+  font: 600 10.5px var(--sans);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--elev);
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+.acc-card-name {
+  font: 600 14px var(--sans);
+  color: var(--body);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.acc-card-balance {
+  font: 700 22px var(--mono);
+  letter-spacing: -0.6px;
+}
+.acc-card-sub {
+  font: 500 12px var(--sans);
+  color: var(--muted);
+}
+.acc-card-new {
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 150px;
+  border-style: dashed;
+  border-width: 1.5px;
+  background: transparent;
+  color: var(--muted2);
+  font: 600 14px var(--sans);
+}
+.acc-card-new:hover {
+  color: var(--strong);
+  border-color: var(--yellow);
+}
+.acc-card-new-plus {
+  font: 400 28px/1 var(--sans);
+}
+@media (max-width: 720px) {
+  .acc-hero {
+    padding: 16px;
+  }
+  .acc-hero-stats {
+    gap: 18px;
+  }
+  .acc-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .acc-card {
+    padding: 14px;
+  }
+  .acc-card-balance {
+    font-size: 17px;
+    letter-spacing: -0.4px;
+  }
+  .acc-card-new {
+    min-height: 120px;
+  }
+}
+.acc-share-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 10px;
+  font: 500 12px var(--sans);
+  color: var(--muted2);
+}
+.acc-share-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.acc-share-legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.acc-share-legend em {
+  font-style: normal;
+  font-family: var(--mono);
+  color: var(--strong);
 }

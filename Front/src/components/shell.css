@@ -426,3 +426,40 @@ textarea:focus-visible {
 .split-side .list-sub {
   white-space: normal;
 }
+
+/* ------------------------------- log out --------------------------------- */
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  padding: 0 12px;
+  margin-left: 4px;
+  border-radius: 9px;
+  border: 1px solid var(--line2);
+  background: transparent;
+  color: var(--muted2);
+  font: 600 13px var(--sans);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.logout-btn:hover {
+  color: var(--down);
+  border-color: var(--down);
+  background: var(--down-soft);
+}
+
+@media (max-width: 720px) {
+  .logout-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+    border-color: transparent;
+    margin-left: 0;
+  }
+  .logout-btn-label {
+    display: none;
+  }
+}

@@ -59,6 +59,7 @@ export function Charts() {
         value: topCat?.name ?? '—',
         sub: topCat ? formatMoney(topCat.amount, currency, showCents) : 'no expenses',
         color: 'var(--strong)',
+        text: true,
       },
       {
         label: 'Avg / day',
@@ -91,7 +92,7 @@ export function Charts() {
         {statStrip.map((st, i) => (
           <div className="stat-card" key={i}>
             <div className="stat-label">{st.label}</div>
-            <div className="stat-value" style={{ color: st.color }}>
+            <div className={'stat-value' + ('text' in st ? ' stat-value-text' : '')} style={{ color: st.color }}>
               {st.value}
             </div>
             <div className="stat-sub">{st.sub}</div>
@@ -99,14 +100,15 @@ export function Charts() {
         ))}
       </div>
 
-      <MonthCalendar currency={currency} showCents={showCents} />
-
-      <div className="charts-row">
-        <TrendBars trend={trend ?? []} />
+      <div className="charts-grid">
         <CategoryDonut breakdown={breakdown ?? []} currency={currency} showCents={showCents} />
+        <MonthCalendar currency={currency} showCents={showCents} />
       </div>
 
-      <CumulativeLineChart series={cumulative ?? []} currency={currency} showCents={showCents} />
+      <div className="charts-grid">
+        <TrendBars trend={trend ?? []} />
+        <CumulativeLineChart series={cumulative ?? []} currency={currency} showCents={showCents} />
+      </div>
       </div>
 
     </div>

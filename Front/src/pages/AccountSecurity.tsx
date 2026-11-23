@@ -3,6 +3,7 @@ import { changePassword, changeUsername, logoutAll } from '../api/auth'
 import { apiErrorMessage } from '../api/client'
 import { useAuth } from '../auth/AuthContext'
 import { passwordError, usernameError } from '../auth/validation'
+import { LogoutIcon } from '../components/TopBar'
 
 type Status = { kind: 'error' | 'success'; text: string } | null
 
@@ -17,7 +18,7 @@ function StatusLine({ status }: { status: Status }) {
 
 /** Settings → Account: who is signed in, rename, change password, sign out everywhere. */
 export function AccountSecurity() {
-  const { username, setSession } = useAuth()
+  const { username, setSession, logout } = useAuth()
 
   const [newUsername, setNewUsername] = useState('')
   const [unPassword, setUnPassword] = useState('')
@@ -84,79 +85,140 @@ export function AccountSecurity() {
     }
   }
 
+  const [open, setOpen] = useState<'username' | 'password' | null>(null)
+  const toggle = (k: 'username' | 'password') => setOpen((cur) => (cur === k ? null : k))
+
   return (
-    <section className="settings-section">
-      <h2 className="settings-section-title">Account</h2>
-      {username && (
-        <p className="settings-hint">
-          Signed in as <strong>{username}</strong>
-        </p>
-      )}
-
-      <form onSubmit={onChangeUsername} className="settings-password-form" noValidate>
-        <div className="settings-field-label">Change username</div>
-        <input
-          className="settings-input"
-          placeholder="New username"
-          value={newUsername}
-          onChange={(e) => setNewUsername(e.target.value.toLowerCase())}
-          autoComplete="username"
-          autoCapitalize="none"
-          spellCheck={false}
-        />
-        <input
-          className="settings-input"
-          type="password"
-          placeholder="Password"
-          value={unPassword}
-          onChange={(e) => setUnPassword(e.target.value)}
-          autoComplete="current-password"
-        />
-        <StatusLine status={unStatus} />
-        <button className="settings-submit" type="submit" disabled={unLoading}>
-          {unLoading ? 'Saving…' : 'Change username'}
+    <>
+      <h2 className="set-group-title">Security</h2>
+      <section className="set-group">
+        <button className="set-row set-row-btn" onClick={() => toggle('username')} aria-expanded={open === 'username'}>
+          <span>
+            <span className="set-row-label">Change username</span>
+            <span className="set-row-hint">Currently {username}</span>
+          </span>
+          <Chevron open={open === 'username'} />
         </button>
-      </form>
+        {open === 'username' && (
+          <form onSubmit={onChangeUsername} className="set-row-form" noValidate>
+            <input
+              className="settings-input"
+              placeholder="New username"
+              aria-label="New username"
+              value={newUsername}
+              onChange={(e) => setNewUsername(e.target.value.toLowerCase())}
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
+              autoFocus
+            />
+            <input
+              className="settings-input"
+              type="password"
+              placeholder="Password"
+              aria-label="Password"
+              value={unPassword}
+              onChange={(e) => setUnPassword(e.target.value)}
+              autoComplete="current-password"
+            />
+            <StatusLine status={unStatus} />
+            <button className="settings-submit" type="submit" disabled={unLoading}>
+              {unLoading ? 'Saving…' : 'Change username'}
+            </button>
+          </form>
+        )}
+        {open !== 'username' && unStatus?.kind === 'success' && (
+          <div className="set-row-note">
+            <StatusLine status={unStatus} />
+          </div>
+        )}
 
-      <form onSubmit={onChangePassword} className="settings-password-form" noValidate>
-        <div className="settings-field-label">Change password</div>
-        <input
-          className="settings-input"
-          type="password"
-          placeholder="Current password"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          autoComplete="current-password"
-        />
-        <input
-          className="settings-input"
-          type="password"
-          placeholder="New password (8+ characters, letters and digits)"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          autoComplete="new-password"
-        />
-        <input
-          className="settings-input"
-          type="password"
-          placeholder="Confirm new password"
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          autoComplete="new-password"
-        />
-        <StatusLine status={pwStatus} />
-        <button className="settings-submit" type="submit" disabled={pwLoading}>
-          {pwLoading ? 'Changing…' : 'Change password'}
+        <button className="set-row set-row-btn" onClick={() => toggle('password')} aria-expanded={open === 'password'}>
+          <span>
+            <span className="set-row-label">Change password</span>
+            <span className="set-row-hint">Signs out your other devices</span>
+          </span>
+          <Chevron open={open === 'password'} />
         </button>
-      </form>
+        {open === 'password' && (
+          <form onSubmit={onChangePassword} className="set-row-form" noValidate>
+            <input
+              className="settings-input"
+              type="password"
+              placeholder="Current password"
+              aria-label="Current password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              autoComplete="current-password"
+              autoFocus
+            />
+            <input
+              className="settings-input"
+              type="password"
+              placeholder="New password (8+ characters, letters and digits)"
+              aria-label="New password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              autoComplete="new-password"
+            />
+            <input
+              className="settings-input"
+              type="password"
+              placeholder="Confirm new password"
+              aria-label="Confirm new password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              autoComplete="new-password"
+            />
+            <StatusLine status={pwStatus} />
+            <button className="settings-submit" type="submit" disabled={pwLoading}>
+              {pwLoading ? 'Changing…' : 'Change password'}
+            </button>
+          </form>
+        )}
+        {open !== 'password' && pwStatus?.kind === 'success' && (
+          <div className="set-row-note">
+            <StatusLine status={pwStatus} />
+          </div>
+        )}
 
-      <div className="settings-password-form">
-        <div className="settings-field-label">Sessions</div>
-        <button className="pm-btn pm-btn-ghost" type="button" onClick={onLogoutAll} style={{ alignSelf: 'flex-start' }}>
-          Sign out other devices
+        <button className="set-row set-row-btn" onClick={onLogoutAll}>
+          <span>
+            <span className="set-row-label">Sign out other devices</span>
+            <span className="set-row-hint">Keeps you signed in here</span>
+          </span>
+          <Chevron />
         </button>
-        <StatusLine status={allStatus} />
-      </div>
-    </section>
+        {allStatus && (
+          <div className="set-row-note">
+            <StatusLine status={allStatus} />
+          </div>
+        )}
+      </section>
+
+      <section className="set-group set-group-danger">
+        <button className="set-row set-row-btn set-logout-row" onClick={logout}>
+          <LogoutIcon />
+          <span className="set-row-label">Log out</span>
+        </button>
+      </section>
+    </>
   )
 }
+
+export const Chevron = ({ open = false }: { open?: boolean }) => (
+  <svg
+    className={'set-chevron' + (open ? ' open' : '')}
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="m9 6 6 6-6 6" />
+  </svg>
+)

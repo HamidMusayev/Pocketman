@@ -65,10 +65,10 @@ const GearIcon = () => (
     <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.1a2 2 0 1 1-4 0V21a1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 4.1V4a2 2 0 1 1 4 0v.1A1.7 1.7 0 0 0 16.9 5.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 11a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" />
   </Svg>
 )
-const LockIcon = () => (
-  <Svg size={17}>
-    <rect x="5" y="11" width="14" height="10" rx="2" />
-    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+export const LogoutIcon = ({ size = 17 }: IconProps) => (
+  <Svg size={size}>
+    <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" />
+    <path d="M10 17l-5-5 5-5M5 12h11" />
   </Svg>
 )
 
@@ -130,8 +130,14 @@ export function TopBar() {
             <NavLink to="/settings" className="icon-btn" title="Settings" aria-label="Settings">
               <GearIcon />
             </NavLink>
-            <button className="icon-btn" onClick={logout} title={username ? `Sign out (${username})` : 'Sign out'} aria-label="Sign out">
-              <LockIcon />
+            <button
+              className="logout-btn"
+              onClick={logout}
+              title={username ? `Log out (${username})` : 'Log out'}
+              aria-label="Log out"
+            >
+              <LogoutIcon />
+              <span className="logout-btn-label">Log out</span>
             </button>
           </div>
         </div>
