@@ -11,6 +11,10 @@ if [ -f "$DB" ]; then
     BACKUP="$DB.bak-$(date +%Y%m%d-%H%M%S)-${CURRENT:-none}"
     cp "$DB" "$BACKUP"
     echo "Backed up database to $BACKUP before migrating ${CURRENT:-none} -> $HEAD"
+    # Keep only the 5 newest backups (names sort by timestamp).
+    ls -1 "$DB".bak-* 2>/dev/null | sort -r | tail -n +6 | while read -r OLD; do
+      rm -f "$OLD" && echo "Removed old backup $OLD"
+    done
   fi
 fi
 
