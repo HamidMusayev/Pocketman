@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import type { Category } from '../api/types'
+import type { Category, RecurringRule } from '../api/types'
 import { CategoryFormModal } from '../components/CategoryFormModal'
 import { CategoryIcon } from '../components/CategoryIcon'
 import { PeriodPicker } from '../components/PeriodPicker'
@@ -8,11 +8,11 @@ import { usePeriodParams } from '../context/PeriodContext'
 import { useAccounts } from '../hooks/useAccounts'
 import { useBudgetSummary, useCategories } from '../hooks/useCategories'
 import { useCategoryIconById } from '../hooks/useCategoryIcons'
-import { useDeleteRecurring, useRecurringRules } from '../hooks/useRecurring'
+import { useRecurringRules } from '../hooks/useRecurring'
 import { useSettings } from '../hooks/useSettings'
 import { budgetColor, ringColor } from '../lib/charts'
 import { formatDateLabel } from '../lib/dates'
-import { formatMoney, formatTransactionAmount } from '../lib/money'
+import { formatMoney, formatTransactionAmount, sumMoney } from '../lib/money'
 import './pages.css'
 
 /** Budgets per category, plus the recurring payments that feed them. */
@@ -23,7 +23,6 @@ export function Budget() {
   const { data: accounts } = useAccounts()
   const { data: rules } = useRecurringRules()
   const { data: settings } = useSettings()
-  const deleteRecurring = useDeleteRecurring()
   const iconById = useCategoryIconById()
 
   const currency = settings?.currency_symbol ?? '$'
@@ -32,11 +31,12 @@ export function Budget() {
   const [editing, setEditing] = useState<Category | null>(null)
   const [addingCategory, setAddingCategory] = useState(false)
   const [addingRule, setAddingRule] = useState(false)
+  const [editingRule, setEditingRule] = useState<RecurringRule | null>(null)
 
   const incomeCategories = useMemo(() => (categories ?? []).filter((c) => c.type === 'income'), [categories])
 
   // all spending this period (the summary only totals categories that have a budget)
-  const spentAll = (summary?.categories ?? []).reduce((sum, c) => sum + c.spent, 0)
+  const spentAll = sumMoney((summary?.categories ?? []).map((c) => c.spent))
   const spent = summary?.spent_total ?? 0
   const budgeted = summary?.budget_total ?? 0
   const pct = summary?.pct ?? 0
@@ -93,32 +93,28 @@ export function Budget() {
       </div>
       <div className="list-card">
         {(rules ?? []).map((r) => (
-          <div className="list-row" key={r.id}>
+          <button className="list-row" key={r.id} onClick={() => setEditingRule(r)} aria-label={`Edit ${r.description}`}>
             <span className="icon-badge">
-              <CategoryIcon iconKey={iconById(r.category_id)} size={17} />
+              <CategoryIcon iconKey={r.type === 'transfer' ? 'transfer' : iconById(r.category_id)} size={17} />
             </span>
             <span className="list-main">
               <span className="list-title">{r.description}</span>
               <span className="list-sub">
+                {r.type === 'transfer' && `${r.account_name} → ${r.transfer_account_name} · `}
                 {r.frequency} · next {formatDateLabel(r.next_due_date)}
+                {r.auto_approve && ' · automatic'}
               </span>
             </span>
-            <span className="list-value" style={{ color: r.type === 'income' ? 'var(--up)' : 'var(--down)' }}>
+            <span
+              className={'list-value' + (r.type === 'transfer' ? ' txn-transfer' : '')}
+              style={r.type === 'transfer' ? undefined : { color: r.type === 'income' ? 'var(--up)' : 'var(--down)' }}
+            >
               {formatTransactionAmount(r.type, r.amount, currency, showCents)}
             </span>
-            <button
-              className="row-icon-btn"
-              aria-label={`Remove ${r.description}`}
-              onClick={() => {
-                if (window.confirm(`Stop the recurring payment "${r.description}"?`)) deleteRecurring.mutate(r.id)
-              }}
-            >
-              ×
-            </button>
-          </div>
+          </button>
         ))}
         {(rules ?? []).length === 0 && (
-          <div className="pm-empty">Rent, subscriptions, salary… add them once and approve each time they come due.</div>
+          <div className="pm-empty">Rent, subscriptions, salary, savings transfers… add them once; approve each time or let them post automatically.</div>
         )}
       </div>
 
@@ -177,12 +173,16 @@ export function Budget() {
 
       {addingCategory && <CategoryFormModal onClose={() => setAddingCategory(false)} />}
       {editing && <CategoryFormModal category={editing} onClose={() => setEditing(null)} />}
-      {addingRule && (
+      {(addingRule || editingRule) && (
         <RecurringFormModal
           categories={categories ?? []}
           accounts={accounts ?? []}
           currency={currency}
-          onClose={() => setAddingRule(false)}
+          rule={editingRule ?? undefined}
+          onClose={() => {
+            setAddingRule(false)
+            setEditingRule(null)
+          }}
         />
       )}
     </div>

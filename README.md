@@ -41,22 +41,31 @@ all-time cumulative-balance line.
 - **Period picker** — on Overview, Charts and Budget: step through months, or switch to
   the last 90 days or all time.
 - **Overview** — compact balance/income/expenses summary, search with an optional filter
-  row, and transactions grouped by day. **+** opens the add form (income, expense, or a
+  row (type, category, account, **tag**), and transactions grouped by day, 50 at a time
+  with "Show more". **+** opens the add form (income, expense, or a
   **transfer between accounts**, which doesn't count as income or expense) with your
-  most-used categories first. Tap a row to edit or delete it.
-- **Recurring payments** — rules with real per-rule due-date tracking. Due items are
-  generated automatically when the app opens and wait on Overview for Approve or Skip.
+  most-used categories first, plus an optional **note and tags**. Tap a row to edit or
+  delete it. **Budget alerts** appear when a category reaches 80% / 100% of its budget.
+- **Recurring payments** — income, expense or **transfer** rules with real per-rule
+  due-date tracking. Due items are generated automatically when the app opens and wait on
+  Overview for Approve or Skip, or post on their own if the rule is set to
+  **Add automatically**. Tap a rule to edit it.
 - **Budget** — total spent against your budgets, per-category progress, category
   add/edit (budgets are set there), and the recurring-payment rules.
 - **Charts** — a monthly calendar heat-grid of daily income/expense, plus hand-rolled
   SVG: income-vs-expenses bars, expenses-by-category donut, and an all-time
-  cumulative-balance area chart.
-- **Accounts** — net worth and every account's balance; add, rename or remove in one form.
+  cumulative-balance area chart. **Monthly report**: a month compared with the one before
+  (per-category change, largest expenses, spending by tag), printable / savable as PDF.
+- **Accounts** — net worth and every account's balance, with an optional **starting
+  balance** for money that was there before Pocketman; add, rename or remove in one form.
+  **Savings goals** with progress and how much to put aside per month to hit the date.
+- **Installable (PWA)** — "Add to Home Screen" on a phone opens it like an app.
 - **Settings** — theme (dark, light, or match the device), accent color, currency
   symbol, show-cents toggle, **CSV export & import** (per-row error reporting on
   import), and change-password.
 
-Money and "today" are real: no demo transactions are seeded (a fresh install starts
+Money is exact: amounts are stored as whole cents, so totals never drift
+(0.10 + 0.20 is 0.30, not 0.30000000000000004). Money and "today" are real: no demo transactions are seeded (a fresh install starts
 empty with just a `Main` account and the default categories), and dates use the real
 server clock, not the prototype's hardcoded date.
 
@@ -98,6 +107,6 @@ nginx · Docker Compose.
 ## Tests
 
 ```bash
-cd Backend && .venv/Scripts/python -m pytest -q     # 51 passed
-cd Front   && npm test                              # 36 passed
+cd Backend && .venv/Scripts/python -m pytest -q     # 112 passed
+cd Front   && npm test                              # 58 passed
 ```

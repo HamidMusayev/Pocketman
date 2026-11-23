@@ -7,6 +7,7 @@ import { Accounts } from './pages/Accounts'
 import { Budget } from './pages/Budget'
 import { Charts } from './pages/Charts'
 import { Overview } from './pages/Overview'
+import { Report } from './pages/Report'
 import { SettingsPage } from './pages/Settings'
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
         <Route path="/charts" element={<Charts />} />
         <Route path="/budget" element={<Budget />} />
         <Route path="/accounts" element={<Accounts />} />
+        <Route path="/report" element={<Report />} />
         <Route path="/settings" element={<SettingsPage />} />
         {/* old addresses from before Budget absorbed these two tabs */}
         <Route path="/categories" element={<Navigate to="/budget" replace />} />

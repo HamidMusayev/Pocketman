@@ -28,12 +28,15 @@ export function PendingPanel({ currency, showCents }: { currency: string; showCe
               <div className="pending-panel-main">
                 <div className="txn-desc">{p.description}</div>
                 <div className="pending-meta">
-                  {p.category_name} · {p.account_name} · {formatDateLabel(p.due_date)}
+                  {p.type === 'transfer'
+                    ? `${p.account_name} → ${p.transfer_account_name}`
+                    : `${p.category_name} · ${p.account_name}`}{' '}
+                  · {formatDateLabel(p.due_date)}
                 </div>
               </div>
               <div
                 className="pending-amount"
-                style={{ color: p.type === 'income' ? 'var(--up)' : 'var(--down)' }}
+                style={p.type === 'transfer' ? undefined : { color: p.type === 'income' ? 'var(--up)' : 'var(--down)' }}
               >
                 {formatTransactionAmount(p.type, p.amount, currency, showCents)}
               </div>

@@ -2,6 +2,7 @@ import { apiClient } from './client'
 import type {
   CategoryBreakdownItem,
   CumulativePoint,
+  MonthlyReport,
   PeriodParams,
   Summary,
   TrendPoint,
@@ -27,5 +28,10 @@ export async function getCategoryBreakdown(
 
 export async function getCumulativeBalance(): Promise<CumulativePoint[]> {
   const res = await apiClient.get('/stats/cumulative-balance')
+  return res.data
+}
+
+export async function getMonthlyReport(year: number, month: number): Promise<MonthlyReport> {
+  const res = await apiClient.get('/stats/monthly-report', { params: { year, month } })
   return res.data
 }

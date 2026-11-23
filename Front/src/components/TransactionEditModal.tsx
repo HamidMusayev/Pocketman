@@ -3,7 +3,10 @@ import { apiErrorMessage } from '../api/client'
 import type { Account, Category, Transaction, TransactionType } from '../api/types'
 import { useDeleteTransaction, useUpdateTransaction } from '../hooks/useTransactions'
 import { useSettings } from '../hooks/useSettings'
+import { parseAmount } from '../lib/money'
+import { formatTags, parseTags, tagsError } from '../lib/tags'
 import { Modal } from './Modal'
+import { TagInput } from './TagInput'
 
 interface Props {
   transaction: Transaction
@@ -27,6 +30,8 @@ export function TransactionEditModal({ transaction, categories, accounts, onClos
     transaction.transfer_account_id ?? accounts.find((a) => a.id !== transaction.account_id)?.id ?? null,
   )
   const [date, setDate] = useState(transaction.date)
+  const [note, setNote] = useState(transaction.note ?? '')
+  const [tagText, setTagText] = useState(formatTags(transaction.tags ?? []))
   const [error, setError] = useState<string | null>(null)
 
   const isTransfer = type === 'transfer'
@@ -44,11 +49,18 @@ export function TransactionEditModal({ transaction, categories, accounts, onClos
   }
 
   async function onSave() {
-    const amt = Number(amount)
-    if (!amt || amt <= 0) {
+    const amt = parseAmount(amount)
+    if (amt === null) {
       setError('Amount must be greater than zero.')
       return
     }
+    const tags = parseTags(tagText)
+    const tagProblem = tagsError(tags)
+    if (tagProblem) {
+      setError(tagProblem)
+      return
+    }
+    const extras = { note: note.trim() || null, tags }
     try {
       if (isTransfer) {
         if (!transferAccountId || transferAccountId === accountId) {
@@ -65,6 +77,7 @@ export function TransactionEditModal({ transaction, categories, accounts, onClos
             account_id: accountId,
             transfer_account_id: transferAccountId,
             date,
+            ...extras,
           },
         })
       } else {
@@ -82,6 +95,7 @@ export function TransactionEditModal({ transaction, categories, accounts, onClos
             category_id: categoryId,
             account_id: accountId,
             date,
+            ...extras,
           },
         })
       }
@@ -125,7 +139,8 @@ export function TransactionEditModal({ transaction, categories, accounts, onClos
         <input
           className="pm-input pm-input-mono"
           style={{ width: '100%' }}
-          type="number"
+          type="text"
+          inputMode="decimal"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
@@ -213,6 +228,23 @@ export function TransactionEditModal({ transaction, categories, accounts, onClos
           value={date}
           onChange={(e) => setDate(e.target.value)}
         />
+      </div>
+
+      <div className="modal-field">
+        <label className="modal-label">Note</label>
+        <textarea
+          className="pm-input pm-textarea"
+          aria-label="Note"
+          rows={2}
+          placeholder="Optional"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+        />
+      </div>
+
+      <div className="modal-field">
+        <label className="modal-label">Tags</label>
+        <TagInput value={tagText} onChange={setTagText} />
       </div>
 
       {error && <div className="pm-inline-error">{error}</div>}

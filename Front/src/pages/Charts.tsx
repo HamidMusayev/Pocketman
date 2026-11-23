@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { CategoryDonut } from '../components/charts/CategoryDonut'
 import { CumulativeLineChart } from '../components/charts/CumulativeLineChart'
 import { MonthCalendar } from '../components/charts/MonthCalendar'
@@ -78,7 +79,12 @@ export function Charts() {
     <div>
       <div className="page-head">
         <h1 className="page-title">Charts</h1>
-        <PeriodPicker />
+        <div className="page-head-actions">
+          <Link to="/report" className="pm-btn pm-btn-ghost pm-btn-sm report-link">
+            Monthly report
+          </Link>
+          <PeriodPicker />
+        </div>
       </div>
       <div className="charts-page">
       <div className="stat-strip">

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { TransactionFilters } from '../api/transactions'
 import type { Transaction, TransactionType } from '../api/types'
 import { AddTransactionModal } from '../components/AddTransactionModal'
+import { BudgetAlerts } from '../components/BudgetAlerts'
 import { CategoryIcon } from '../components/CategoryIcon'
 import { PendingPanel } from '../components/PendingPanel'
 import { PeriodPicker } from '../components/PeriodPicker'
@@ -10,11 +11,13 @@ import { usePeriod, usePeriodParams } from '../context/PeriodContext'
 import { useAccounts } from '../hooks/useAccounts'
 import { useCategories } from '../hooks/useCategories'
 import { useCategoryIconById } from '../hooks/useCategoryIcons'
+import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { useSettings } from '../hooks/useSettings'
 import { useSummary } from '../hooks/useStats'
-import { useTransactions } from '../hooks/useTransactions'
+import { useTags } from '../hooks/useTags'
+import { useTransactionPages } from '../hooks/useTransactions'
 import { defaultEntryDate, formatDayShort, formatWeekday } from '../lib/dates'
-import { formatMoney, formatSignedMoney, formatTransactionAmount } from '../lib/money'
+import { formatMoney, formatSignedMoney, formatTransactionAmount, sumMoney } from '../lib/money'
 import './pages.css'
 
 /** One calendar day's worth of rows, plus that day's net (transfers move money
@@ -36,8 +39,12 @@ function groupByDay(list: Transaction[]): DayGroup[] {
       groups.push(group)
     }
     group.items.push(t)
-    if (t.type === 'income') group.net += t.amount
-    else if (t.type === 'expense') group.net -= t.amount
+  }
+  for (const g of groups) {
+    // summed in cents so a day of 0.10s and 0.20s doesn't show 0.30000000004
+    g.net = sumMoney(
+      g.items.map((t) => (t.type === 'income' ? t.amount : t.type === 'expense' ? -t.amount : 0)),
+    )
   }
   return groups
 }
@@ -65,23 +72,29 @@ export function Overview() {
   const [filterCat, setFilterCat] = useState<string>('all')
   const [filterAcc, setFilterAcc] = useState<string>('all')
   const [filterType, setFilterType] = useState<string>('all')
+  const [filterTag, setFilterTag] = useState<string>('all')
+  const { data: tags } = useTags()
+  // one request once typing pauses, not one per keystroke
+  const debouncedSearch = useDebouncedValue(search.trim(), 300)
 
   const [adding, setAdding] = useState(false)
   const [editing, setEditing] = useState<Transaction | null>(null)
 
-  const activeFilters = [filterCat, filterAcc, filterType].filter((f) => f !== 'all').length
+  const activeFilters = [filterCat, filterAcc, filterType, filterTag].filter((f) => f !== 'all').length
 
   const filters: TransactionFilters = {
     ...params,
-    ...(search.trim() ? { search: search.trim() } : {}),
+    ...(debouncedSearch ? { search: debouncedSearch } : {}),
     ...(filterCat !== 'all' ? { category_id: Number(filterCat) } : {}),
     ...(filterAcc !== 'all' ? { account_id: Number(filterAcc) } : {}),
     ...(filterType !== 'all' ? { type: filterType as TransactionType } : {}),
+    ...(filterTag !== 'all' ? { tag: filterTag } : {}),
   }
-  const { data: transactions } = useTransactions(filters)
+  const pages = useTransactionPages(filters)
 
-  const list = transactions ?? []
-  const days = useMemo(() => groupByDay(transactions ?? []), [transactions])
+  const list = useMemo(() => (pages.data?.pages ?? []).flatMap((p) => p.items), [pages.data])
+  const total = pages.data?.pages[0]?.total ?? 0
+  const days = useMemo(() => groupByDay(list), [list])
 
   const income = summary?.income ?? 0
   const expense = summary?.expense ?? 0
@@ -128,6 +141,8 @@ export function Overview() {
       </section>
 
       <PendingPanel currency={currency} showCents={showCents} />
+
+      <BudgetAlerts currency={currency} showCents={showCents} />
 
       </aside>
 
@@ -185,6 +200,16 @@ export function Overview() {
               </option>
             ))}
           </select>
+          {(tags ?? []).length > 0 && (
+            <select className="txn-filter" aria-label="Filter by tag" value={filterTag} onChange={(e) => setFilterTag(e.target.value)}>
+              <option value="all">All tags</option>
+              {(tags ?? []).map((t) => (
+                <option key={t.id} value={t.name}>
+                  #{t.name}
+                </option>
+              ))}
+            </select>
+          )}
           {activeFilters > 0 && (
             <button
               className="pm-btn pm-btn-ghost-elev"
@@ -192,6 +217,7 @@ export function Overview() {
                 setFilterCat('all')
                 setFilterAcc('all')
                 setFilterType('all')
+                setFilterTag('all')
               }}
             >
               Clear
@@ -226,7 +252,21 @@ export function Overview() {
                       {t.type === 'transfer'
                         ? `${t.account_name} → ${t.transfer_account_name}`
                         : `${t.category_name} · ${t.account_name}`}
+                      {t.note && (
+                        <span className="txn-note-mark" title={t.note} aria-label="Has a note">
+                          {' '}· ✎
+                        </span>
+                      )}
                     </span>
+                    {(t.tags ?? []).length > 0 && (
+                      <span className="txn-tags">
+                        {t.tags.map((tag) => (
+                          <span className="tag-chip" key={tag}>
+                            #{tag}
+                          </span>
+                        ))}
+                      </span>
+                    )}
                   </span>
                   <span
                     className={'txn-amount' + (t.type === 'transfer' ? ' txn-transfer' : '')}
@@ -241,7 +281,16 @@ export function Overview() {
             </div>
           </section>
         ))}
-        {list.length === 0 && (
+        {pages.hasNextPage && (
+          <button
+            className="pm-btn pm-btn-ghost load-more"
+            onClick={() => pages.fetchNextPage()}
+            disabled={pages.isFetchingNextPage}
+          >
+            {pages.isFetchingNextPage ? 'Loading…' : `Show more (${total - list.length} left)`}
+          </button>
+        )}
+        {list.length === 0 && !pages.isLoading && (
           <div className="pm-empty">
             {search || activeFilters ? 'Nothing matches this search.' : 'No transactions yet. Use + to add your first one.'}
           </div>
