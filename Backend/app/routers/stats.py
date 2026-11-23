@@ -8,6 +8,7 @@ from app.models.user import User
 from app.schemas.stats import (
     CategoryBreakdownItem,
     CumulativePoint,
+    MonthlyReport,
     SummaryResponse,
     TrendPoint,
 )
@@ -16,6 +17,7 @@ from app.services.periods import PERIODS
 from app.services.stats import (
     get_category_breakdown,
     get_cumulative_balance,
+    get_monthly_report,
     get_summary,
     get_trend,
 )
@@ -67,3 +69,14 @@ def cumulative_balance(
     db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ) -> list[dict]:
     return get_cumulative_balance(db, user.id)
+
+
+@router.get("/monthly-report", response_model=MonthlyReport)
+def monthly_report(
+    year: int | None = Query(None, ge=1900, le=2999),
+    month: int | None = Query(None, ge=1, le=12),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> dict:
+    today = date.today()
+    return get_monthly_report(db, user.id, year or today.year, month or today.month)

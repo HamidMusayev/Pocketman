@@ -88,7 +88,7 @@ def test_catch_up_engine_exact_occurrence_count(auth_client):
     db = next(db_gen)
     try:
         user_id = auth_client.get("/api/auth/me").json()["id"]
-        generated = run_catch_up(db, user_id, today=date(2026, 4, 15))
+        generated, _ = run_catch_up(db, user_id, today=date(2026, 4, 15))
         # Jan 15, Feb 15, Mar 15, Apr 15 = 4 occurrences
         assert len(generated) == 4
         dates = sorted(p.due_date for p in generated)

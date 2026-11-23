@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
@@ -5,7 +7,7 @@ from app.models.account import Account
 from app.models.transaction import Transaction
 
 
-def compute_net(db: Session, account_id: int) -> tuple[float, int]:
+def compute_net(db: Session, account_id: int) -> tuple[Decimal, int]:
     """Signed balance of an account. Income adds, expense subtracts, an outgoing
     transfer (this account is the source) subtracts, and an incoming transfer
     (this account is the destination) adds. transaction_count includes both
@@ -20,7 +22,7 @@ def compute_net(db: Session, account_id: int) -> tuple[float, int]:
         .filter(Transaction.type == "transfer", Transaction.transfer_account_id == account_id)
         .all()
     )
-    net = 0.0
+    net = Decimal("0.00")
     for type_, amount in outgoing:
         if type_ == "income":
             net += amount
@@ -44,21 +46,40 @@ def account_in_use(db: Session, account_id: int) -> bool:
         )
         .first()
     )
-    has_rule = db.query(RecurringRule).filter(RecurringRule.account_id == account_id).first()
+    has_rule = (
+        db.query(RecurringRule)
+        .filter(
+            or_(
+                RecurringRule.account_id == account_id,
+                RecurringRule.transfer_account_id == account_id,
+            )
+        )
+        .first()
+    )
     has_pending = (
-        db.query(PendingApproval).filter(PendingApproval.account_id == account_id).first()
+        db.query(PendingApproval)
+        .filter(
+            or_(
+                PendingApproval.account_id == account_id,
+                PendingApproval.transfer_account_id == account_id,
+            )
+        )
+        .first()
     )
     return bool(has_txn or has_rule or has_pending)
 
 
 def to_response_dict(db: Session, account: Account) -> dict:
     net, count = compute_net(db, account.id)
+    opening = account.opening_balance or Decimal("0.00")
     return {
         "id": account.id,
         "name": account.name,
         "type": account.type,
         "icon": account.icon,
         "removable": account.removable,
-        "net": net,
+        "opening_balance": opening,
+        # `net` is the current balance: opening balance + all activity
+        "net": opening + net,
         "transaction_count": count,
     }

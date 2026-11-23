@@ -33,7 +33,10 @@ def create_account(
 ) -> dict:
     if _name_taken(db, user.id, body.name):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Account name already exists")
-    account = Account(user_id=user.id, name=body.name, type=body.type, icon=body.icon, removable=True)
+    account = Account(
+        user_id=user.id, name=body.name, type=body.type, icon=body.icon,
+        opening_balance=body.opening_balance, removable=True,
+    )
     db.add(account)
     db.commit()
     db.refresh(account)
@@ -56,6 +59,8 @@ def update_account(
         account.type = body.type
     if body.icon is not None:
         account.icon = body.icon
+    if body.opening_balance is not None:
+        account.opening_balance = body.opening_balance
     db.commit()
     db.refresh(account)
     return to_response_dict(db, account)

@@ -89,7 +89,9 @@ def test_owner_can_log_in_and_new_users_start_empty(db_path, monkeypatch):
             r = client.post("/api/auth/login", json={"username": "hamid_owner", "password": "old1"})
             assert r.status_code == 200
             h = {"Authorization": f"Bearer {r.json()['token']}"}
-            assert [t["description"] for t in client.get("/api/transactions", headers=h).json()] == ["lunch"]
+            txns = client.get("/api/transactions", headers=h).json()
+            assert [(t["description"], t["amount"]) for t in txns] == [("lunch", 12.5)]
+            assert client.get("/api/recurring", headers=h).json()[0]["amount"] == 100
             assert client.get("/api/settings", headers=h).json()["currency_symbol"] == "₼"
 
             # a second person can sign up with the same account/category names
@@ -109,3 +111,19 @@ def test_fresh_install_creates_no_owner(db_path, monkeypatch):
     with engine.connect() as c:
         assert c.execute(text("SELECT COUNT(*) FROM users")).scalar_one() == 0
     engine.dispose()
+
+
+def test_money_columns_become_cents_and_downgrade_restores_floats(db_path, monkeypatch):
+    test_legacy_data_is_assigned_to_owner(db_path, monkeypatch)
+    engine = create_engine(f"sqlite:///{db_path}")
+    with engine.connect() as c:
+        assert c.execute(text("SELECT amount FROM transactions")).scalar_one() == 1250
+        assert c.execute(text("SELECT amount FROM pending_approvals")).scalar_one() == 10000
+    engine.dispose()
+
+    command.downgrade(_alembic_cfg(), "c3a9d2e4f1b7")
+    engine = create_engine(f"sqlite:///{db_path}")
+    with engine.connect() as c:
+        assert c.execute(text("SELECT amount FROM transactions")).scalar_one() == 12.5
+    engine.dispose()
+    command.upgrade(_alembic_cfg(), "head")

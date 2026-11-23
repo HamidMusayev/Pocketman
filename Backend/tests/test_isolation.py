@@ -41,7 +41,7 @@ def test_lists_are_scoped(client, two_users):
     assert client.get("/api/recurring/pending", headers=b).json() == []
     assert len(client.get("/api/categories", headers=b).json()) == 16
     # bob's catch-up must not generate anything from alice's rules
-    assert client.post("/api/recurring/catch-up", headers=b).json() == {"generated": 0, "pending": []}
+    assert client.post("/api/recurring/catch-up", headers=b).json() == {"generated": 0, "posted": 0, "pending": []}
     export = client.get("/api/transactions/export", headers=b).text
     assert "alice secret" not in export
 

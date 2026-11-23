@@ -1,13 +1,14 @@
 from pydantic import BaseModel, Field, field_validator
 
 from app.constants import CATEGORY_ICON_KEYS, CATEGORY_TYPES
+from app.money import MoneyField
 
 
 class CategoryBase(BaseModel):
     name: str = Field(max_length=100)
     type: str
     icon: str = "other"
-    budget: float | None = None
+    budget: MoneyField | None = None
 
     @field_validator("type")
     @classmethod
@@ -33,7 +34,7 @@ class CategoryBase(BaseModel):
 
     @field_validator("budget")
     @classmethod
-    def validate_budget(cls, v: float | None) -> float | None:
+    def validate_budget(cls, v):
         if v is not None and v < 0:
             raise ValueError("budget cannot be negative")
         return v
@@ -46,7 +47,7 @@ class CategoryCreate(CategoryBase):
 class CategoryUpdate(BaseModel):
     name: str | None = Field(default=None, max_length=100)
     icon: str | None = None
-    budget: float | None = None
+    budget: MoneyField | None = None
 
     @field_validator("icon")
     @classmethod
@@ -64,7 +65,7 @@ class CategoryResponse(BaseModel):
     name: str
     type: str
     icon: str
-    budget: float | None
+    budget: MoneyField | None
 
     model_config = {"from_attributes": True}
 
@@ -73,14 +74,14 @@ class CategoryBudgetItem(BaseModel):
     category_id: int
     name: str
     icon: str
-    spent: float
-    budget: float | None
+    spent: MoneyField
+    budget: MoneyField | None
     pct_used: float | None  # null when no budget set
 
 
 class CategoryBudgetSummary(BaseModel):
     categories: list[CategoryBudgetItem]
-    spent_total: float
-    budget_total: float
+    spent_total: MoneyField
+    budget_total: MoneyField
     pct: float
     budgeted_count: int
