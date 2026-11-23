@@ -33,12 +33,17 @@ export function Accounts() {
         </div>
       </div>
 
+      <div className="split">
+      <aside className="split-side">
       <section className="summary">
         <div>
           <div className="summary-label">Net worth · all accounts</div>
           <div className="summary-balance">{formatSignedMoney(total, currency, showCents)}</div>
         </div>
       </section>
+      </aside>
+
+      <div className="split-main">
 
       <div className="list-card">
         {list.map((a) => (
@@ -59,6 +64,8 @@ export function Accounts() {
           </button>
         ))}
         {list.length === 0 && <div className="pm-empty">No accounts yet.</div>}
+      </div>
+      </div>
       </div>
 
       {form && <AccountFormModal account={form === 'new' ? undefined : form} onClose={() => setForm(null)} />}

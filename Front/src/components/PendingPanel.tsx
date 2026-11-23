@@ -18,7 +18,7 @@ export function PendingPanel({ currency, showCents }: { currency: string; showCe
     <div className="pending-panel">
       <button className="pending-panel-head" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
         <span className="pending-dot" />
-        {list.length} recurring payment{list.length === 1 ? '' : 's'} waiting for approval
+        {list.length} payment{list.length === 1 ? '' : 's'} to approve
         <span className="pending-panel-toggle">{open ? 'Hide' : 'Review'}</span>
       </button>
       {open && (

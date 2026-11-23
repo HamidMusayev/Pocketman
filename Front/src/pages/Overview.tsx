@@ -99,6 +99,8 @@ export function Overview() {
         </div>
       </div>
 
+      <div className="split">
+      <aside className="split-side">
       {/* ------------------------------ summary ------------------------------ */}
       <section className="summary" aria-label="Summary">
         <div>
@@ -127,6 +129,9 @@ export function Overview() {
 
       <PendingPanel currency={currency} showCents={showCents} />
 
+      </aside>
+
+      <div className="split-main">
       {/* -------------------------- search + filters ------------------------- */}
       <div className="ov-toolbar">
         <div className="ov-search-wrap">
@@ -238,9 +243,11 @@ export function Overview() {
         ))}
         {list.length === 0 && (
           <div className="pm-empty">
-            {search || activeFilters ? 'Nothing matches this search.' : 'No transactions yet. Tap + to add one.'}
+            {search || activeFilters ? 'Nothing matches this search.' : 'No transactions yet. Use + to add your first one.'}
           </div>
         )}
+      </div>
+      </div>
       </div>
 
       {/* phones: a floating add button above the bottom nav */}

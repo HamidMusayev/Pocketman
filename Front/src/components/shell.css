@@ -350,3 +350,79 @@
     height: 40px;
   }
 }
+
+/* --------------------------- two-column pages ---------------------------- */
+/* Wide screens: a fixed side column (summary, totals) next to the main list,
+   so nothing stretches edge to edge. Narrow screens: stacked, side first. */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+@media (min-width: 960px) {
+  .split {
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .split-side {
+    position: sticky;
+    top: 82px;
+  }
+
+  .split-side .summary {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .split-side .summary-stats {
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid var(--line);
+    padding-top: 6px;
+  }
+
+  .split-side .summary-stats > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 7px 0;
+  }
+
+  .split-side .summary-stat-value {
+    margin-top: 0;
+  }
+}
+
+/* keyboard focus: a soft ring instead of the browser's square outline */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.topbar-tab:focus-visible {
+  outline-offset: -2px;
+}
+
+.split-side > :last-child {
+  margin-bottom: 0;
+}
+
+/* fields show focus with their own border colour */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
+
+.split-side .list-sub {
+  white-space: normal;
+}

@@ -35,6 +35,8 @@ export function Budget() {
 
   const incomeCategories = useMemo(() => (categories ?? []).filter((c) => c.type === 'income'), [categories])
 
+  // all spending this period (the summary only totals categories that have a budget)
+  const spentAll = (summary?.categories ?? []).reduce((sum, c) => sum + c.spent, 0)
   const spent = summary?.spent_total ?? 0
   const budgeted = summary?.budget_total ?? 0
   const pct = summary?.pct ?? 0
@@ -57,18 +59,20 @@ export function Budget() {
         </div>
       </div>
 
+      <div className="split">
+      <aside className="split-side">
       {/* ---------------------------- total ---------------------------- */}
       <section className="summary budget-total">
         <div style={{ flex: 1, minWidth: 0 }}>
           <div className="summary-label">Spent</div>
-          <div className="summary-balance">{formatMoney(spent, currency, showCents)}</div>
+          <div className="summary-balance">{formatMoney(spentAll, currency, showCents)}</div>
           {hasBudget ? (
             <>
               <div className="bar">
                 <div className="bar-fill" style={{ width: Math.min(100, pct) + '%', background: ringColor(pct) }} />
               </div>
               <div className="budget-total-sub">
-                {pct}% of {formatMoney(budgeted, currency, showCents)} ·{' '}
+                Budgeted categories: {formatMoney(spent, currency, showCents)} of {formatMoney(budgeted, currency, showCents)} ·{' '}
                 {budgeted - spent >= 0
                   ? `${formatMoney(budgeted - spent, currency, showCents)} left`
                   : `${formatMoney(spent - budgeted, currency, showCents)} over`}
@@ -80,6 +84,47 @@ export function Budget() {
         </div>
       </section>
 
+      {/* --------------------------- recurring ------------------------- */}
+      <div className="pm-section-head" id="recurring">
+        <h2 className="pm-section-title">Recurring payments</h2>
+        <button className="pm-btn pm-btn-ghost pm-btn-sm" onClick={() => setAddingRule(true)}>
+          + New
+        </button>
+      </div>
+      <div className="list-card">
+        {(rules ?? []).map((r) => (
+          <div className="list-row" key={r.id}>
+            <span className="icon-badge">
+              <CategoryIcon iconKey={iconById(r.category_id)} size={17} />
+            </span>
+            <span className="list-main">
+              <span className="list-title">{r.description}</span>
+              <span className="list-sub">
+                {r.frequency} · next {formatDateLabel(r.next_due_date)}
+              </span>
+            </span>
+            <span className="list-value" style={{ color: r.type === 'income' ? 'var(--up)' : 'var(--down)' }}>
+              {formatTransactionAmount(r.type, r.amount, currency, showCents)}
+            </span>
+            <button
+              className="row-icon-btn"
+              aria-label={`Remove ${r.description}`}
+              onClick={() => {
+                if (window.confirm(`Stop the recurring payment "${r.description}"?`)) deleteRecurring.mutate(r.id)
+              }}
+            >
+              ×
+            </button>
+          </div>
+        ))}
+        {(rules ?? []).length === 0 && (
+          <div className="pm-empty">Rent, subscriptions, salary… add them once and approve each time they come due.</div>
+        )}
+      </div>
+
+      </aside>
+
+      <div className="split-main">
       {/* -------------------------- categories ------------------------- */}
       <div className="pm-section-head">
         <h2 className="pm-section-title">Spending by category</h2>
@@ -127,42 +172,7 @@ export function Budget() {
         </div>
       )}
 
-      {/* --------------------------- recurring ------------------------- */}
-      <div className="pm-section-head section-gap" id="recurring">
-        <h2 className="pm-section-title">Recurring payments</h2>
-        <button className="pm-btn pm-btn-ghost pm-btn-sm" onClick={() => setAddingRule(true)}>
-          + New
-        </button>
       </div>
-      <div className="list-card">
-        {(rules ?? []).map((r) => (
-          <div className="list-row" key={r.id}>
-            <span className="icon-badge">
-              <CategoryIcon iconKey={iconById(r.category_id)} size={17} />
-            </span>
-            <span className="list-main">
-              <span className="list-title">{r.description}</span>
-              <span className="list-sub">
-                {r.frequency} · next {formatDateLabel(r.next_due_date)}
-              </span>
-            </span>
-            <span className="list-value" style={{ color: r.type === 'income' ? 'var(--up)' : 'var(--down)' }}>
-              {formatTransactionAmount(r.type, r.amount, currency, showCents)}
-            </span>
-            <button
-              className="row-icon-btn"
-              aria-label={`Remove ${r.description}`}
-              onClick={() => {
-                if (window.confirm(`Stop the recurring payment "${r.description}"?`)) deleteRecurring.mutate(r.id)
-              }}
-            >
-              ×
-            </button>
-          </div>
-        ))}
-        {(rules ?? []).length === 0 && (
-          <div className="pm-empty">Rent, subscriptions, salary… add them once and approve each time they come due.</div>
-        )}
       </div>
 
       {addingCategory && <CategoryFormModal onClose={() => setAddingCategory(false)} />}
