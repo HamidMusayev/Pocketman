@@ -46,10 +46,16 @@ all-time cumulative-balance line.
   **transfer between accounts**, which doesn't count as income or expense) with your
   most-used categories first, plus an optional **note and tags**. Tap a row to edit or
   delete it. **Budget alerts** appear when a category reaches 80% / 100% of its budget.
+- **Planned income & expenses** — add a transaction with a future date and it is saved as
+  **planned**: shown faded at the top of Overview and left out of every balance. When the
+  day comes, Overview asks **"Did it happen?"** — *Yes* lets you fix the real amount and
+  date before it's posted; *No* lets you **postpone** it (tomorrow, a week, or any date)
+  or **delete** it. An **end-of-month forecast** shows today's balance plus planned income
+  minus planned expenses (recurring ones included).
 - **Recurring payments** — income, expense or **transfer** rules with real per-rule
-  due-date tracking. Due items are generated automatically when the app opens and wait on
-  Overview for Approve or Skip, or post on their own if the rule is set to
-  **Add automatically**. Tap a rule to edit it.
+  due-date tracking. Due items are generated automatically when the app opens and show up
+  on Overview as planned items ("Did it happen?"), or post on their own if the rule is set
+  to **Add automatically**. Tap a rule to edit it.
 - **Budget** — total spent against your budgets, per-category progress, category
   add/edit (budgets are set there), and the recurring-payment rules.
 - **Charts** — a monthly calendar heat-grid of daily income/expense, plus hand-rolled

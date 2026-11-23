@@ -1,7 +1,7 @@
 from datetime import date
 from decimal import Decimal
 
-from sqlalchemy import Boolean, Date, ForeignKey, String
+from sqlalchemy import Boolean, Date, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
@@ -38,7 +38,12 @@ class RecurringRule(Base):
 
 
 class PendingApproval(Base):
-    """A due-but-not-yet-approved occurrence of a RecurringRule.
+    """A planned income/expense/transfer that has not happened yet.
+
+    Two sources: a one-off item the user planned for a future date
+    (`recurring_rule_id` is null), or a due occurrence of a RecurringRule that
+    isn't set to add itself automatically. Either way it stays out of every
+    balance until the user confirms it, and then becomes a real Transaction.
 
     Fields are snapshotted from the rule at generation time so editing the
     rule later doesn't retroactively change an already-pending item.
@@ -48,8 +53,9 @@ class PendingApproval(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
-    recurring_rule_id: Mapped[int] = mapped_column(
-        ForeignKey("recurring_rules.id"), nullable=False
+    # null for a one-off planned item
+    recurring_rule_id: Mapped[int | None] = mapped_column(
+        ForeignKey("recurring_rules.id"), nullable=True
     )
     description: Mapped[str] = mapped_column(String, nullable=False)
     amount: Mapped[Decimal] = mapped_column(Money, nullable=False)
@@ -60,6 +66,10 @@ class PendingApproval(Base):
     )
     type: Mapped[str] = mapped_column(String, nullable=False)
     due_date: Mapped[date] = mapped_column(Date, nullable=False)
+    # carried over to the transaction when the item is confirmed
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # normalized tag names, comma-separated (tags only become Tag rows once real)
+    tags: Mapped[str | None] = mapped_column(String, nullable=True)
 
     rule = relationship("RecurringRule", back_populates="pending_approvals")
     category = relationship("Category", back_populates="pending_approvals")

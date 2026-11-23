@@ -509,6 +509,147 @@ button.txn-row:hover {
   gap: 8px;
 }
 
+/* planned items whose day has come: "Did it happen?" */
+.due-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.due-card {
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--yellow);
+  background: var(--card);
+  border-radius: 14px;
+  padding: 13px 16px;
+}
+.due-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.due-card-main {
+  flex: 1;
+  min-width: 0;
+}
+.due-card-title {
+  font: 600 14.5px var(--sans);
+  color: var(--strong);
+}
+.due-overdue {
+  color: var(--down);
+  font-weight: 600;
+}
+.due-card-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.due-card-wrap {
+  flex-wrap: wrap;
+}
+.due-question {
+  font: 600 13px var(--sans);
+  color: var(--body);
+  margin-right: auto;
+}
+.due-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.due-card-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+.due-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font: 500 12px var(--sans);
+  color: var(--muted);
+}
+.due-field .pm-input {
+  padding: 7px 10px;
+}
+.due-amount-input {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 10px;
+  background: var(--card2);
+  font: 600 14px var(--mono);
+  color: var(--muted2);
+}
+.due-amount-input input {
+  width: 96px;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--body);
+  font: 600 14px var(--mono);
+  padding: 7px 0;
+}
+.due-date-input {
+  flex: 1;
+  min-width: 150px;
+}
+.btn-danger-text {
+  color: var(--down);
+}
+.btn-approve:disabled,
+.btn-skip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* planned items not due yet: faded, above the transactions */
+.txn-planned {
+  opacity: 0.55;
+}
+.txn-planned:hover {
+  opacity: 0.85;
+}
+.planned-hint {
+  font: 500 12.5px var(--sans);
+  color: var(--muted2);
+  background: var(--card2);
+  border-radius: 8px;
+  padding: 9px 12px;
+  margin: 4px 0 12px;
+}
+
+/* end-of-month forecast */
+.forecast-value {
+  font: 600 22px var(--mono);
+  color: var(--strong);
+  margin: 4px 0 10px;
+}
+.forecast-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font: 500 12.5px var(--sans);
+  color: var(--muted2);
+}
+.forecast-rows > div {
+  display: flex;
+  justify-content: space-between;
+}
+.forecast-rows > div span:last-child {
+  font-family: var(--mono);
+}
+.forecast-card {
+  margin-bottom: 14px;
+}
+
 /* ============================ budget ============================ */
 .budget-total-sub {
   font: 500 12.5px var(--sans);

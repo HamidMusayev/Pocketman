@@ -47,3 +47,27 @@ export function defaultEntryDate(period: string, year: number, month: number): s
   if (period !== 'monthly' || (year === now.getFullYear() && month === now.getMonth() + 1)) return todayIso()
   return newTransactionDate(period, year, month)
 }
+
+/** `iso` moved by `days` (negative goes back), as YYYY-MM-DD. */
+export function addDaysIso(iso: string, days: number): string {
+  const d = new Date(iso + 'T00:00:00')
+  d.setDate(d.getDate() + days)
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+/** Whole days from `from` to `to` (both YYYY-MM-DD); negative if `to` is earlier. */
+export function daysBetween(from: string, to: string): number {
+  const a = Date.UTC(+from.slice(0, 4), +from.slice(5, 7) - 1, +from.slice(8, 10))
+  const b = Date.UTC(+to.slice(0, 4), +to.slice(5, 7) - 1, +to.slice(8, 10))
+  return Math.round((b - a) / 86_400_000)
+}
+
+/** When a planned item is due, relative to today: "Today", "Yesterday",
+ * "3 days ago", "Tomorrow", "In 5 days". */
+export function dueLabel(due: string, today: string = todayIso()): string {
+  const n = daysBetween(today, due)
+  if (n === 0) return 'Today'
+  if (n === -1) return 'Yesterday'
+  if (n === 1) return 'Tomorrow'
+  return n < 0 ? `${-n} days ago` : `In ${n} days`
+}

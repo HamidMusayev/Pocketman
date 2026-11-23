@@ -42,6 +42,8 @@ function useInvalidateAfterTransactionChange() {
     qc.invalidateQueries({ queryKey: queryKeys.accounts })
     qc.invalidateQueries({ queryKey: queryKeys.budgetSummary })
     qc.invalidateQueries({ queryKey: queryKeys.stats })
+    // the end-of-month forecast starts from the current balance
+    qc.invalidateQueries({ queryKey: queryKeys.planned })
   }
 }
 

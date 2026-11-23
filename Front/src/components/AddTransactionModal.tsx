@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
 import { apiErrorMessage } from '../api/client'
 import type { Account, Category, Transaction, TransactionType } from '../api/types'
+import { useCreatePlanned } from '../hooks/usePlanned'
 import { useCreateTransaction } from '../hooks/useTransactions'
+import { formatDateLabel, todayIso } from '../lib/dates'
 import { parseAmount } from '../lib/money'
 import { parseTags, tagsError } from '../lib/tags'
 import { CategoryIcon } from './CategoryIcon'
@@ -29,6 +31,7 @@ interface Props {
 
 export function AddTransactionModal({ categories, accounts, recent, currency, defaultDate, onClose }: Props) {
   const createTransaction = useCreateTransaction()
+  const createPlanned = useCreatePlanned()
 
   const [type, setType] = useState<TransactionType>('expense')
   const [amount, setAmount] = useState('')
@@ -47,6 +50,9 @@ export function AddTransactionModal({ categories, accounts, recent, currency, de
   const [error, setError] = useState<string | null>(null)
 
   const isTransfer = type === 'transfer'
+  // a future date makes it a plan: kept out of the balance until confirmed
+  const isPlanned = date > todayIso()
+  const create = isPlanned ? createPlanned : createTransaction
 
   // Categories of this type, most-used first.
   const ordered = useMemo(() => {
@@ -85,7 +91,7 @@ export function AddTransactionModal({ categories, accounts, recent, currency, de
           return
         }
         setError(null)
-        await createTransaction.mutateAsync({
+        await create.mutateAsync({
           type: 'transfer',
           amount: amt,
           description: desc.trim() || 'Transfer',
@@ -100,7 +106,7 @@ export function AddTransactionModal({ categories, accounts, recent, currency, de
           return
         }
         setError(null)
-        await createTransaction.mutateAsync({
+        await create.mutateAsync({
           type,
           amount: amt,
           description: desc.trim() || selected?.name || '',
@@ -238,14 +244,21 @@ export function AddTransactionModal({ categories, accounts, recent, currency, de
         </button>
       )}
 
+      {isPlanned && (
+        <p className="planned-hint" role="note">
+          Future date: this is saved as <b>planned</b>. It won't change your balance until you confirm it on{' '}
+          {formatDateLabel(date)}.
+        </p>
+      )}
+
       {error && <div className="pm-inline-error">{error}</div>}
 
       <button
         className="pm-btn pm-btn-primary add-submit"
         onClick={onSubmit}
-        disabled={createTransaction.isPending}
+        disabled={create.isPending}
       >
-        Add
+        {isPlanned ? 'Plan it' : 'Add'}
       </button>
     </Modal>
   )

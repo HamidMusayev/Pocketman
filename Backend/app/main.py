@@ -8,6 +8,7 @@ from app.routers import (
     categories,
     goals,
     imports,
+    planned,
     recurring,
     settings as settings_router,
     stats,
@@ -36,6 +37,7 @@ app.include_router(stats.router)
 app.include_router(tags.router)
 app.include_router(goals.router)
 app.include_router(imports.router)
+app.include_router(planned.router)
 
 
 @app.get("/api/health")

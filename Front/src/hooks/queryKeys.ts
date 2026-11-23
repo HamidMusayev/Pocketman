@@ -10,4 +10,6 @@ export const queryKeys = {
   stats: ['stats'] as const,
   tags: ['tags'] as const,
   goals: ['goals'] as const,
+  /** planned items; the forecast lives under it so one invalidation covers both */
+  planned: ['planned'] as const,
 }

@@ -140,7 +140,7 @@ class RecurringResponse(BaseModel):
 
 class PendingResponse(BaseModel):
     id: int
-    recurring_rule_id: int
+    recurring_rule_id: int | None
     description: str
     amount: MoneyField
     category_id: int | None
