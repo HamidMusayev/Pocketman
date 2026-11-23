@@ -500,3 +500,124 @@
     padding: 56px 12px 12px;
   }
 }
+
+/* ------------------------------ feature list ------------------------------ */
+.auth-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 30px;
+}
+.auth-hero-actions .auth-intro {
+  margin: 0;
+}
+.auth-features-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--line2);
+  background: color-mix(in srgb, var(--card) 80%, transparent);
+  color: var(--strong);
+  font: 600 14px var(--sans);
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.auth-features-btn svg {
+  color: var(--yellow);
+}
+.auth-features-btn:hover,
+.auth-features-btn:focus-visible {
+  border-color: color-mix(in srgb, var(--yellow) 60%, transparent);
+  transform: translateY(-1px);
+}
+.auth-features-card {
+  width: min(560px, 100%);
+  max-height: min(80vh, 720px);
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--line2);
+  border-radius: 16px;
+  padding: 20px 22px 8px;
+}
+.auth-features-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.auth-features-head h3 {
+  margin: 0;
+  font: 700 18px var(--sans);
+  color: var(--strong);
+}
+.auth-features-close {
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid var(--line2);
+  background: transparent;
+  color: var(--strong);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+.auth-features-list {
+  margin: 0;
+  padding: 0 4px 12px 0;
+  list-style: none;
+  counter-reset: feat;
+  overflow-y: auto;
+}
+.auth-features-list li {
+  counter-increment: feat;
+  position: relative;
+  padding: 10px 0 10px 40px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font: 400 13px/1.45 var(--sans);
+  color: var(--muted);
+}
+.auth-features-list li:first-child {
+  border-top: none;
+}
+.auth-features-list li::before {
+  content: counter(feat);
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--yellow) 18%, transparent);
+  color: var(--yellow);
+  font: 700 12px var(--sans);
+}
+.auth-features-list strong {
+  font: 600 14px var(--sans);
+  color: var(--strong);
+}
+
+@media (max-width: 860px) {
+  .auth-hero-actions {
+    margin-bottom: 16px;
+    gap: 8px;
+  }
+  .auth-features-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  .auth-features-card {
+    max-height: calc(100vh - 80px);
+    padding: 16px 16px 6px;
+  }
+}

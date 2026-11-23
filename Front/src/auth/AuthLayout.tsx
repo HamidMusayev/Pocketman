@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { AuthCardHeader } from './AuthCardHeader'
+import { FeatureList } from './FeatureList'
 import { IntroVideo } from './IntroVideo'
 import './auth.css'
 
@@ -66,7 +67,10 @@ export function AuthLayout({ children }: { children: ReactNode }) {
             recurring bills and savings goals on track, and see it all in charts, in a space that
             only you can open.
           </p>
-          <IntroVideo />
+          <div className="auth-hero-actions">
+            <IntroVideo />
+            <FeatureList />
+          </div>
           <ul className="auth-points">
             {POINTS.map((p) => (
               <li key={p.title}>
