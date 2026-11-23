@@ -11,6 +11,7 @@ from app.models.user import User
 from app.ownership import find_owned, get_owned, owned_query
 from app.schemas.recurring import (
     CatchUpResult,
+    check_rule_kind,
     PendingResponse,
     RecurringCreate,
     RecurringResponse,
@@ -22,12 +23,29 @@ from app.services.recurring import approve_pending, run_catch_up
 router = APIRouter(prefix="/api/recurring", tags=["recurring"])
 
 
-def _validate_refs(db: Session, user_id: int, category_id: int, account_id: int) -> None:
-    """Both refs must belong to the caller (prevents attaching a rule to another user's data)."""
-    if find_owned(db, Category, category_id, user_id) is None:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="category_id does not exist")
+def _unprocessable(detail: str) -> HTTPException:
+    return HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=detail)
+
+
+def _validate_refs(
+    db: Session,
+    user_id: int,
+    category_id: int | None,
+    account_id: int,
+    transfer_account_id: int | None = None,
+    rule_type: str | None = None,
+) -> None:
+    """Every ref must belong to the caller (prevents attaching a rule to another user's data)."""
+    if category_id is not None:
+        category = find_owned(db, Category, category_id, user_id)
+        if category is None:
+            raise _unprocessable("category_id does not exist")
+        if rule_type in ("income", "expense") and category.type != rule_type:
+            raise _unprocessable(f"category is a {category.type} category")
     if find_owned(db, Account, account_id, user_id) is None:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="account_id does not exist")
+        raise _unprocessable("account_id does not exist")
+    if transfer_account_id is not None and find_owned(db, Account, transfer_account_id, user_id) is None:
+        raise _unprocessable("transfer_account_id does not exist")
 
 
 def _rule_response(rule: RecurringRule) -> dict:
@@ -36,12 +54,15 @@ def _rule_response(rule: RecurringRule) -> dict:
         "description": rule.description,
         "amount": rule.amount,
         "category_id": rule.category_id,
-        "category_name": rule.category.name if rule.category else "",
+        "category_name": rule.category.name if rule.category else None,
         "account_id": rule.account_id,
         "account_name": rule.account.name if rule.account else "",
+        "transfer_account_id": rule.transfer_account_id,
+        "transfer_account_name": rule.transfer_account.name if rule.transfer_account else None,
         "type": rule.type,
         "frequency": rule.frequency,
         "next_due_date": rule.next_due_date,
+        "auto_approve": rule.auto_approve,
     }
 
 
@@ -52,9 +73,11 @@ def _pending_response(p: PendingApproval) -> dict:
         "description": p.description,
         "amount": p.amount,
         "category_id": p.category_id,
-        "category_name": p.category.name if p.category else "",
+        "category_name": p.category.name if p.category else None,
         "account_id": p.account_id,
         "account_name": p.account.name if p.account else "",
+        "transfer_account_id": p.transfer_account_id,
+        "transfer_account_name": p.transfer_account.name if p.transfer_account else None,
         "type": p.type,
         "due_date": p.due_date,
     }
@@ -76,16 +99,20 @@ def list_recurring(
 def create_recurring(
     body: RecurringCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ) -> dict:
-    _validate_refs(db, user.id, body.category_id, body.account_id)
+    _validate_refs(
+        db, user.id, body.category_id, body.account_id, body.transfer_account_id, body.type
+    )
     rule = RecurringRule(
         user_id=user.id,
         description=body.description,
         amount=body.amount,
         category_id=body.category_id,
         account_id=body.account_id,
+        transfer_account_id=body.transfer_account_id,
         type=body.type,
         frequency=body.frequency,
         next_due_date=body.start_date or date.today(),
+        auto_approve=body.auto_approve,
     )
     db.add(rule)
     db.commit()
@@ -103,13 +130,22 @@ def update_recurring(
     rule = get_owned(db, RecurringRule, rule_id, user.id, "Recurring rule")
     data = body.model_dump(exclude_unset=True)
     for field, value in data.items():
-        if value is None:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"{field} cannot be null")
-    _validate_refs(
-        db, user.id, data.get("category_id", rule.category_id), data.get("account_id", rule.account_id)
-    )
+        if value is None and field not in ("category_id", "transfer_account_id"):
+            raise _unprocessable(f"{field} cannot be null")
     for field, value in data.items():
         setattr(rule, field, value)
+    # keep the rule coherent for its (possibly changed) type
+    if rule.type == "transfer":
+        rule.category_id = None
+    else:
+        rule.transfer_account_id = None
+    try:
+        check_rule_kind(rule.type, rule.category_id, rule.account_id, rule.transfer_account_id)
+    except ValueError as exc:
+        raise _unprocessable(str(exc)) from None
+    _validate_refs(
+        db, user.id, rule.category_id, rule.account_id, rule.transfer_account_id, rule.type
+    )
     db.commit()
     db.refresh(rule)
     return _rule_response(rule)
@@ -126,9 +162,10 @@ def delete_recurring(
 
 @router.post("/catch-up", response_model=CatchUpResult)
 def catch_up(db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> dict:
-    generated = run_catch_up(db, user.id)
+    generated, posted = run_catch_up(db, user.id)
     return {
         "generated": len(generated),
+        "posted": posted,
         "pending": [_pending_response(p) for p in _user_pending(db, user.id)],
     }
 
@@ -137,6 +174,10 @@ def catch_up(db: Session = Depends(get_db), user: User = Depends(get_current_use
 def list_pending(
     db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ) -> list[dict]:
+    # Automatic catch-up: whatever came due since the last visit is generated
+    # (or, for auto-approve rules, posted) before the list is returned, so the
+    # user never has to remember to press "Catch up".
+    run_catch_up(db, user.id)
     return [_pending_response(p) for p in _user_pending(db, user.id)]
 
 

@@ -26,3 +26,12 @@ ACCENT_COLORS = ["#FCD535", "#2dbdb6", "#0ecb81", "#3b82f6"]
 
 # Safety valve for the recurring catch-up loop (see services/recurring.py)
 MAX_CATCH_UP_OCCURRENCES = 36
+
+MAX_TAG_LEN = 40
+MAX_TAGS_PER_TRANSACTION = 10
+
+GOAL_ICON_KEYS = ["target", "car", "housing", "travel", "savings", "gift", "education", "healthcare"]
+
+# Transactions list pagination
+DEFAULT_PAGE_SIZE = 50
+MAX_PAGE_SIZE = 500

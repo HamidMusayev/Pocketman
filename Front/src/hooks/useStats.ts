@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import {
   getCategoryBreakdown,
   getCumulativeBalance,
+  getMonthlyReport,
   getSummary,
   getTrend,
 } from '../api/stats'
@@ -28,4 +29,11 @@ export function useCategoryBreakdown(params: PeriodParams) {
 
 export function useCumulativeBalance() {
   return useQuery({ queryKey: [...queryKeys.stats, 'cumulative-balance'], queryFn: getCumulativeBalance })
+}
+
+export function useMonthlyReport(year: number, month: number) {
+  return useQuery({
+    queryKey: [...queryKeys.stats, 'monthly-report', year, month],
+    queryFn: () => getMonthlyReport(year, month),
+  })
 }

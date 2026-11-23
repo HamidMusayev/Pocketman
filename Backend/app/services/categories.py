@@ -1,7 +1,10 @@
+from decimal import Decimal
+
 from sqlalchemy.orm import Session
 
 from app.models.category import Category
 from app.models.transaction import Transaction
+from app.money import ZERO
 from app.services.periods import period_bounds
 
 
@@ -23,16 +26,16 @@ def spent_by_category(
     year: int | None,
     month: int | None,
     type_: str = "expense",
-) -> dict[int, float]:
+) -> dict[int, Decimal]:
     start, end = period_bounds(period, year, month)
     query = db.query(Transaction).filter(
         Transaction.user_id == user_id, Transaction.type == type_
     )
     if start is not None:
         query = query.filter(Transaction.date >= start, Transaction.date <= end)
-    totals: dict[int, float] = {}
+    totals: dict[int, Decimal] = {}
     for txn in query.all():
-        totals[txn.category_id] = totals.get(txn.category_id, 0.0) + txn.amount
+        totals[txn.category_id] = totals.get(txn.category_id, ZERO) + txn.amount
     return totals
 
 
@@ -48,11 +51,11 @@ def budget_summary(
     )
 
     items = []
-    spent_total = 0.0
-    budget_total = 0.0
+    spent_total = ZERO
+    budget_total = ZERO
     budgeted_count = 0
     for c in categories:
-        c_spent = spent.get(c.id, 0.0)
+        c_spent = spent.get(c.id, ZERO)
         pct_used = None
         if c.budget and c.budget > 0:
             pct_used = round((c_spent / c.budget) * 100)
@@ -73,7 +76,7 @@ def budget_summary(
     # "spent_total" for the ring only counts spend within budgeted categories,
     # matching the prototype's ring (budgetSpent sums only categories with budget>0)
     budgeted_ids = {c.id for c in categories if c.budget and c.budget > 0}
-    ring_spent = sum(spent.get(cid, 0.0) for cid in budgeted_ids)
+    ring_spent = sum((spent.get(cid, ZERO) for cid in budgeted_ids), ZERO)
     pct = round((ring_spent / budget_total) * 100) if budget_total > 0 else 0
 
     return {

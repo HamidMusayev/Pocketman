@@ -1,7 +1,10 @@
-from sqlalchemy import Float, ForeignKey, String, UniqueConstraint
+from decimal import Decimal
+
+from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from app.money import Money
 
 
 class Category(Base):
@@ -14,7 +17,7 @@ class Category(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     type: Mapped[str] = mapped_column(String, nullable=False)  # income | expense
     icon: Mapped[str] = mapped_column(String, nullable=False, default="other")
-    budget: Mapped[float | None] = mapped_column(Float, nullable=True)
+    budget: Mapped[Decimal | None] = mapped_column(Money, nullable=True)
 
     transactions = relationship("Transaction", back_populates="category")
     recurring_rules = relationship("RecurringRule", back_populates="category")

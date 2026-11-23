@@ -8,4 +8,6 @@ export const queryKeys = {
   recurring: ['recurring'] as const,
   pending: ['recurring-pending'] as const,
   stats: ['stats'] as const,
+  tags: ['tags'] as const,
+  goals: ['goals'] as const,
 }

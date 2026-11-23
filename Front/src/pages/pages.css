@@ -594,3 +594,293 @@ button.txn-row:hover {
     font-size: 16px;
   }
 }
+
+/* ============================================================================
+   Notes, tags, budget alerts, goals, monthly report
+   ========================================================================== */
+
+.pm-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 44px;
+  margin-bottom: 8px;
+}
+.modal-hint {
+  margin-top: 6px;
+  font: 400 12px/1.45 var(--sans);
+  color: var(--muted);
+}
+.link-btn {
+  background: none;
+  border: none;
+  padding: 4px 0;
+  color: var(--muted2);
+  font: 500 13px var(--sans);
+  cursor: pointer;
+}
+.link-btn:hover {
+  color: var(--strong);
+}
+.add-extras-toggle {
+  display: block;
+  margin: 2px 0 12px;
+}
+.check-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 4px 0 14px;
+  font: 500 14px var(--sans);
+  color: var(--body);
+  cursor: pointer;
+}
+.check-row input {
+  margin-top: 3px;
+  accent-color: var(--yellow);
+  width: 16px;
+  height: 16px;
+}
+.check-row .modal-hint {
+  display: block;
+  margin-top: 2px;
+}
+
+/* ---- tags ---- */
+.tag-chip {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--elev);
+  color: var(--muted2);
+  font: 500 11px var(--sans);
+  line-height: 18px;
+  white-space: nowrap;
+}
+.tag-chip-btn {
+  border: 1px solid var(--line);
+  cursor: pointer;
+  padding: 3px 10px;
+  font-size: 12px;
+}
+.tag-chip-btn:hover {
+  color: var(--strong);
+}
+.tag-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.txn-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 3px;
+}
+.txn-note-mark {
+  color: var(--muted);
+}
+
+.load-more {
+  display: block;
+  margin: 4px auto 0;
+}
+
+/* ---- budget alerts (Overview) ---- */
+.budget-alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+.budget-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--body);
+  text-decoration: none;
+  font: 400 13px var(--sans);
+}
+.budget-alert-near {
+  border-color: color-mix(in srgb, var(--yellow) 45%, var(--line));
+}
+.budget-alert-near svg,
+.budget-alert-near .budget-alert-pct {
+  color: var(--yellow2);
+}
+.budget-alert-over {
+  border-color: color-mix(in srgb, var(--down) 50%, var(--line));
+  background: color-mix(in srgb, var(--down) 7%, var(--card));
+}
+.budget-alert-over svg,
+.budget-alert-over .budget-alert-pct {
+  color: var(--down);
+}
+.budget-alert-text {
+  flex: 1;
+  min-width: 0;
+}
+.budget-alert-text strong {
+  color: var(--strong);
+  font-weight: 600;
+}
+.budget-alert-pct {
+  font: 600 13px var(--mono);
+}
+
+/* ---- goals (Accounts) ---- */
+.section-gap {
+  margin-top: 28px;
+}
+.goal-row {
+  cursor: default;
+}
+.goal-main {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+.goal-main .bar {
+  margin: 6px 0 5px;
+}
+.goal-done {
+  color: var(--up);
+  font-weight: 500;
+}
+
+/* ---- monthly report ---- */
+.report-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+.report-back {
+  display: inline-block;
+  margin-bottom: 4px;
+  color: var(--muted2);
+  text-decoration: none;
+  font: 500 13px var(--sans);
+}
+.report-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.report-month-nav .icon-btn {
+  font-size: 20px;
+}
+.report-month {
+  font: 600 14px var(--sans);
+  color: var(--strong);
+  min-width: 120px;
+  text-align: center;
+}
+.report-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 12px;
+  margin-bottom: 26px;
+}
+.report-change {
+  display: block;
+  margin-top: 4px;
+  font: 500 12px var(--sans);
+  color: var(--muted);
+}
+.report-change.good {
+  color: var(--up);
+}
+.report-change.bad {
+  color: var(--down);
+}
+.report-section {
+  margin-bottom: 26px;
+}
+.report-section .pm-section-title {
+  margin-bottom: 12px;
+}
+.report-legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 10px;
+  font: 500 12px var(--sans);
+  color: var(--muted2);
+}
+.swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  margin-right: 4px;
+  vertical-align: -1px;
+}
+.swatch-cur,
+.report-bar.cur {
+  background: var(--yellow);
+}
+.swatch-prev,
+.report-bar.prev {
+  background: var(--elev);
+}
+.report-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 6px;
+}
+.report-bar {
+  display: block;
+  height: 5px;
+  border-radius: 3px;
+  min-width: 2px;
+}
+.report-over {
+  color: var(--down);
+  font-weight: 500;
+}
+.report-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: 0 20px;
+}
+.print-only {
+  display: none;
+}
+
+@media print {
+  .topbar,
+  .bottom-nav,
+  .fab,
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block;
+  }
+  .report-print-title {
+    font: 600 13px var(--sans);
+    color: #555;
+    margin-bottom: 16px;
+  }
+  body,
+  .app-shell {
+    background: #fff !important;
+  }
+  .report,
+  .report * {
+    color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .report-section,
+  .report-cards {
+    break-inside: avoid;
+  }
+}

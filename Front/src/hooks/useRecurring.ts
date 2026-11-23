@@ -7,7 +7,9 @@ import {
   dismissPending,
   listPending,
   listRecurring,
+  updateRecurring,
   type RecurringInput,
+  type RecurringPatch,
 } from '../api/recurring'
 import { queryKeys } from './queryKeys'
 
@@ -27,6 +29,14 @@ export function useCreateRecurring() {
   })
 }
 
+export function useUpdateRecurring() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, patch }: { id: number; patch: RecurringPatch }) => updateRecurring(id, patch),
+    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.recurring }),
+  })
+}
+
 export function useDeleteRecurring() {
   const qc = useQueryClient()
   return useMutation({
@@ -39,9 +49,16 @@ export function useCatchUp() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: catchUp,
-    onSuccess: () => {
+    onSuccess: (result) => {
       qc.invalidateQueries({ queryKey: queryKeys.pending })
       qc.invalidateQueries({ queryKey: queryKeys.recurring })
+      if (result.posted > 0) {
+        // auto-approve rules just added real transactions
+        qc.invalidateQueries({ queryKey: queryKeys.transactions })
+        qc.invalidateQueries({ queryKey: queryKeys.accounts })
+        qc.invalidateQueries({ queryKey: queryKeys.budgetSummary })
+        qc.invalidateQueries({ queryKey: queryKeys.stats })
+      }
     },
   })
 }

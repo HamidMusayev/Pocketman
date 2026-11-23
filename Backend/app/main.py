@@ -2,7 +2,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import accounts, auth, categories, recurring, settings as settings_router, stats, transactions
+from app.routers import (
+    accounts,
+    auth,
+    categories,
+    goals,
+    recurring,
+    settings as settings_router,
+    stats,
+    tags,
+    transactions,
+)
 
 app = FastAPI(title="Pocketman API", version="1.0.0")
 
@@ -12,6 +22,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Total-Count"],
 )
 
 app.include_router(auth.router)
@@ -21,6 +32,8 @@ app.include_router(categories.router)
 app.include_router(transactions.router)
 app.include_router(recurring.router)
 app.include_router(stats.router)
+app.include_router(tags.router)
+app.include_router(goals.router)
 
 
 @app.get("/api/health")

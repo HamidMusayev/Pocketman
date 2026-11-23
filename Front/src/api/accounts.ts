@@ -10,6 +10,7 @@ export interface AccountInput {
   name: string
   type: string
   icon: string
+  opening_balance?: number
 }
 
 export async function createAccount(input: AccountInput): Promise<Account> {

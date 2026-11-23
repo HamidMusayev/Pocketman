@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatCompactMoney, formatMoney, formatSignedMoney, formatTransactionAmount } from './money'
+import { formatCompactMoney, formatMoney, formatSignedMoney, formatTransactionAmount, parseAmount, sumMoney } from './money'
 
 describe('formatMoney', () => {
   it('adds thousands separators and two decimals when showCents is on', () => {
@@ -44,5 +44,36 @@ describe('formatCompactMoney', () => {
     expect(formatCompactMoney(3200, '$')).toBe('$3.2k')
     expect(formatCompactMoney(1_250_000, '$')).toBe('$1.3M')
     expect(formatCompactMoney(0, '$')).toBe('$0')
+  })
+})
+
+describe('sumMoney', () => {
+  it('adds in cents so there is no float drift', () => {
+    expect(sumMoney([0.1, 0.2])).toBe(0.3)
+    expect(sumMoney([])).toBe(0)
+    expect(sumMoney([10, -2.5])).toBe(7.5)
+  })
+})
+
+describe('parseAmount', () => {
+  it('accepts dots, commas and rounds to cents', () => {
+    expect(parseAmount('12.5')).toBe(12.5)
+    expect(parseAmount('12,50')).toBe(12.5)
+    expect(parseAmount(' 3.456 ')).toBe(3.46)
+    expect(parseAmount('.5')).toBe(0.5)
+  })
+  it('rejects junk, zero and negatives unless allowed', () => {
+    expect(parseAmount('')).toBeNull()
+    expect(parseAmount('abc')).toBeNull()
+    expect(parseAmount('0')).toBeNull()
+    expect(parseAmount('-5')).toBeNull()
+    expect(parseAmount('-5', { allowNegative: true })).toBe(-5)
+    expect(parseAmount('0', { allowZero: true })).toBe(0)
+  })
+})
+
+describe('formatTransactionAmount for transfers', () => {
+  it('is neutral', () => {
+    expect(formatTransactionAmount('transfer', 5, '$', true)).toBe('⇄ $5.00')
   })
 })

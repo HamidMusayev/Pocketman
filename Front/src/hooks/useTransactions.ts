@@ -1,9 +1,10 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createTransaction,
   deleteTransaction,
   importTransactionsCsv,
   listTransactions,
+  listTransactionsPage,
   updateTransaction,
   type TransactionFilters,
   type TransactionInput,
@@ -17,10 +18,26 @@ export function useTransactions(filters: TransactionFilters) {
   })
 }
 
+export const TRANSACTIONS_PAGE_SIZE = 50
+
+/** The Overview list: loads 50 at a time, `fetchNextPage` for more. */
+export function useTransactionPages(filters: TransactionFilters) {
+  return useInfiniteQuery({
+    queryKey: [...queryKeys.transactions, 'pages', filters],
+    queryFn: ({ pageParam }) => listTransactionsPage(filters, TRANSACTIONS_PAGE_SIZE, pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (last, pages) => {
+      const loaded = pages.reduce((n, p) => n + p.items.length, 0)
+      return loaded < last.total && last.items.length > 0 ? loaded : undefined
+    },
+  })
+}
+
 function useInvalidateAfterTransactionChange() {
   const qc = useQueryClient()
   return () => {
     qc.invalidateQueries({ queryKey: queryKeys.transactions })
+    qc.invalidateQueries({ queryKey: queryKeys.tags })
     qc.invalidateQueries({ queryKey: queryKeys.accounts })
     qc.invalidateQueries({ queryKey: queryKeys.budgetSummary })
     qc.invalidateQueries({ queryKey: queryKeys.stats })
@@ -60,6 +77,7 @@ export function useImportTransactions() {
       invalidate()
       // import can auto-create categories/accounts
       qc.invalidateQueries({ queryKey: queryKeys.categories })
+      qc.invalidateQueries({ queryKey: queryKeys.accounts })
     },
   })
 }

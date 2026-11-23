@@ -12,6 +12,15 @@ window.matchMedia?.('(prefers-color-scheme: light)').addEventListener?.('change'
   if (getThemeMode() === 'system') applyThemeMode('system')
 })
 
+// installable app (PWA); only in production builds so dev hot-reload isn't cached
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {
+      /* not supported here (e.g. plain http on a LAN IP) — the app still works */
+    })
+  })
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

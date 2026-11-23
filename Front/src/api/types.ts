@@ -17,6 +17,9 @@ export interface Account {
   type: string
   icon: string
   removable: boolean
+  /** money already in the account when it was added */
+  opening_balance: number
+  /** current balance: opening balance + all activity */
   net: number
   transaction_count: number
 }
@@ -51,6 +54,8 @@ export interface Transaction {
   type: TransactionType
   amount: number
   description: string
+  note: string | null
+  tags: string[]
   category_id: number | null
   category_name: string | null
   account_id: number
@@ -58,6 +63,20 @@ export interface Transaction {
   transfer_account_id: number | null
   transfer_account_name: string | null
   date: string
+}
+
+export interface TransactionPage {
+  items: Transaction[]
+  /** number of rows matching the filters, across all pages */
+  total: number
+}
+
+export interface Tag {
+  id: number
+  name: string
+  count: number
+  income: number
+  expense: number
 }
 
 export interface ImportResult {
@@ -70,13 +89,17 @@ export interface RecurringRule {
   id: number
   description: string
   amount: number
-  category_id: number
-  category_name: string
+  category_id: number | null
+  category_name: string | null
   account_id: number
   account_name: string
-  type: TxnType
+  transfer_account_id: number | null
+  transfer_account_name: string | null
+  type: TransactionType
   frequency: Frequency
   next_due_date: string
+  /** post due occurrences straight away instead of asking */
+  auto_approve: boolean
 }
 
 export interface PendingApproval {
@@ -84,17 +107,61 @@ export interface PendingApproval {
   recurring_rule_id: number
   description: string
   amount: number
-  category_id: number
-  category_name: string
+  category_id: number | null
+  category_name: string | null
   account_id: number
   account_name: string
-  type: TxnType
+  transfer_account_id: number | null
+  transfer_account_name: string | null
+  type: TransactionType
   due_date: string
 }
 
 export interface CatchUpResult {
   generated: number
+  /** occurrences of auto-approve rules posted straight to transactions */
+  posted: number
   pending: PendingApproval[]
+}
+
+export interface Goal {
+  id: number
+  name: string
+  icon: string
+  target_amount: number
+  saved_amount: number
+  remaining: number
+  pct: number
+  target_date: string | null
+  months_left: number | null
+  /** how much to put aside each month to make the target date */
+  monthly_needed: number | null
+  completed: boolean
+}
+
+export interface ReportCategory {
+  category_id: number
+  name: string
+  icon: string
+  amount: number
+  previous: number
+  change_pct: number | null
+  budget: number | null
+  over_budget: boolean
+}
+
+export interface MonthlyReport {
+  year: number
+  month: number
+  current: Summary
+  previous: Summary
+  income_change_pct: number | null
+  expense_change_pct: number | null
+  transaction_count: number
+  avg_daily_expense: number
+  categories: ReportCategory[]
+  top_expenses: { id: number; description: string; category_name: string | null; amount: number; date: string }[]
+  tags: { name: string; amount: number }[]
 }
 
 export interface Summary {

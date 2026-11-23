@@ -2,14 +2,22 @@ import csv
 import io
 from datetime import datetime
 
-from sqlalchemy.orm import Session
+from decimal import Decimal
+
+from sqlalchemy import false
+from sqlalchemy.orm import Session, selectinload
 
 from app.models.account import Account
 from app.models.category import Category
+from app.models.tag import Tag
 from app.models.transaction import Transaction
+from app.money import MAX_AMOUNT, to_money
+from app.schemas.transaction import normalize_tags
 from app.services.periods import period_bounds
 
-CSV_HEADER = ["Date", "Type", "Description", "Category", "Account", "Amount", "To Account"]
+CSV_HEADER = [
+    "Date", "Type", "Description", "Category", "Account", "Amount", "To Account", "Note", "Tags",
+]
 
 MAX_IMPORT_ROWS = 20_000
 MAX_NAME_LEN = 100
@@ -24,7 +32,7 @@ def _escape_like(value: str) -> str:
     return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
-def query_transactions(
+def filtered_query(
     db: Session,
     user_id: int,
     period: str = "all",
@@ -34,14 +42,18 @@ def query_transactions(
     category_id: int | None = None,
     account_id: int | None = None,
     type_: str | None = None,
+    tag: str | None = None,
 ):
+    """The (unordered, unpaginated) query behind the list, export and count."""
     start, end = period_bounds(period, year, month)
     query = db.query(Transaction).filter(Transaction.user_id == user_id)
     if start is not None:
         query = query.filter(Transaction.date >= start, Transaction.date <= end)
     if search:
+        pattern = f"%{_escape_like(search)}%"
         query = query.filter(
-            Transaction.description.ilike(f"%{_escape_like(search)}%", escape="\\")
+            Transaction.description.ilike(pattern, escape="\\")
+            | Transaction.note.ilike(pattern, escape="\\")
         )
     if category_id is not None:
         query = query.filter(Transaction.category_id == category_id)
@@ -49,7 +61,66 @@ def query_transactions(
         query = query.filter(Transaction.account_id == account_id)
     if type_ is not None:
         query = query.filter(Transaction.type == type_)
-    return query.order_by(Transaction.date.desc(), Transaction.id.desc()).all()
+    if tag:
+        normalized = normalize_tags([tag])
+        if not normalized:
+            return query.filter(false())
+        query = query.filter(
+            Transaction.tags.any((Tag.name == normalized[0]) & (Tag.user_id == user_id))
+        )
+    return query
+
+
+def query_transactions(
+    db: Session,
+    user_id: int,
+    *,
+    limit: int | None = None,
+    offset: int = 0,
+    **filters,
+) -> list[Transaction]:
+    query = (
+        filtered_query(db, user_id, **filters)
+        .options(
+            selectinload(Transaction.tags),
+            selectinload(Transaction.category),
+            selectinload(Transaction.account),
+            selectinload(Transaction.transfer_account),
+        )
+        .order_by(Transaction.date.desc(), Transaction.id.desc())
+    )
+    if offset:
+        query = query.offset(offset)
+    if limit is not None:
+        query = query.limit(limit)
+    return query.all()
+
+
+def set_tags(db: Session, user_id: int, txn: Transaction, names: list[str]) -> None:
+    """Replace a transaction's tags, creating any tag the user doesn't have yet."""
+    if not names:
+        txn.tags = []
+        return
+    existing = {
+        t.name: t
+        for t in db.query(Tag).filter(Tag.user_id == user_id, Tag.name.in_(names)).all()
+    }
+    tags = []
+    for name in names:
+        tag = existing.get(name)
+        if tag is None:
+            tag = Tag(user_id=user_id, name=name)
+            db.add(tag)
+            existing[name] = tag
+        tags.append(tag)
+    txn.tags = tags
+
+
+def prune_unused_tags(db: Session, user_id: int) -> None:
+    db.flush()
+    db.query(Tag).filter(Tag.user_id == user_id, ~Tag.transactions.any()).delete(
+        synchronize_session=False
+    )
 
 
 def to_response_dict(txn: Transaction) -> dict:
@@ -58,6 +129,8 @@ def to_response_dict(txn: Transaction) -> dict:
         "type": txn.type,
         "amount": txn.amount,
         "description": txn.description,
+        "note": txn.note,
+        "tags": [t.name for t in txn.tags],
         "category_id": txn.category_id,
         "category_name": txn.category.name if txn.category else None,
         "account_id": txn.account_id,
@@ -86,6 +159,8 @@ def export_csv(transactions: list[Transaction]) -> str:
                 _csv_safe(t.account.name) if t.account else "",
                 f"{t.amount:.2f}",
                 _csv_safe(t.transfer_account.name) if t.transfer_account else "",
+                _csv_safe(t.note or ""),
+                " ".join(tag.name for tag in t.tags),
             ]
         )
     return buffer.getvalue()
@@ -161,9 +236,15 @@ def import_csv(db: Session, user_id: int, content: str) -> dict:
                     f"Type must be 'income', 'expense' or 'transfer', got '{row.get('Type')}'"
                 )
 
-            amount = float(row.get("Amount") or "")
-            if not (0 < amount < 1e12):
+            try:
+                amount = to_money((row.get("Amount") or "").strip())
+            except Exception:
+                raise ValueError(f"Amount must be a number, got '{row.get('Amount')}'") from None
+            if not (Decimal(0) < amount < MAX_AMOUNT):
                 raise ValueError("Amount must be greater than 0")
+
+            note = (row.get("Note") or "").strip()[:2000] or None
+            tags = normalize_tags((row.get("Tags") or "").replace(",", " ").split())
 
             description = (row.get("Description") or "").strip()[:MAX_DESCRIPTION_LEN]
             if not description:
@@ -185,34 +266,35 @@ def import_csv(db: Session, user_id: int, content: str) -> dict:
                 to_account = _get_or_create_account(db, user_id, to_name, account_cache)
                 if to_account.id == account.id:
                     raise ValueError("Transfer source and destination must differ")
-                db.add(
-                    Transaction(
-                        user_id=user_id,
-                        type="transfer",
-                        amount=amount,
-                        description=description,
-                        category_id=None,
-                        account_id=account.id,
-                        transfer_account_id=to_account.id,
-                        date=txn_date,
-                    )
+                txn = Transaction(
+                    user_id=user_id,
+                    type="transfer",
+                    amount=amount,
+                    description=description,
+                    note=note,
+                    category_id=None,
+                    account_id=account.id,
+                    transfer_account_id=to_account.id,
+                    date=txn_date,
                 )
             else:
                 category_name = (row.get("Category") or "Other").strip() or "Other"
                 category = _get_or_create_category(
                     db, user_id, category_name, type_, category_cache
                 )
-                db.add(
-                    Transaction(
-                        user_id=user_id,
-                        type=type_,
-                        amount=amount,
-                        description=description,
-                        category_id=category.id,
-                        account_id=account.id,
-                        date=txn_date,
-                    )
+                txn = Transaction(
+                    user_id=user_id,
+                    type=type_,
+                    amount=amount,
+                    description=description,
+                    note=note,
+                    category_id=category.id,
+                    account_id=account.id,
+                    date=txn_date,
                 )
+            db.add(txn)
+            set_tags(db, user_id, txn, tags)
+            db.flush()
             created += 1
         except ValueError as exc:
             skipped += 1

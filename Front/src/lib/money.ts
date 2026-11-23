@@ -15,13 +15,38 @@ export function formatSignedMoney(amount: number, currencySymbol: string, showCe
   return sign + formatMoney(amount, currencySymbol, showCents)
 }
 
-/** Transaction amount text with a leading +/- matching type, e.g. "+$12.00". */
+/** Adds money amounts in whole cents so 0.1 + 0.2 is exactly 0.3. */
+export function sumMoney(amounts: Iterable<number>): number {
+  let cents = 0
+  for (const a of amounts) cents += Math.round(a * 100)
+  return cents / 100
+}
+
+/** Parses what someone typed into an amount box ("12,50" or "12.5") to a
+ * number rounded to cents, or null if it isn't one. By default only amounts
+ * above zero are accepted. */
+export function parseAmount(
+  text: string,
+  { allowNegative = false, allowZero = false } = {},
+): number | null {
+  const cleaned = text.trim().replace(/\s/g, '').replace(',', '.')
+  if (!/^-?(\d+\.?\d*|\.\d+)$/.test(cleaned)) return null
+  const n = Math.round(Number(cleaned) * 100) / 100 || 0 // -0 → 0
+  if (!Number.isFinite(n)) return null
+  if (n === 0 && !allowZero) return null
+  if (n < 0 && !allowNegative) return null
+  return n
+}
+
+/** Transaction amount text with a leading +/- matching type, e.g. "+$12.00".
+ * Transfers get a neutral "⇄". */
 export function formatTransactionAmount(
-  type: 'income' | 'expense',
+  type: 'income' | 'expense' | 'transfer',
   amount: number,
   currencySymbol: string,
   showCents: boolean,
 ): string {
+  if (type === 'transfer') return '⇄ ' + formatMoney(amount, currencySymbol, showCents)
   const sign = type === 'income' ? '+' : '−'
   return sign + formatMoney(amount, currencySymbol, showCents)
 }

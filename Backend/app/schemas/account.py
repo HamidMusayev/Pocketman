@@ -1,12 +1,17 @@
 from pydantic import BaseModel, Field, field_validator
 
+from decimal import Decimal
+
 from app.constants import ACCOUNT_ICON_KEYS, ACCOUNT_TYPES
+from app.money import MoneyField
 
 
 class AccountBase(BaseModel):
     name: str = Field(max_length=100)
     type: str = "cash"
     icon: str = "wallet"
+    # may be negative (e.g. a credit card that already carries debt)
+    opening_balance: MoneyField = Decimal("0.00")
 
     @field_validator("type")
     @classmethod
@@ -39,6 +44,7 @@ class AccountUpdate(BaseModel):
     name: str | None = Field(default=None, max_length=100)
     type: str | None = None
     icon: str | None = None
+    opening_balance: MoneyField | None = None
 
     @field_validator("type")
     @classmethod
@@ -62,7 +68,8 @@ class AccountResponse(BaseModel):
     type: str
     icon: str
     removable: bool
-    net: float
+    opening_balance: MoneyField
+    net: MoneyField
     transaction_count: int
 
     model_config = {"from_attributes": True}

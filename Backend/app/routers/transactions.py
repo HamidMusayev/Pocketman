@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, UploadFile, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.constants import MAX_PAGE_SIZE
 from app.database import get_db
 from app.models.account import Account
 from app.models.category import Category
@@ -16,7 +17,15 @@ from app.schemas.transaction import (
     TransactionUpdate,
 )
 from app.security import get_current_user
-from app.services.transactions import export_csv, import_csv, query_transactions, to_response_dict
+from app.services.transactions import (
+    export_csv,
+    filtered_query,
+    import_csv,
+    prune_unused_tags,
+    query_transactions,
+    set_tags,
+    to_response_dict,
+)
 
 router = APIRouter(prefix="/api/transactions", tags=["transactions"])
 
@@ -49,6 +58,7 @@ def _validate_refs(
 
 @router.get("", response_model=list[TransactionResponse])
 def list_transactions(
+    response: Response,
     period: str = Query("all", pattern="^(monthly|all|range)$"),
     year: int | None = None,
     month: int | None = None,
@@ -56,13 +66,20 @@ def list_transactions(
     category_id: int | None = None,
     account_id: int | None = None,
     type: str | None = Query(None, pattern="^(income|expense|transfer)$"),
+    tag: str | None = Query(None, max_length=60),
+    limit: int | None = Query(None, ge=1, le=MAX_PAGE_SIZE),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> list[dict]:
-    txns = query_transactions(
-        db, user.id, period=period, year=year, month=month, search=search,
-        category_id=category_id, account_id=account_id, type_=type,
+    """Newest first. With `limit`, returns one page; `X-Total-Count` always
+    carries the number of matching rows so the client knows if there's more."""
+    filters = dict(
+        period=period, year=year, month=month, search=search,
+        category_id=category_id, account_id=account_id, type_=type, tag=tag,
     )
+    response.headers["X-Total-Count"] = str(filtered_query(db, user.id, **filters).count())
+    txns = query_transactions(db, user.id, limit=limit, offset=offset, **filters)
     return [to_response_dict(t) for t in txns]
 
 
@@ -75,12 +92,13 @@ def export_transactions(
     category_id: int | None = None,
     account_id: int | None = None,
     type: str | None = Query(None, pattern="^(income|expense|transfer)$"),
+    tag: str | None = Query(None, max_length=60),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> StreamingResponse:
     txns = query_transactions(
         db, user.id, period=period, year=year, month=month, search=search,
-        category_id=category_id, account_id=account_id, type_=type,
+        category_id=category_id, account_id=account_id, type_=type, tag=tag,
     )
     csv_text = export_csv(txns)
     return StreamingResponse(
@@ -121,8 +139,11 @@ def create_transaction(
         transfer_account_id=body.transfer_account_id,
         txn_type=body.type,
     )
-    txn = Transaction(**body.model_dump(), user_id=user.id)
+    data = body.model_dump()
+    tags = data.pop("tags")
+    txn = Transaction(**data, user_id=user.id)
     db.add(txn)
+    set_tags(db, user.id, txn, tags)
     db.commit()
     db.refresh(txn)
     return to_response_dict(txn)
@@ -137,13 +158,16 @@ def update_transaction(
 ) -> dict:
     txn = get_owned(db, Transaction, transaction_id, user.id, "Transaction")
     data = body.model_dump(exclude_unset=True)
-    for required in ("type", "amount", "description", "account_id", "date"):
+    for required in ("type", "amount", "description", "account_id", "date", "tags"):
         if required in data and data[required] is None:
             raise _unprocessable(f"{required} cannot be null")
     if "amount" in data and data["amount"] <= 0:
         raise _unprocessable("amount must be greater than 0")
+    tags = data.pop("tags", None)
     for field, value in data.items():
         setattr(txn, field, value)
+    if tags is not None:
+        set_tags(db, user.id, txn, tags)
 
     # keep the row coherent for its (possibly changed) type
     if txn.type == "transfer":
@@ -167,6 +191,8 @@ def update_transaction(
         txn_type=txn.type,
     )
 
+    if tags is not None:
+        prune_unused_tags(db, user.id)
     db.commit()
     db.refresh(txn)
     return to_response_dict(txn)
@@ -177,5 +203,8 @@ def delete_transaction(
     transaction_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)
 ) -> None:
     txn = get_owned(db, Transaction, transaction_id, user.id, "Transaction")
+    had_tags = bool(txn.tags)
     db.delete(txn)
+    if had_tags:
+        prune_unused_tags(db, user.id)
     db.commit()

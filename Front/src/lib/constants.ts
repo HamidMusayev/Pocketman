@@ -25,3 +25,18 @@ export const ACCOUNT_ICON_LABELS: Record<string, string> = {
   bank: 'Bank',
   card: 'Card',
 }
+
+export const GOAL_ICON_KEYS = [
+  'target', 'car', 'housing', 'travel', 'savings', 'gift', 'education', 'healthcare',
+] as const
+
+export const GOAL_ICON_LABELS: Record<string, string> = {
+  target: 'Target',
+  car: 'Car',
+  housing: 'Home',
+  travel: 'Travel',
+  savings: 'Savings',
+  gift: 'Gift',
+  education: 'Education',
+  healthcare: 'Health',
+}

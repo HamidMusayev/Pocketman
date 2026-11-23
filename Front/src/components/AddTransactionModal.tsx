@@ -2,8 +2,11 @@ import { useMemo, useState } from 'react'
 import { apiErrorMessage } from '../api/client'
 import type { Account, Category, Transaction, TransactionType } from '../api/types'
 import { useCreateTransaction } from '../hooks/useTransactions'
+import { parseAmount } from '../lib/money'
+import { parseTags, tagsError } from '../lib/tags'
 import { CategoryIcon } from './CategoryIcon'
 import { Modal } from './Modal'
+import { TagInput } from './TagInput'
 
 const TYPES: { key: TransactionType; label: string }[] = [
   { key: 'expense', label: 'Expense' },
@@ -38,6 +41,9 @@ export function AddTransactionModal({ categories, accounts, recent, currency, de
   const transferAccountId = pickedTransfer ?? accounts.find((a) => a.id !== accountId)?.id ?? null
   const [date, setDate] = useState(defaultDate)
   const [showAll, setShowAll] = useState(false)
+  const [showExtras, setShowExtras] = useState(false)
+  const [note, setNote] = useState('')
+  const [tagText, setTagText] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const isTransfer = type === 'transfer'
@@ -56,8 +62,8 @@ export function AddTransactionModal({ categories, accounts, recent, currency, de
   if (selected && !visible.includes(selected)) visible = [...visible, selected]
 
   async function onSubmit() {
-    const amt = Number(amount)
-    if (!amt || amt <= 0) {
+    const amt = parseAmount(amount)
+    if (amt === null) {
       setError('Enter an amount.')
       return
     }
@@ -65,6 +71,13 @@ export function AddTransactionModal({ categories, accounts, recent, currency, de
       setError('Pick an account.')
       return
     }
+    const tags = parseTags(tagText)
+    const tagProblem = tagsError(tags)
+    if (tagProblem) {
+      setError(tagProblem)
+      return
+    }
+    const extras = { note: note.trim() || null, tags }
     try {
       if (isTransfer) {
         if (!transferAccountId || transferAccountId === accountId) {
@@ -79,6 +92,7 @@ export function AddTransactionModal({ categories, accounts, recent, currency, de
           account_id: accountId,
           transfer_account_id: transferAccountId,
           date,
+          ...extras,
         })
       } else {
         if (!categoryId) {
@@ -93,6 +107,7 @@ export function AddTransactionModal({ categories, accounts, recent, currency, de
           category_id: categoryId,
           account_id: accountId,
           date,
+          ...extras,
         })
       }
       onClose()
@@ -123,7 +138,7 @@ export function AddTransactionModal({ categories, accounts, recent, currency, de
       <div className="add-amount">
         <span>{currency}</span>
         <input
-          type="number"
+          type="text"
           inputMode="decimal"
           placeholder="0.00"
           aria-label="Amount"
@@ -203,6 +218,25 @@ export function AddTransactionModal({ categories, accounts, recent, currency, de
           <input className="pm-input" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
       </div>
+
+      {showExtras ? (
+        <div className="modal-field">
+          <label className="modal-label">Note & tags</label>
+          <textarea
+            className="pm-input pm-textarea"
+            aria-label="Note"
+            placeholder="Note (optional)"
+            rows={2}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+          <TagInput value={tagText} onChange={setTagText} />
+        </div>
+      ) : (
+        <button type="button" className="link-btn add-extras-toggle" onClick={() => setShowExtras(true)}>
+          + Note & tags
+        </button>
+      )}
 
       {error && <div className="pm-inline-error">{error}</div>}
 
