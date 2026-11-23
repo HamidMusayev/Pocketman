@@ -34,7 +34,8 @@ export function useUpdateAccount() {
 export function useDeleteAccount() {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: (id: number) => deleteAccount(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: KEY }),
+    mutationFn: ({ id, moveTo }: { id: number; moveTo?: number }) => deleteAccount(id, moveTo),
+    // history may have moved to another account: balances, lists and stats all change
+    onSuccess: () => qc.invalidateQueries(),
   })
 }

@@ -23,6 +23,8 @@ export async function updateAccount(id: number, patch: Partial<AccountInput>): P
   return res.data
 }
 
-export async function deleteAccount(id: number): Promise<void> {
-  await apiClient.delete(`/accounts/${id}`)
+/** `moveTo`: the account that takes over this one's transactions, recurring
+ * rules and starting balance (needed when the account has history). */
+export async function deleteAccount(id: number, moveTo?: number): Promise<void> {
+  await apiClient.delete(`/accounts/${id}`, moveTo ? { params: { move_to: moveTo } } : undefined)
 }

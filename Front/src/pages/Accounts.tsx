@@ -20,6 +20,7 @@ export function Accounts() {
 
   // null = closed, 'new' = add form, otherwise the account being edited
   const [form, setForm] = useState<Account | 'new' | null>(null)
+  const [removing, setRemoving] = useState<Account | null>(null)
 
   const list = useMemo(() => accounts ?? [], [accounts])
   const total = useMemo(() => sumMoney(list.map((a) => a.net)), [list])
@@ -93,21 +94,34 @@ export function Accounts() {
       {/* ------------------------------ accounts ----------------------------- */}
       <div className="acc-grid">
         {list.map((a, i) => (
-          <button className="acc-card" key={a.id} onClick={() => setForm(a)} aria-label={`Edit ${a.name}`}>
+          <div className="acc-card" key={a.id}>
             <span className="acc-card-top">
               <span className="icon-badge" style={{ color: rampColor(i) }}>
                 <CategoryIcon iconKey={a.icon} size={19} />
               </span>
-              <span className="acc-card-type">{a.type[0].toUpperCase() + a.type.slice(1)}</span>
+              <span className="acc-card-actions">
+                <button className="acc-act" onClick={() => setForm(a)} aria-label={`Edit ${a.name}`} title="Edit">
+                  <PencilIcon />
+                </button>
+                <button
+                  className="acc-act acc-act-danger"
+                  onClick={() => setRemoving(a)}
+                  aria-label={`Delete ${a.name}`}
+                  title="Delete"
+                >
+                  <TrashIcon />
+                </button>
+              </span>
             </span>
             <span className="acc-card-name">{a.name}</span>
             <span className="acc-card-balance" style={{ color: a.net < 0 ? 'var(--down)' : 'var(--strong)' }}>
               {formatSignedMoney(a.net, currency, showCents)}
             </span>
             <span className="acc-card-sub">
-              {a.transaction_count} transaction{a.transaction_count === 1 ? '' : 's'}
+              {a.type[0].toUpperCase() + a.type.slice(1)} · {a.transaction_count} transaction
+              {a.transaction_count === 1 ? '' : 's'}
             </span>
-          </button>
+          </div>
         ))}
         <button className="acc-card acc-card-new" onClick={() => setForm('new')}>
           <span className="acc-card-new-plus">+</span>
@@ -117,15 +131,40 @@ export function Accounts() {
 
       <GoalsSection currency={currency} showCents={showCents} />
 
-      {form && <AccountFormModal account={form === 'new' ? undefined : form} onClose={() => setForm(null)} />}
+      {form && (
+        <AccountFormModal
+          account={form === 'new' ? undefined : form}
+          onClose={() => setForm(null)}
+          onDelete={(a) => {
+            setForm(null)
+            setRemoving(a)
+          }}
+        />
+      )}
+      {removing && (
+        <DeleteAccountModal
+          account={removing}
+          others={list.filter((a) => a.id !== removing.id)}
+          currency={currency}
+          showCents={showCents}
+          onClose={() => setRemoving(null)}
+        />
+      )}
     </div>
   )
 }
 
-function AccountFormModal({ account, onClose }: { account?: Account; onClose: () => void }) {
+function AccountFormModal({
+  account,
+  onClose,
+  onDelete,
+}: {
+  account?: Account
+  onClose: () => void
+  onDelete: (a: Account) => void
+}) {
   const createAccount = useCreateAccount()
   const updateAccount = useUpdateAccount()
-  const deleteAccount = useDeleteAccount()
 
   const [name, setName] = useState(account?.name ?? '')
   const [icon, setIcon] = useState(account?.icon ?? 'wallet')
@@ -151,16 +190,6 @@ function AccountFormModal({ account, onClose }: { account?: Account; onClose: ()
       onClose()
     } catch (err) {
       setError(apiErrorMessage(err, 'Could not save account.'))
-    }
-  }
-
-  async function onDelete() {
-    if (!account || !window.confirm(`Remove the "${account.name}" account?`)) return
-    try {
-      await deleteAccount.mutateAsync(account.id)
-      onClose()
-    } catch (err) {
-      setError(apiErrorMessage(err, 'Could not remove account.'))
     }
   }
 
@@ -220,8 +249,8 @@ function AccountFormModal({ account, onClose }: { account?: Account; onClose: ()
       {error && <div className="pm-inline-error">{error}</div>}
 
       <div className="modal-actions">
-        {account?.removable && (
-          <button className="pm-btn modal-danger" onClick={onDelete} disabled={deleteAccount.isPending}>
+        {account && (
+          <button className="pm-btn modal-danger" onClick={() => onDelete(account)}>
             Delete
           </button>
         )}
@@ -239,3 +268,99 @@ function AccountFormModal({ account, onClose }: { account?: Account; onClose: ()
     </Modal>
   )
 }
+
+/** Confirm removing an account. If it has history, pick the account that takes
+ * it over (transactions, recurring rules and the starting balance move there). */
+function DeleteAccountModal({
+  account,
+  others,
+  currency,
+  showCents,
+  onClose,
+}: {
+  account: Account
+  others: Account[]
+  currency: string
+  showCents: boolean
+  onClose: () => void
+}) {
+  const deleteAccount = useDeleteAccount()
+  const [moveTo, setMoveTo] = useState<number | null>(others[0]?.id ?? null)
+  const [error, setError] = useState<string | null>(null)
+  const hasHistory = account.transaction_count > 0 || account.opening_balance !== 0
+
+  async function onConfirm() {
+    setError(null)
+    try {
+      await deleteAccount.mutateAsync({ id: account.id, moveTo: hasHistory ? (moveTo ?? undefined) : undefined })
+      onClose()
+    } catch (err) {
+      setError(apiErrorMessage(err, 'Could not remove account.'))
+    }
+  }
+
+  return (
+    <Modal title={`Delete "${account.name}"?`} onClose={onClose}>
+      {others.length === 0 ? (
+        <p className="acc-del-text">
+          This is your only account. Add another account first, then you can delete this one.
+        </p>
+      ) : hasHistory ? (
+        <>
+          <p className="acc-del-text">
+            This account has {account.transaction_count} transaction{account.transaction_count === 1 ? '' : 's'} and a
+            balance of <strong>{formatSignedMoney(account.net, currency, showCents)}</strong>. Nothing is lost: its
+            transactions, recurring payments and balance move to the account you pick. Transfers between the two
+            accounts are removed.
+          </p>
+          <div className="modal-field">
+            <label className="modal-label" htmlFor="move-to">
+              Move everything to
+            </label>
+            <select
+              id="move-to"
+              className="pm-select"
+              style={{ width: '100%' }}
+              value={moveTo ?? ''}
+              onChange={(e) => setMoveTo(Number(e.target.value))}
+            >
+              {others.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </>
+      ) : (
+        <p className="acc-del-text">This account is empty, so deleting it changes nothing else.</p>
+      )}
+
+      {error && <div className="pm-inline-error">{error}</div>}
+
+      <div className="modal-actions">
+        <button className="pm-btn pm-btn-ghost-elev" onClick={onClose}>
+          Cancel
+        </button>
+        {others.length > 0 && (
+          <button className="pm-btn modal-danger-solid" onClick={onConfirm} disabled={deleteAccount.isPending}>
+            {deleteAccount.isPending ? 'Deleting…' : 'Delete account'}
+          </button>
+        )}
+      </div>
+    </Modal>
+  )
+}
+
+const PencilIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z" />
+    <path d="m13.5 6.5 4 4" />
+  </svg>
+)
+
+const TrashIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+  </svg>
+)

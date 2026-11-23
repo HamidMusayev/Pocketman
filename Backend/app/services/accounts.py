@@ -83,3 +83,29 @@ def to_response_dict(db: Session, account: Account) -> dict:
         "net": opening + net,
         "transaction_count": count,
     }
+
+
+def move_account_history(db: Session, source: Account, target: Account) -> None:
+    """Hand everything recorded on `source` over to `target`: transactions,
+    recurring rules, pending approvals and the starting balance. Transfers
+    between the two would become transfers from an account to itself, which
+    mean nothing, so those are dropped. Does not commit."""
+    from app.models.recurring import PendingApproval, RecurringRule
+
+    for model in (Transaction, RecurringRule, PendingApproval):
+        rows = (
+            db.query(model)
+            .filter(or_(model.account_id == source.id, model.transfer_account_id == source.id))
+            .all()
+        )
+        for row in rows:
+            if row.account_id == source.id:
+                row.account_id = target.id
+            if row.transfer_account_id == source.id:
+                row.transfer_account_id = target.id
+            if row.transfer_account_id is not None and row.transfer_account_id == row.account_id:
+                db.delete(row)
+        db.flush()
+
+    target.opening_balance = (target.opening_balance or 0) + (source.opening_balance or 0)
+    db.flush()
