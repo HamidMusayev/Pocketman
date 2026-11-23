@@ -1,9 +1,9 @@
+import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import { PeriodProvider } from '../context/PeriodContext'
+import { useCatchUp } from '../hooks/useRecurring'
 import { useSettings } from '../hooks/useSettings'
 import { themeVars } from '../lib/theme'
-import { PeriodControls } from './PeriodControls'
-import { SummaryCards } from './SummaryCards'
 import { TopBar } from './TopBar'
 import './shell.css'
 
@@ -11,15 +11,20 @@ export function Layout() {
   const { data: settings } = useSettings()
   const style = themeVars(settings?.accent_color ?? '#FCD535')
 
+  // Recurring payments that came due since the last visit show up as pending
+  // on Overview without anyone having to press "Catch up".
+  const { mutate: catchUp } = useCatchUp()
+  useEffect(() => {
+    catchUp()
+  }, [catchUp])
+
   return (
     <PeriodProvider>
-      <div style={style}>
+      <div style={style} className="app-shell">
         <TopBar />
-        <PeriodControls />
-        <div className="page-container">
-          <SummaryCards />
+        <main className="page-container">
           <Outlet />
-        </div>
+        </main>
       </div>
     </PeriodProvider>
   )

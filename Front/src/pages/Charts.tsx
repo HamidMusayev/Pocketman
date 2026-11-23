@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { CategoryDonut } from '../components/charts/CategoryDonut'
-import { CategoryRanking } from '../components/charts/CategoryRanking'
 import { CumulativeLineChart } from '../components/charts/CumulativeLineChart'
 import { MonthCalendar } from '../components/charts/MonthCalendar'
+import { PeriodPicker } from '../components/PeriodPicker'
 import { TrendBars } from '../components/charts/TrendBars'
 import { usePeriod, usePeriodParams } from '../context/PeriodContext'
 import { useTransactions } from '../hooks/useTransactions'
@@ -57,7 +57,7 @@ export function Charts() {
         label: 'Top category',
         value: topCat?.name ?? '—',
         sub: topCat ? formatMoney(topCat.amount, currency, showCents) : 'no expenses',
-        color: 'var(--yellow)',
+        color: 'var(--strong)',
       },
       {
         label: 'Avg / day',
@@ -75,7 +75,12 @@ export function Charts() {
   }, [breakdown, expenseTxns, savingsRate, expense, period, params.year, params.month, currency, showCents])
 
   return (
-    <div className="charts-page">
+    <div>
+      <div className="page-head">
+        <h1 className="page-title">Charts</h1>
+        <PeriodPicker />
+      </div>
+      <div className="charts-page">
       <div className="stat-strip">
         {statStrip.map((st, i) => (
           <div className="stat-card" key={i}>
@@ -96,8 +101,8 @@ export function Charts() {
       </div>
 
       <CumulativeLineChart series={cumulative ?? []} currency={currency} showCents={showCents} />
+      </div>
 
-      <CategoryRanking breakdown={breakdown ?? []} currency={currency} showCents={showCents} />
     </div>
   )
 }

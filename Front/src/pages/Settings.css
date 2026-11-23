@@ -1,10 +1,10 @@
 .settings-page {
-  max-width: 480px;
+  max-width: 520px;
 }
 
 .settings-title {
   font: 700 22px var(--sans);
-  color: #fff;
+  color: var(--strong);
   margin: 0 0 24px;
 }
 
@@ -18,7 +18,7 @@
 
 .settings-section-title {
   font: 700 15px var(--sans);
-  color: #fff;
+  color: var(--strong);
   margin: 0 0 16px;
 }
 
@@ -47,7 +47,7 @@
 }
 
 .accent-swatch.active {
-  border-color: #fff;
+  border-color: var(--strong);
 }
 
 .settings-input {
@@ -121,4 +121,24 @@
     width: 40px;
     height: 40px;
   }
+}
+
+.settings-hint {
+  font: 400 13px/1.5 var(--sans);
+  color: var(--muted2);
+  margin: -6px 0 14px;
+}
+
+.settings-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.settings-import-errors {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--down);
+  font-size: 12px;
 }

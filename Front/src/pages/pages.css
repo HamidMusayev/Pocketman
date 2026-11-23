@@ -1,6 +1,6 @@
 /* ============================================================================
    Shared page styles — translated from the inline styles in
-   `UI Design/Pocketman.dc.html`. One file for all five tabs; grouped by tab.
+   `UI Design/Pocketman.dc.html`. One file for all tabs.
    ========================================================================== */
 
 /* ---- shared form controls ---- */
@@ -73,7 +73,7 @@
 .pm-section-title {
   font: 700 19px var(--sans);
   letter-spacing: -0.3px;
-  color: #fff;
+  color: var(--strong);
 }
 .pm-section-note {
   font: 500 12.5px var(--sans);
@@ -100,222 +100,6 @@
   flex: none;
 }
 
-/* ============================ OVERVIEW ============================ */
-
-/* ---- composer: one flush input row + type/category detail row ---- */
-.composer {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  margin-bottom: 18px;
-  overflow: hidden;
-}
-.composer-main {
-  display: flex;
-  align-items: stretch;
-  min-height: 86px;
-  flex-wrap: wrap;
-}
-.composer-amount {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 26px;
-  border-right: 1px solid var(--line);
-  flex: none;
-}
-.composer-currency {
-  font: 500 22px var(--mono);
-  color: var(--muted);
-}
-.composer-amount input {
-  width: 130px;
-  background: transparent;
-  border: none;
-  color: var(--body);
-  font: 500 30px var(--mono);
-  letter-spacing: -1px;
-  padding: 0;
-  min-width: 0;
-}
-.composer-amount input::placeholder {
-  color: var(--muted);
-}
-.composer-amount input::-webkit-outer-spin-button,
-.composer-amount input::-webkit-inner-spin-button {
-  appearance: none;
-  margin: 0;
-}
-.composer-desc {
-  flex: 1;
-  min-width: 180px;
-  background: transparent;
-  border: none;
-  color: var(--body);
-  font: 400 17px var(--sans);
-  padding: 0 26px;
-}
-.composer-desc::placeholder {
-  color: var(--muted);
-}
-.composer-note {
-  align-self: center;
-  font: 500 12.5px var(--sans);
-  color: var(--muted);
-  white-space: nowrap;
-  padding-right: 14px;
-  flex: none;
-}
-.composer-accounts {
-  align-self: center;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding-right: 16px;
-  flex: none;
-}
-.composer-select {
-  height: 42px;
-  padding: 0 32px 0 14px;
-  background-color: var(--card);
-  border-color: var(--line2);
-}
-.composer-xfer-arrow {
-  color: var(--muted);
-  font-size: 16px;
-  flex: none;
-}
-.composer-add {
-  align-self: stretch;
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  min-width: 132px;
-  padding: 0 28px;
-  border: none;
-  border-radius: 0;
-  cursor: pointer;
-  background: var(--yellow);
-  color: var(--onyellow);
-  font: 700 15px var(--sans);
-}
-.composer-add:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
-
-.composer-detail {
-  display: flex;
-  align-items: stretch;
-  border-top: 1px solid var(--line);
-}
-.composer-col {
-  padding: 18px var(--cpad);
-  min-width: 0;
-}
-.composer-col-type {
-  flex: none;
-  width: 280px;
-  border-right: 1px solid var(--line);
-}
-.composer-col-cat {
-  flex: 1;
-}
-.composer-legend {
-  font: 600 10px var(--sans);
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 14px;
-}
-.composer-hint {
-  margin: 0;
-  font: 400 13px/1.6 var(--sans);
-  color: var(--muted2);
-  max-width: 60ch;
-}
-.composer-types {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-.type-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 15px;
-  border-radius: 9px;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--muted2);
-  font: 600 13.5px var(--sans);
-  cursor: pointer;
-  transition: 0.15s;
-}
-.type-btn:hover {
-  color: var(--body);
-}
-.type-btn.expense.active {
-  color: var(--down);
-  border-color: rgba(246, 70, 93, 0.55);
-  background: rgba(246, 70, 93, 0.08);
-}
-.type-btn.income.active {
-  color: var(--up);
-  border-color: rgba(14, 203, 129, 0.55);
-  background: rgba(14, 203, 129, 0.08);
-}
-.type-btn.transfer.active {
-  color: var(--body);
-  border-color: var(--line2);
-  background: var(--elev);
-}
-
-.cat-chips {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
-}
-.cat-chip {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: var(--chippad);
-  border-radius: 10px;
-  border: 1px solid var(--line2);
-  background: var(--card2);
-  color: var(--body);
-  font: 500 13px var(--sans);
-  cursor: pointer;
-  transition: 0.15s;
-  min-width: 0;
-  text-align: left;
-}
-.cat-chip svg {
-  flex: none;
-  color: var(--muted2);
-}
-.cat-chip span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.cat-chip:hover {
-  border-color: var(--elev);
-  background: var(--elev);
-}
-.cat-chip.active {
-  border-color: var(--yellow);
-  background: var(--yellow);
-  color: var(--onyellow);
-}
-.cat-chip.active svg {
-  color: var(--onyellow);
-}
-
-/* ---- shared segmented type toggle (edit + category modals) ---- */
 .type-toggle {
   display: flex;
   background: var(--elev);
@@ -332,11 +116,11 @@
   color: var(--muted);
 }
 .type-toggle button.exp-active {
-  background: #3a1a1a;
+  background: var(--down-soft);
   color: var(--down);
 }
 .type-toggle button.inc-active {
-  background: #12261c;
+  background: var(--up-soft);
   color: var(--up);
 }
 .type-toggle button.xfer-active {
@@ -347,7 +131,6 @@
   color: var(--muted2);
 }
 
-/* ---- search + csv toolbar ---- */
 .ov-toolbar {
   display: flex;
   gap: 12px;
@@ -444,7 +227,7 @@
 }
 .day-head-date {
   font: 700 14.5px var(--sans);
-  color: #fff;
+  color: var(--strong);
   flex: none;
 }
 .day-head-sub {
@@ -497,7 +280,7 @@
 }
 .txn-desc {
   font: 600 14.5px var(--sans);
-  color: #fff;
+  color: var(--strong);
 }
 .txn-tags {
   display: flex;
@@ -537,138 +320,6 @@
   background: var(--elev);
 }
 /* Base: a plain text "edit" / "cancel" button (accounts + categories rows). */
-.row-edit-btn {
-  border: none;
-  border-radius: 7px;
-  background: transparent;
-  color: var(--muted2);
-  cursor: pointer;
-  font: 500 13px var(--sans);
-  padding: 6px 8px;
-  flex: none;
-  transition: 0.15s;
-}
-.row-edit-btn:hover {
-  color: var(--body);
-}
-/* Transaction rows use an icon-only variant that fades in on hover. */
-.txn-row .row-edit-btn {
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  color: var(--muted);
-  padding: 0;
-  opacity: 0;
-}
-.txn-row:hover .row-edit-btn,
-.txn-row .row-edit-btn:focus-visible {
-  opacity: 1;
-}
-.txn-row .row-edit-btn:hover {
-  color: var(--body);
-  background: var(--elev);
-}
-/* touch devices have no hover, so keep the edit affordance visible there */
-@media (hover: none) {
-  .txn-row .row-edit-btn {
-    opacity: 1;
-  }
-}
-.import-summary {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  padding: 14px 16px;
-  margin-bottom: 16px;
-  font: 500 13px var(--sans);
-  color: var(--body);
-}
-.import-summary ul {
-  margin: 8px 0 0;
-  padding-left: 18px;
-  color: var(--down);
-  font-size: 12px;
-}
-
-/* ============================ RECURRING ============================ */
-.rec-form {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: var(--cpad);
-  margin-bottom: 28px;
-}
-.rec-form-grid {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  align-items: flex-end;
-}
-.rec-form-grid > div {
-  min-width: 120px;
-}
-.rec-desc-field {
-  flex: 2;
-  min-width: 220px;
-}
-.rec-form-field {
-  flex: 1;
-}
-.rec-form-second {
-  display: flex;
-  gap: 16px;
-  align-items: flex-end;
-  margin-top: 16px;
-  flex-wrap: wrap;
-}
-.rec-type-toggle {
-  display: flex;
-  background: var(--elev);
-  border-radius: 8px;
-  padding: 3px;
-}
-.rec-type-toggle button {
-  flex: 1;
-  padding: 9px 12px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font: 600 13px var(--sans);
-  background: transparent;
-  color: var(--muted);
-}
-.rec-type-toggle button.exp-active {
-  background: #3a1a1a;
-  color: var(--down);
-}
-.rec-type-toggle button.inc-active {
-  background: #12261c;
-  color: var(--up);
-}
-.pending-list,
-.rule-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.pending-list {
-  margin-bottom: 36px;
-}
-.pending-row,
-.rule-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 18px;
-  border-radius: 11px;
-  background: var(--card);
-  border: 1px solid var(--line);
-}
-.rule-row .icon-badge {
-  width: 36px;
-  height: 36px;
-}
 .pending-meta,
 .rule-meta {
   font: 500 12px var(--sans);
@@ -697,600 +348,280 @@
   font: 500 13px var(--sans);
   cursor: pointer;
 }
-.pending-label {
-  font: 500 13px var(--sans);
-  color: var(--muted);
-}
-
-/* ============================ CATEGORIES ============================ */
-.budget-header {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 22px 24px;
-  margin-bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-.budget-ring {
-  position: relative;
-  flex: none;
-}
-.budget-ring-pct {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font: 600 14px var(--mono);
-  color: var(--body);
-}
-.budget-header-main {
-  flex: 1;
-  min-width: 180px;
-}
-.budget-header-title {
-  font: 700 15px var(--sans);
-  color: #fff;
-}
-.budget-header-sub {
-  font: 500 13px var(--sans);
-  color: var(--muted);
-  margin-top: 4px;
-}
-.budget-header-remain {
-  text-align: right;
-}
-.budget-header-remain-val {
-  font: 600 22px var(--mono);
-}
-.budget-header-remain-label {
-  font: 500 12px var(--sans);
-  color: var(--muted);
-}
-.cat-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.cat-card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 18px 20px;
-}
-.cat-card-head {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  margin-bottom: 14px;
-}
-.cat-card-head .icon-badge {
-  width: 34px;
-  height: 34px;
-  border-radius: 9px;
-}
-.cat-card-name {
-  font: 600 15px var(--sans);
-  color: #fff;
-  flex: 1;
-}
-.cat-bar {
-  height: 5px;
-  border-radius: 9999px;
-  background: var(--elev);
-  overflow: hidden;
-  margin-bottom: 10px;
-}
-.cat-bar-fill {
-  height: 100%;
-  border-radius: 9999px;
-}
-.cat-card-stats {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-.cat-card-spent {
-  font: 500 13px var(--sans);
-  color: var(--body);
-}
-.cat-card-pct {
-  font: 500 13px var(--mono);
-  color: var(--muted);
-}
-.cat-budget-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.cat-budget-row span {
-  font: 500 12px var(--sans);
-  color: var(--muted);
-}
-.cat-budget-input {
-  flex: 1;
-  background: var(--elev);
-  border: 1px solid var(--line);
-  color: var(--body);
-  border-radius: 7px;
-  padding: 8px 12px;
-  font: 500 13px var(--mono);
-  min-width: 0;
-}
-.cat-budget-save {
-  padding: 8px 16px;
-  border-radius: 7px;
-  border: 1px solid var(--line);
-  background: transparent;
-  color: var(--body);
-  cursor: pointer;
-  font: 500 13px var(--sans);
-}
-.cat-income-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.cat-income-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border-radius: 11px;
-  background: var(--card);
-  border: 1px solid var(--line);
-}
-.cat-income-row .icon-badge {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-}
-.cat-income-name {
-  flex: 1;
-  font: 600 14px var(--sans);
-  color: var(--body);
-}
 .section-gap {
   margin-top: 28px;
 }
 
-/* ============================ ACCOUNTS ============================ */
-.networth-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+
+/* ============================ shared lists ============================ */
+.pm-btn-sm {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+h2.pm-section-title {
+  margin: 0;
+  font-size: 17px;
+}
+.list-card {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 20px 24px;
-  margin-bottom: 20px;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.networth-label {
-  font: 600 12px var(--sans);
-  letter-spacing: 0.8px;
-  color: var(--muted);
-  text-transform: uppercase;
-}
-.networth-value {
-  font: 700 34px var(--mono);
-  color: var(--yellow);
-  margin-top: 6px;
-}
-.networth-sub {
-  text-align: right;
-  font: 500 13px var(--sans);
-  color: var(--muted);
-}
-/* ---- card faces ---- */
-.card-grid {
-  display: grid;
-  /* min() keeps the track from insisting on 316px when the container is
-     narrower than that — otherwise the cards overhang on small phones. */
-  grid-template-columns: repeat(auto-fill, minmax(min(316px, 100%), 1fr));
-  gap: var(--gap);
-}
-.acc-card {
-  position: relative;
   overflow: hidden;
+}
+.list-row,
+.txn-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border: none;
+  border-top: 1px solid var(--line);
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+}
+.list-row:first-child,
+.txn-row:first-child {
+  border-top: none;
+}
+button.list-row,
+button.txn-row {
+  cursor: pointer;
+}
+button.list-row:hover,
+button.txn-row:hover {
+  background: var(--card2);
+}
+.list-row .icon-badge,
+.txn-row .icon-badge {
+  width: 38px;
+  height: 38px;
+}
+.list-main,
+.txn-main {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 20px;
-  min-height: 220px;
-  max-width: 430px;
-  padding: 20px 22px;
-  border-radius: 16px;
-  border: 1px solid var(--line2);
-  background: linear-gradient(158deg, #1b2027 0%, #14171d 52%, #0f1216 100%);
+  gap: 4px;
 }
-.acc-card.primary {
-  border-color: var(--yellow);
+.list-title,
+.txn-desc {
+  font: 600 14.5px var(--sans);
+  color: var(--strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.acc-card-glow {
-  position: absolute;
-  top: -80px;
-  right: -60px;
-  width: 250px;
-  height: 250px;
-  border-radius: 50%;
-  background: var(--yellow);
-  opacity: 0.13;
-  filter: blur(50px);
-  pointer-events: none;
-}
-.acc-card-top {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-.acc-card-name {
-  font: 700 16px var(--sans);
-  color: #fff;
-}
-.acc-card-type {
-  font: 600 10px var(--sans);
-  letter-spacing: 1.7px;
-  text-transform: uppercase;
+.list-sub,
+.txn-sub {
+  font: 500 12.5px var(--sans);
   color: var(--muted);
-  margin-top: 5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.acc-card-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: none;
-}
-.acc-card-remove {
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-  border: 1px solid var(--line2);
-  background: var(--elev);
-  color: var(--muted2);
-  cursor: pointer;
-  font-size: 15px;
-  line-height: 1;
-  flex: none;
-}
-.acc-card-remove:hover {
-  color: var(--down);
-  border-color: rgba(246, 70, 93, 0.5);
-}
-.acc-card-chip {
-  color: var(--muted);
-  display: grid;
-  place-items: center;
-  flex: none;
-}
-.acc-card.primary .acc-card-chip {
-  color: var(--yellow);
-}
-.acc-card-number {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  font: 500 15px var(--mono);
-  letter-spacing: 2.5px;
-  color: var(--muted);
-}
-.acc-card-last {
-  color: var(--body);
-  letter-spacing: 1.5px;
-}
-.acc-card-bottom {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
-}
-.acc-card-label {
-  font: 600 10px var(--sans);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.acc-card-balance {
-  font: 700 24px var(--mono);
-  letter-spacing: -0.8px;
-  margin-top: 7px;
-}
-.acc-card-meta {
+.list-value {
+  font: 600 14.5px var(--mono);
+  color: var(--strong);
+  white-space: nowrap;
   text-align: right;
-  font: 500 11.5px var(--sans);
-  color: var(--muted);
 }
-.acc-card-exp {
-  font: 500 12.5px var(--mono);
-  color: var(--muted2);
-  margin-bottom: 4px;
+.list-value-sub {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 12.5px;
 }
 
-.acc-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
+.bar {
+  display: block;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--elev);
+  overflow: hidden;
+  margin-top: 10px;
 }
-.acc-row {
+.bar-thin {
+  height: 4px;
+  margin-top: 2px;
+  max-width: 260px;
+}
+.bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.3s;
+}
+
+/* ============================ overview ============================ */
+.ov-toolbar {
+  margin-bottom: 12px;
+  flex-wrap: nowrap;
+}
+.ov-search-wrap {
+  min-width: 0;
+}
+.ov-search,
+.ov-tool-btn {
+  height: 44px;
+}
+.ov-tool-btn {
+  padding: 0 16px;
+}
+.ov-tool-btn.active {
+  border-color: var(--muted);
+}
+.ov-filter-count {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--yellow);
+  color: var(--onyellow);
+  font: 700 11px/18px var(--sans);
+  text-align: center;
+}
+.txn-filters {
+  margin-bottom: 14px;
+}
+.txn-days {
+  margin-top: 18px;
+}
+.add-btn-desktop {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+}
+.fab {
+  display: none;
+}
+
+/* pending recurring payments */
+.pending-panel {
+  border: 1px solid var(--line);
+  background: var(--card);
+  border-radius: 14px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.pending-panel-head {
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 15px;
-  padding: 18px 20px;
-  border-radius: 12px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  flex-wrap: wrap;
-}
-.acc-row .icon-badge {
-  width: 44px;
-  height: 44px;
-  border-radius: 11px;
-  color: var(--yellow);
-}
-.acc-main {
-  flex: 1;
-  min-width: 120px;
-}
-.acc-name {
-  font: 600 15px var(--sans);
-  color: #fff;
-}
-.acc-meta {
-  font: 500 12px var(--sans);
-  color: var(--muted);
-  margin-top: 2px;
-}
-.acc-net {
-  font: 600 16px var(--mono);
-}
-.acc-remove {
+  gap: 10px;
+  padding: 13px 16px;
   border: none;
   background: transparent;
-  color: var(--down);
+  color: var(--body);
+  font: 500 13.5px var(--sans);
+  text-align: left;
   cursor: pointer;
-  font: 500 13px var(--sans);
-  padding: 6px 8px;
 }
-.acc-add {
+.pending-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--yellow);
+  flex: none;
+}
+.pending-panel-toggle {
+  margin-left: auto;
+  color: var(--muted2);
+  font-weight: 600;
+}
+.pending-panel-row {
   display: flex;
-  gap: 10px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 16px;
-  flex-wrap: wrap;
   align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
 }
-.acc-add input {
+.pending-panel-main {
   flex: 1;
-  min-width: 200px;
+  min-width: 140px;
 }
-.acc-edit-fields {
+.pending-panel-actions {
   display: flex;
   gap: 8px;
-  flex: 1;
-  flex-wrap: wrap;
+}
+
+/* ============================ budget ============================ */
+.budget-total-sub {
+  font: 500 12.5px var(--sans);
+  color: var(--muted2);
+  margin-top: 8px;
+}
+.income-cats {
+  display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
 }
 
-@media (max-width: 1180px) {
-  .cat-chips {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 900px) {
-  .composer-detail {
-    flex-direction: column;
-  }
-  .composer-col-type {
-    width: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--line);
-  }
-  .composer-amount,
-  .composer-desc {
-    padding: 0 18px;
-  }
-  .composer-note {
+/* ============================ phones ============================ */
+@media (max-width: 720px) {
+  .add-btn-desktop {
     display: none;
   }
-  .composer-add {
-    min-width: 104px;
-    padding: 16px 20px;
-  }
-}
-
-@media (max-width: 760px) {
-  .cat-grid {
-    grid-template-columns: 1fr;
-  }
-  .cat-chips {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .composer-main {
-    padding: 14px 0;
-  }
-  .composer-amount {
-    border-right: none;
-    width: 100%;
-  }
-  .composer-desc {
-    min-width: 0;
-    width: 100%;
-    padding: 10px 18px;
-  }
-  .composer-accounts {
-    padding: 0 18px;
-    flex-wrap: wrap;
-  }
-  .composer-add {
-    margin: 12px 18px 0;
-    width: calc(100% - 36px);
-    border-radius: 10px;
-    padding: 14px 20px;
-  }
-}
-
-/* Phones. Two themes here: give every control a thumb-sized hit area (the
-   44px floor), and stop rows from collapsing into ragged wrapped stacks. */
-@media (max-width: 560px) {
-  .pm-section-head {
-    flex-wrap: wrap;
-    gap: 4px 10px;
-  }
-  .pm-section-note {
-    flex-basis: 100%;
-  }
-
-  .pm-input,
-  .pm-select,
-  .pm-btn {
-    min-height: 44px;
-  }
-
-  /* Search and the CSV buttons: search gets its own full-width row, the two
-     buttons share the next one instead of being squeezed beside it. */
-  .ov-toolbar {
-    flex-wrap: wrap;
-  }
-  .ov-search-wrap {
-    flex-basis: 100%;
-  }
-  .ov-search {
-    min-height: 44px;
-  }
-  .ov-tool-btn {
-    flex: 1;
-    min-height: 44px;
-    justify-content: center;
-  }
-
-  .txn-filters {
-    width: 100%;
+  .fab {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
+    place-items: center;
+    position: fixed;
+    right: 16px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    z-index: 25;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: var(--yellow);
+    color: var(--onyellow);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+  }
+  .fab svg {
+    width: 24px;
+    height: 24px;
+  }
+  .page-head-actions {
+    width: 100%;
+  }
+  .page-head-actions .period-picker {
+    flex: 1;
+    justify-content: space-between;
+  }
+  .ov-tool-label {
+    display: none;
+  }
+  .txn-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
   .txn-filter {
-    min-height: 40px;
     width: 100%;
-    padding-inline: 8px;
-    font-size: 12px;
-  }
-
-  .cat-chip {
-    min-height: 44px;
-  }
-  .type-btn {
-    min-height: 44px;
-  }
-
-  /* Delete/edit are 12px glyphs on desktop — far too small to hit reliably. */
-  .row-icon-btn,
-  .row-edit-btn {
-    min-width: 40px;
-    min-height: 40px;
-  }
-
-  /* Two tidy lines beside the icon — name + meta, then balance and actions —
-     instead of five items competing for one 358px row. */
-  .acc-row {
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto auto;
-    align-items: center;
-    column-gap: 12px;
-    row-gap: 8px;
-    padding: 14px 16px;
-  }
-  .acc-row .icon-badge {
-    grid-row: span 2;
-  }
-  .acc-main {
-    grid-column: 2 / -1;
     min-width: 0;
   }
-  .acc-net {
-    grid-column: 2;
-    justify-self: start;
-    font-size: 15px;
-  }
-  .acc-row .row-edit-btn {
-    grid-column: 3;
-  }
-  .acc-remove {
-    grid-column: 4;
-  }
-  .acc-row .row-edit-btn,
-  .acc-remove {
-    min-height: 40px;
-    padding-inline: 10px;
-  }
-  .acc-add input,
-  .acc-add .pm-select,
-  .acc-add .pm-btn {
-    flex: 1 1 100%;
-    min-width: 0;
-  }
-
-  .card-grid {
+  .list-row,
+  .txn-row {
+    padding: 11px 13px;
     gap: 12px;
   }
-
-  /* Approve/Skip are the whole point of the Recurring tab — they were the
-     smallest targets on the page. */
-  .btn-approve,
-  .btn-skip,
-  .rec-type-toggle button,
-  .type-toggle button {
-    min-height: 42px;
-    padding-inline: 16px;
+  .list-row .icon-badge,
+  .txn-row .icon-badge {
+    width: 34px;
+    height: 34px;
   }
-
-  .cat-budget-input,
-  .cat-budget-save {
-    min-height: 42px;
+  .day-head-sub {
+    display: none;
   }
-
-  /* The × on an account card sat at 28px inside a large tap-friendly card. */
-  .acc-card-remove {
-    width: 36px;
-    height: 36px;
-  }
-}
-
-/* Very narrow phones (iPhone SE and friends). Rows that merely looked tight at
-   390px actually overflow here, so let them wrap. */
-@media (max-width: 380px) {
-  .pending-row {
-    flex-wrap: wrap;
-    row-gap: 10px;
-  }
-  .pending-amount {
-    margin-left: auto;
-  }
-  .btn-approve,
-  .btn-skip {
-    flex: 1;
-  }
-
-  .cat-budget-row {
-    flex-wrap: wrap;
-  }
-  .cat-budget-input {
-    flex: 1 1 100%;
-  }
-  .cat-budget-save {
-    flex: 1;
+  /* 16px+ stops iOS zooming into the search field */
+  .ov-search,
+  .txn-filter {
+    font-size: 16px;
   }
 }

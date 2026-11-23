@@ -36,7 +36,7 @@
 .auth-logo-text {
   font: 700 19px var(--sans);
   letter-spacing: -0.4px;
-  color: #fff;
+  color: var(--strong);
 }
 
 .auth-logo-text span {
@@ -45,7 +45,7 @@
 
 .auth-title {
   font: 700 18px var(--sans);
-  color: #fff;
+  color: var(--strong);
   margin: 0 0 6px;
 }
 

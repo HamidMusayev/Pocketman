@@ -59,7 +59,7 @@
 }
 .chart-title {
   font: 700 15px var(--sans);
-  color: #fff;
+  color: var(--strong);
 }
 .chart-title span {
   color: var(--muted);

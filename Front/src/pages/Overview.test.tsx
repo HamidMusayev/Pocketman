@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { PeriodProvider } from '../context/PeriodContext'
@@ -40,6 +40,16 @@ vi.mock('../api/accounts', () => ({
   deleteAccount: vi.fn(),
 }))
 
+vi.mock('../api/stats', () => ({
+  getSummary: vi.fn().mockResolvedValue({ income: 0, expense: 0, balance: 0, savings_rate: 0 }),
+}))
+
+vi.mock('../api/recurring', () => ({
+  listPending: vi.fn().mockResolvedValue([]),
+  approvePending: vi.fn(),
+  dismissPending: vi.fn(),
+}))
+
 vi.mock('../api/settings', () => ({
   getSettings: vi.fn().mockResolvedValue({
     accent_color: '#FCD535',
@@ -74,12 +84,16 @@ describe('Overview add-transaction form', () => {
 
     const user = userEvent.setup()
 
+    // open the add form from the page header
+    await user.click(screen.getByRole('button', { name: 'Add' }))
+
     // wait for the expense category chip to render (categories loaded)
     const foodChip = await screen.findByRole('button', { name: 'Food' })
 
     await user.type(screen.getByPlaceholderText('0.00'), '12')
     await user.click(foodChip)
-    await user.click(screen.getByRole('button', { name: 'Add' }))
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'Add' }))
 
     await waitFor(() => expect(mocks.createTransaction).toHaveBeenCalledTimes(1))
     expect(mocks.createTransaction).toHaveBeenCalledWith(

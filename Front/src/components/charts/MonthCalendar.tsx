@@ -15,9 +15,9 @@ interface Props {
 
 /** A month calendar heat-grid: each day shows its income (green) and expense
  * (red), with a faint net tint so the month reads at a glance. Follows the
- * shared period month; its ‹ › nav drives the same state as the top controls. */
+ * shared period month (set by the page's period picker). */
 export function MonthCalendar({ currency, showCents }: Props) {
-  const { year, month, monthLabel, prevMonth, nextMonth } = usePeriod()
+  const { year, month, monthLabel } = usePeriod()
 
   // Always this specific month's transactions, independent of the page period.
   const { data: txns } = useTransactions({ period: 'monthly', year, month: month + 1 })
@@ -50,15 +50,9 @@ export function MonthCalendar({ currency, showCents }: Props) {
         <div className="chart-title">
           Daily activity <span>· income &amp; expenses per day</span>
         </div>
-        <div className="cal-nav">
-          <button onClick={prevMonth} aria-label="Previous month">
-            ‹
-          </button>
-          <span className="cal-nav-label">{monthLabel}</span>
-          <button onClick={nextMonth} aria-label="Next month">
-            ›
-          </button>
-        </div>
+        <span className="chart-title">
+          <span>{monthLabel}</span>
+        </span>
       </div>
 
       <div className="cal-scroll">

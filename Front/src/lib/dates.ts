@@ -38,3 +38,12 @@ export function todayIso(): string {
   const now = new Date()
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
 }
+
+/** Default date for the add form: today when looking at the current month (or
+ * a non-monthly window), otherwise the 15th of the month being viewed.
+ * `month` is 1-indexed. */
+export function defaultEntryDate(period: string, year: number, month: number): string {
+  const now = new Date()
+  if (period !== 'monthly' || (year === now.getFullYear() && month === now.getMonth() + 1)) return todayIso()
+  return newTransactionDate(period, year, month)
+}

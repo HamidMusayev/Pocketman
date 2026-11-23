@@ -5,6 +5,12 @@ import { BrowserRouter } from 'react-router-dom'
 import './theme.css'
 import App from './App.tsx'
 import { AuthProvider } from './auth/AuthContext'
+import { applyThemeMode, getThemeMode } from './lib/themeMode'
+
+applyThemeMode(getThemeMode())
+window.matchMedia?.('(prefers-color-scheme: light)').addEventListener?.('change', () => {
+  if (getThemeMode() === 'system') applyThemeMode('system')
+})
 
 const queryClient = new QueryClient({
   defaultOptions: {
