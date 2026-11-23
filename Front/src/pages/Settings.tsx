@@ -1,7 +1,9 @@
 import { useRef, useState } from 'react'
 import { apiErrorMessage } from '../api/client'
 import { downloadCsvBlob, exportTransactionsCsv } from '../api/transactions'
-import type { ImportResult } from '../api/types'
+import { MMBAK_MAX_BYTES, previewMmbak } from '../api/imports'
+import type { ImportResult, MmbakPreview, MmbakResult } from '../api/types'
+import { MmbakImportModal } from '../components/MmbakImportModal'
 import { useSettings, useUpdateSettings } from '../hooks/useSettings'
 import { useImportTransactions } from '../hooks/useTransactions'
 import { AccountSecurity, Chevron } from './AccountSecurity'
@@ -20,6 +22,12 @@ export function SettingsPage() {
   const fileInput = useRef<HTMLInputElement>(null)
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
+
+  const mmbakInput = useRef<HTMLInputElement>(null)
+  const [mmbak, setMmbak] = useState<{ file: File; preview: MmbakPreview } | null>(null)
+  const [mmbakLoading, setMmbakLoading] = useState(false)
+  const [mmbakError, setMmbakError] = useState<string | null>(null)
+  const [mmbakResult, setMmbakResult] = useState<MmbakResult | null>(null)
 
   if (!settings) return null
 
@@ -154,6 +162,76 @@ export function SettingsPage() {
           </div>
         )}
       </section>
+
+      <h2 className="set-group-title">Import from another app</h2>
+      <section className="set-group">
+        <button
+          className="set-row set-row-btn"
+          onClick={() => mmbakInput.current?.click()}
+          disabled={mmbakLoading}
+        >
+          <span>
+            <span className="set-row-label">{mmbakLoading ? 'Reading backup…' : 'Money Manager backup'}</span>
+            <span className="set-row-hint">
+              Accounts, categories and transactions from a .mmbak file. You see a summary before anything is added.
+            </span>
+          </span>
+          <Chevron />
+        </button>
+        <input
+          ref={mmbakInput}
+          type="file"
+          accept=".mmbak,.zip,application/octet-stream,application/zip"
+          style={{ display: 'none' }}
+          onChange={async (e) => {
+            const file = e.target.files?.[0]
+            e.target.value = ''
+            if (!file) return
+            setMmbakError(null)
+            setMmbakResult(null)
+            if (file.size > MMBAK_MAX_BYTES) {
+              setMmbakError(`The file is larger than ${MMBAK_MAX_BYTES / (1024 * 1024)} MB.`)
+              return
+            }
+            setMmbakLoading(true)
+            try {
+              setMmbak({ file, preview: await previewMmbak(file) })
+            } catch (err) {
+              setMmbakError(apiErrorMessage(err, 'Could not read the backup.'))
+            } finally {
+              setMmbakLoading(false)
+            }
+          }}
+        />
+        {(mmbakError || mmbakResult) && (
+          <div className="set-row-note">
+            {mmbakError && <div className="settings-error">{mmbakError}</div>}
+            {mmbakResult && (
+              <div className="settings-success">
+                Imported {mmbakResult.transactions} transaction{mmbakResult.transactions === 1 ? '' : 's'}
+                {mmbakResult.accounts > 0 && `, ${mmbakResult.accounts} new account${mmbakResult.accounts === 1 ? '' : 's'}`}
+                {mmbakResult.categories > 0 &&
+                  `, ${mmbakResult.categories} new categor${mmbakResult.categories === 1 ? 'y' : 'ies'}`}
+                {mmbakResult.duplicates > 0 && `. ${mmbakResult.duplicates} were already imported`}.
+              </div>
+            )}
+          </div>
+        )}
+      </section>
+
+      {mmbak && (
+        <MmbakImportModal
+          file={mmbak.file}
+          preview={mmbak.preview}
+          currencySymbol={settings.currency_symbol}
+          showCents={settings.show_cents}
+          onClose={() => setMmbak(null)}
+          onDone={(result) => {
+            setMmbak(null)
+            setMmbakResult(result)
+          }}
+        />
+      )}
 
       <AccountSecurity />
     </div>

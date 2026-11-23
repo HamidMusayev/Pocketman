@@ -233,3 +233,100 @@ label.set-row {
     text-align: center;
   }
 }
+
+/* ------------------------ Money Manager import ------------------------ */
+.mmbak-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.mmbak-file {
+  font: 600 14px var(--sans);
+  color: var(--strong);
+  overflow-wrap: anywhere;
+}
+
+.mmbak-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.mmbak-stats > div {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.mmbak-stats dt {
+  font: 500 12px var(--sans);
+  color: var(--muted);
+}
+
+.mmbak-stats dd {
+  margin: 2px 0 0;
+  font: 700 18px var(--mono);
+  color: var(--strong);
+}
+
+.mmbak-notes {
+  margin: 0;
+  padding-left: 18px;
+  font: 400 13px var(--sans);
+  color: var(--body);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mmbak-warn {
+  color: var(--down);
+}
+
+.mmbak-sample-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  border-top: 1px solid var(--line);
+}
+
+.mmbak-sample-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mmbak-sample-desc {
+  font: 500 13px var(--sans);
+  color: var(--strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mmbak-amt {
+  font: 600 13px var(--mono);
+  white-space: nowrap;
+}
+
+.mmbak-amt-income {
+  color: var(--up);
+}
+
+.mmbak-amt-expense {
+  color: var(--down);
+}
+
+.mmbak-check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font: 400 13px var(--sans);
+  color: var(--body);
+}
