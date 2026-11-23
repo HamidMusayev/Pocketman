@@ -27,8 +27,9 @@ services:
       context: ../Front
     depends_on:
       - backend
-    ports:
-      - "${FRONTEND_PORT:-3000}:80"
+    # No host port: Coolify's proxy (Traefik) routes the domain to port 80.
+    expose:
+      - "80"
     restart: unless-stopped
 
 volumes:
