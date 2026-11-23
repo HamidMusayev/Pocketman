@@ -104,7 +104,7 @@ export interface RecurringRule {
 
 export interface PendingApproval {
   id: number
-  recurring_rule_id: number
+  recurring_rule_id: number | null
   description: string
   amount: number
   category_id: number | null
@@ -233,4 +233,35 @@ export interface MmbakResult {
   duplicates: number
   skipped: number
   currency_symbol: string | null
+}
+
+/** Income/expense/transfer expected on `due_date`. Not in any balance until
+ * the user confirms it happened. One-off (`recurring_rule_id` null) or a due
+ * occurrence of a recurring rule that isn't added automatically. */
+export interface PlannedItem {
+  id: number
+  recurring_rule_id: number | null
+  frequency: Frequency | null
+  description: string
+  amount: number
+  note: string | null
+  tags: string[]
+  category_id: number | null
+  category_name: string | null
+  account_id: number
+  account_name: string
+  transfer_account_id: number | null
+  transfer_account_name: string | null
+  type: TransactionType
+  due_date: string
+}
+
+export interface Forecast {
+  today: string
+  end_date: string
+  balance: number
+  planned_income: number
+  planned_expense: number
+  expected_balance: number
+  item_count: number
 }

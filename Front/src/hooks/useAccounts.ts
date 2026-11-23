@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createAccount, deleteAccount, listAccounts, updateAccount, type AccountInput } from '../api/accounts'
+import { queryKeys } from './queryKeys'
 
 const KEY = ['accounts']
 // balances feed net worth and the cumulative-balance chart
@@ -16,6 +17,7 @@ export function useCreateAccount() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEY })
       qc.invalidateQueries({ queryKey: STATS })
+      qc.invalidateQueries({ queryKey: queryKeys.planned })
     },
   })
 }
@@ -27,6 +29,7 @@ export function useUpdateAccount() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: KEY })
       qc.invalidateQueries({ queryKey: STATS })
+      qc.invalidateQueries({ queryKey: queryKeys.planned })
     },
   })
 }

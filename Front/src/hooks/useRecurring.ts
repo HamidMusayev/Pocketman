@@ -25,7 +25,10 @@ export function useCreateRecurring() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (input: RecurringInput) => createRecurring(input),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.recurring }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.recurring })
+      qc.invalidateQueries({ queryKey: queryKeys.planned })
+    },
   })
 }
 
@@ -33,7 +36,10 @@ export function useUpdateRecurring() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: ({ id, patch }: { id: number; patch: RecurringPatch }) => updateRecurring(id, patch),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.recurring }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.recurring })
+      qc.invalidateQueries({ queryKey: queryKeys.planned })
+    },
   })
 }
 
@@ -41,7 +47,10 @@ export function useDeleteRecurring() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: (id: number) => deleteRecurring(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: queryKeys.recurring }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.recurring })
+      qc.invalidateQueries({ queryKey: queryKeys.planned })
+    },
   })
 }
 
@@ -67,6 +76,7 @@ function useInvalidateAfterApprovalChange() {
   const qc = useQueryClient()
   return () => {
     qc.invalidateQueries({ queryKey: queryKeys.pending })
+    qc.invalidateQueries({ queryKey: queryKeys.planned })
     qc.invalidateQueries({ queryKey: queryKeys.transactions })
     qc.invalidateQueries({ queryKey: queryKeys.accounts })
     qc.invalidateQueries({ queryKey: queryKeys.budgetSummary })

@@ -87,18 +87,6 @@ def run_catch_up(
 
 
 def approve_pending(db: Session, pending: PendingApproval) -> Transaction:
-    txn = Transaction(
-        user_id=pending.user_id,
-        type=pending.type,
-        amount=pending.amount,
-        description=pending.description,
-        category_id=pending.category_id,
-        account_id=pending.account_id,
-        transfer_account_id=pending.transfer_account_id,
-        date=pending.due_date,
-    )
-    db.add(txn)
-    db.delete(pending)
-    db.commit()
-    db.refresh(txn)
-    return txn
+    from app.services.planned import confirm_planned
+
+    return confirm_planned(db, pending)

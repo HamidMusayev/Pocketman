@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react'
 import type { TransactionFilters } from '../api/transactions'
-import type { Transaction, TransactionType } from '../api/types'
+import type { PlannedItem, Transaction, TransactionType } from '../api/types'
 import { AddTransactionModal } from '../components/AddTransactionModal'
 import { BudgetAlerts } from '../components/BudgetAlerts'
 import { CategoryIcon } from '../components/CategoryIcon'
-import { PendingPanel } from '../components/PendingPanel'
+import { ForecastCard } from '../components/ForecastCard'
+import { PlannedEditModal } from '../components/PlannedEditModal'
+import { PlannedPanel } from '../components/PlannedPanel'
 import { PeriodPicker } from '../components/PeriodPicker'
 import { TransactionEditModal } from '../components/TransactionEditModal'
 import { usePeriod, usePeriodParams } from '../context/PeriodContext'
@@ -12,12 +14,13 @@ import { useAccounts } from '../hooks/useAccounts'
 import { useCategories } from '../hooks/useCategories'
 import { useCategoryIconById } from '../hooks/useCategoryIcons'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
+import { usePlanned } from '../hooks/usePlanned'
 import { useSettings } from '../hooks/useSettings'
 import { useCategoryBreakdown, useSummary } from '../hooks/useStats'
 import { useTags } from '../hooks/useTags'
 import { useTransactionPages } from '../hooks/useTransactions'
 import { RAMP } from '../lib/colorRamp'
-import { defaultEntryDate, formatDayShort, formatWeekday } from '../lib/dates'
+import { defaultEntryDate, dueLabel, formatDayShort, formatWeekday, todayIso } from '../lib/dates'
 import { formatMoney, formatSignedMoney, formatTransactionAmount, sumMoney } from '../lib/money'
 import './pages.css'
 
@@ -82,6 +85,11 @@ export function Overview() {
 
   const [adding, setAdding] = useState(false)
   const [editing, setEditing] = useState<Transaction | null>(null)
+  const [editingPlanned, setEditingPlanned] = useState<PlannedItem | null>(null)
+  const { data: planned } = usePlanned()
+  // not yet due: shown faded above the list; due ones ask "Did it happen?" in the side column
+  const today = todayIso()
+  const upcoming = (planned ?? []).filter((p) => p.due_date > today)
 
   const activeFilters = [filterCat, filterAcc, filterType, filterTag].filter((f) => f !== 'all').length
 
@@ -145,7 +153,9 @@ export function Overview() {
         </div>
       </section>
 
-      <PendingPanel currency={currency} showCents={showCents} />
+      <PlannedPanel currency={currency} showCents={showCents} />
+
+      <ForecastCard currency={currency} showCents={showCents} />
 
       <BudgetAlerts currency={currency} showCents={showCents} />
 
@@ -253,6 +263,39 @@ export function Overview() {
 
       {/* ---------------------- transactions, by day ----------------------- */}
       <div className="txn-days">
+        {upcoming.length > 0 && !search && activeFilters === 0 && (
+          <section className="txn-day txn-upcoming" aria-label="Planned">
+            <header className="day-head">
+              <span className="day-head-date">Planned</span>
+              <span className="day-head-sub">not in your balance yet</span>
+              <span className="day-head-rule" />
+            </header>
+            <div className="txn-group">
+              {upcoming.map((p) => (
+                <button className="txn-row txn-planned" key={p.id} onClick={() => setEditingPlanned(p)} aria-label={`Edit planned ${p.description}`}>
+                  <span className="icon-badge">
+                    <CategoryIcon iconKey={p.type === 'transfer' ? 'transfer' : iconById(p.category_id)} size={18} />
+                  </span>
+                  <span className="txn-main">
+                    <span className="txn-desc">{p.description}</span>
+                    <span className="txn-sub">
+                      {dueLabel(p.due_date, today)} · {formatDayShort(p.due_date)}
+                      {p.type === 'transfer'
+                        ? ` · ${p.account_name} → ${p.transfer_account_name}`
+                        : ` · ${p.category_name}`}
+                    </span>
+                  </span>
+                  <span
+                    className={'txn-amount' + (p.type === 'transfer' ? ' txn-transfer' : '')}
+                    style={p.type === 'transfer' ? undefined : { color: p.type === 'income' ? 'var(--up)' : 'var(--down)' }}
+                  >
+                    {formatTransactionAmount(p.type, p.amount, currency, showCents)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
         {days.map((day) => (
           <section className="txn-day" key={day.date}>
             <header className="day-head">
@@ -315,7 +358,7 @@ export function Overview() {
             {pages.isFetchingNextPage ? 'Loading…' : `Show more (${total - list.length} left)`}
           </button>
         )}
-        {list.length === 0 && !pages.isLoading && (
+        {list.length === 0 && upcoming.length === 0 && !pages.isLoading && (
           <div className="pm-empty">
             {search || activeFilters ? 'Nothing matches this search.' : 'No transactions yet. Use + to add your first one.'}
           </div>
@@ -339,6 +382,10 @@ export function Overview() {
           defaultDate={defaultEntryDate(params.period, params.year, params.month)}
           onClose={() => setAdding(false)}
         />
+      )}
+
+      {editingPlanned && (
+        <PlannedEditModal item={editingPlanned} currency={currency} onClose={() => setEditingPlanned(null)} />
       )}
 
       {editing && (
