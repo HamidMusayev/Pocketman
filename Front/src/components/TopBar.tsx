@@ -98,7 +98,7 @@ function ThemeToggle() {
 }
 
 export function TopBar() {
-  const { logout } = useAuth()
+  const { logout, username } = useAuth()
 
   return (
     <>
@@ -130,7 +130,7 @@ export function TopBar() {
             <NavLink to="/settings" className="icon-btn" title="Settings" aria-label="Settings">
               <GearIcon />
             </NavLink>
-            <button className="icon-btn" onClick={logout} title="Lock" aria-label="Lock">
+            <button className="icon-btn" onClick={logout} title={username ? `Sign out (${username})` : 'Sign out'} aria-label="Sign out">
               <LockIcon />
             </button>
           </div>

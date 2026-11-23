@@ -4,11 +4,9 @@ from sqlalchemy.orm import Session
 from app.constants import ACCENT_COLORS
 from app.database import get_db
 from app.schemas.settings import SettingsResponse, SettingsUpdate
-from app.security import get_settings_row, require_auth
+from app.security import get_settings_row
 
-router = APIRouter(
-    prefix="/api/settings", tags=["settings"], dependencies=[Depends(require_auth)]
-)
+router = APIRouter(prefix="/api/settings", tags=["settings"])
 
 
 @router.get("", response_model=SettingsResponse)

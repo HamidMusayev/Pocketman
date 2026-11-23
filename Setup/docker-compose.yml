@@ -16,6 +16,11 @@ services:
       # The browser only ever talks to the frontend origin (nginx proxies
       # /api), so CORS is mostly a dev-mode concern. Kept configurable anyway.
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      # Multi-user: set to "false" to close sign-ups once everyone has an account.
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
+      # Username given to the pre-existing single-user data on the first
+      # upgrade to multi-user (log in with it and the old password).
+      OWNER_USERNAME: ${OWNER_USERNAME:-pocketman}
     volumes:
       - pocketman-data:/app/data
     expose:

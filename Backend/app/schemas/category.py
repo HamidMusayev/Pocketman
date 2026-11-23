@@ -1,10 +1,10 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from app.constants import CATEGORY_ICON_KEYS, CATEGORY_TYPES
 
 
 class CategoryBase(BaseModel):
-    name: str
+    name: str = Field(max_length=100)
     type: str
     icon: str = "other"
     budget: float | None = None
@@ -44,9 +44,19 @@ class CategoryCreate(CategoryBase):
 
 
 class CategoryUpdate(BaseModel):
-    name: str | None = None
+    name: str | None = Field(default=None, max_length=100)
     icon: str | None = None
     budget: float | None = None
+
+    @field_validator("icon")
+    @classmethod
+    def validate_icon(cls, v: str | None) -> str | None:
+        return None if v is None else CategoryBase.validate_icon(v)
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str | None) -> str | None:
+        return None if v is None else CategoryBase.validate_name(v)
 
 
 class CategoryResponse(BaseModel):

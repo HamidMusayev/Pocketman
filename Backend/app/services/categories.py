@@ -17,10 +17,17 @@ def category_in_use(db: Session, category_id: int) -> bool:
 
 
 def spent_by_category(
-    db: Session, period: str, year: int | None, month: int | None, type_: str = "expense"
+    db: Session,
+    user_id: int,
+    period: str,
+    year: int | None,
+    month: int | None,
+    type_: str = "expense",
 ) -> dict[int, float]:
     start, end = period_bounds(period, year, month)
-    query = db.query(Transaction).filter(Transaction.type == type_)
+    query = db.query(Transaction).filter(
+        Transaction.user_id == user_id, Transaction.type == type_
+    )
     if start is not None:
         query = query.filter(Transaction.date >= start, Transaction.date <= end)
     totals: dict[int, float] = {}
@@ -29,9 +36,16 @@ def spent_by_category(
     return totals
 
 
-def budget_summary(db: Session, period: str, year: int | None, month: int | None) -> dict:
-    spent = spent_by_category(db, period, year, month, "expense")
-    categories = db.query(Category).filter(Category.type == "expense").order_by(Category.id).all()
+def budget_summary(
+    db: Session, user_id: int, period: str, year: int | None, month: int | None
+) -> dict:
+    spent = spent_by_category(db, user_id, period, year, month, "expense")
+    categories = (
+        db.query(Category)
+        .filter(Category.user_id == user_id, Category.type == "expense")
+        .order_by(Category.id)
+        .all()
+    )
 
     items = []
     spent_total = 0.0

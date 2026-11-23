@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SettingsResponse(BaseModel):
@@ -11,5 +11,5 @@ class SettingsResponse(BaseModel):
 
 class SettingsUpdate(BaseModel):
     accent_color: str | None = None
-    currency_symbol: str | None = None
+    currency_symbol: str | None = Field(default=None, max_length=8)
     show_cents: bool | None = None

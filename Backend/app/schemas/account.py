@@ -1,10 +1,10 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from app.constants import ACCOUNT_ICON_KEYS, ACCOUNT_TYPES
 
 
 class AccountBase(BaseModel):
-    name: str
+    name: str = Field(max_length=100)
     type: str = "cash"
     icon: str = "wallet"
 
@@ -36,9 +36,24 @@ class AccountCreate(AccountBase):
 
 
 class AccountUpdate(BaseModel):
-    name: str | None = None
+    name: str | None = Field(default=None, max_length=100)
     type: str | None = None
     icon: str | None = None
+
+    @field_validator("type")
+    @classmethod
+    def validate_type(cls, v: str | None) -> str | None:
+        return None if v is None else AccountBase.validate_type(v)
+
+    @field_validator("icon")
+    @classmethod
+    def validate_icon(cls, v: str | None) -> str | None:
+        return None if v is None else AccountBase.validate_icon(v)
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str | None) -> str | None:
+        return None if v is None else AccountBase.validate_name(v)
 
 
 class AccountResponse(BaseModel):

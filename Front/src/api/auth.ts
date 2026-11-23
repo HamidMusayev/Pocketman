@@ -1,20 +1,43 @@
 import { apiClient } from './client'
 
-export async function getAuthStatus(): Promise<{ setup_complete: boolean }> {
+export interface AuthResponse {
+  token: string
+  username: string
+}
+
+export async function getAuthStatus(): Promise<{ registration_enabled: boolean }> {
   const res = await apiClient.get('/auth/status')
   return res.data
 }
 
-export async function setupPassword(password: string): Promise<{ token: string }> {
-  const res = await apiClient.post('/auth/setup', { password })
+export async function register(username: string, password: string): Promise<AuthResponse> {
+  const res = await apiClient.post('/auth/register', { username, password })
   return res.data
 }
 
-export async function login(password: string): Promise<{ token: string }> {
-  const res = await apiClient.post('/auth/login', { password })
+export async function login(username: string, password: string): Promise<AuthResponse> {
+  const res = await apiClient.post('/auth/login', { username, password })
   return res.data
 }
 
-export async function changePassword(current_password: string, new_password: string): Promise<void> {
-  await apiClient.post('/auth/change-password', { current_password, new_password })
+export async function getMe(): Promise<{ id: number; username: string }> {
+  const res = await apiClient.get('/auth/me')
+  return res.data
+}
+
+/** Returns a fresh token: every token issued before the change is revoked. */
+export async function changePassword(current_password: string, new_password: string): Promise<AuthResponse> {
+  const res = await apiClient.post('/auth/change-password', { current_password, new_password })
+  return res.data
+}
+
+export async function changeUsername(new_username: string, password: string): Promise<AuthResponse> {
+  const res = await apiClient.post('/auth/change-username', { new_username, password })
+  return res.data
+}
+
+/** Signs out every other device; returns a fresh token for this one. */
+export async function logoutAll(): Promise<AuthResponse> {
+  const res = await apiClient.post('/auth/logout-all')
+  return res.data
 }

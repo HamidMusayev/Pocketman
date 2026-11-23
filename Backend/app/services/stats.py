@@ -8,11 +8,15 @@ from app.models.transaction import Transaction
 from app.services.periods import period_bounds
 
 
+def _user_transactions(db: Session, user_id: int):
+    return db.query(Transaction).filter(Transaction.user_id == user_id)
+
+
 def _period_transactions(
-    db: Session, period: str, year: int | None, month: int | None
+    db: Session, user_id: int, period: str, year: int | None, month: int | None
 ) -> list[Transaction]:
     start, end = period_bounds(period, year, month)
-    query = db.query(Transaction)
+    query = _user_transactions(db, user_id)
     if start is not None:
         query = query.filter(Transaction.date >= start, Transaction.date <= end)
     return query.all()
@@ -26,11 +30,13 @@ def compute_summary(transactions: list[Transaction]) -> dict:
     return {"income": income, "expense": expense, "balance": balance, "savings_rate": savings_rate}
 
 
-def get_summary(db: Session, period: str, year: int | None, month: int | None) -> dict:
-    return compute_summary(_period_transactions(db, period, year, month))
+def get_summary(db: Session, user_id: int, period: str, year: int | None, month: int | None) -> dict:
+    return compute_summary(_period_transactions(db, user_id, period, year, month))
 
 
-def get_trend(db: Session, months: int, anchor_year: int, anchor_month: int) -> list[dict]:
+def get_trend(
+    db: Session, user_id: int, months: int, anchor_year: int, anchor_month: int
+) -> list[dict]:
     points = []
     for k in range(months - 1, -1, -1):
         anchor = date(anchor_year, anchor_month, 1) - relativedelta(months=k)
@@ -38,7 +44,7 @@ def get_trend(db: Session, months: int, anchor_year: int, anchor_month: int) -> 
         start = date(y, m, 1)
         end = start + relativedelta(months=1) - timedelta(days=1)
         rows = (
-            db.query(Transaction)
+            _user_transactions(db, user_id)
             .filter(Transaction.date >= start, Transaction.date <= end)
             .all()
         )
@@ -51,14 +57,21 @@ def get_trend(db: Session, months: int, anchor_year: int, anchor_month: int) -> 
 
 
 def get_category_breakdown(
-    db: Session, period: str, year: int | None, month: int | None, type_: str = "expense"
+    db: Session,
+    user_id: int,
+    period: str,
+    year: int | None,
+    month: int | None,
+    type_: str = "expense",
 ) -> list[dict]:
-    rows = [t for t in _period_transactions(db, period, year, month) if t.type == type_]
+    rows = [t for t in _period_transactions(db, user_id, period, year, month) if t.type == type_]
     totals: dict[int, float] = {}
     for t in rows:
         totals[t.category_id] = totals.get(t.category_id, 0.0) + t.amount
     total_sum = sum(totals.values())
-    categories = {c.id: c for c in db.query(Category).all()}
+    categories = {
+        c.id: c for c in db.query(Category).filter(Category.user_id == user_id).all()
+    }
     sorted_ids = sorted(totals.keys(), key=lambda cid: -totals[cid])
     result = []
     for cid in sorted_ids:
@@ -75,8 +88,8 @@ def get_category_breakdown(
     return result
 
 
-def get_cumulative_balance(db: Session) -> list[dict]:
-    rows = db.query(Transaction).order_by(Transaction.date, Transaction.id).all()
+def get_cumulative_balance(db: Session, user_id: int) -> list[dict]:
+    rows = _user_transactions(db, user_id).order_by(Transaction.date, Transaction.id).all()
     running = 0.0
     result = []
     for t in rows:
@@ -88,4 +101,3 @@ def get_cumulative_balance(db: Session) -> list[dict]:
             running -= t.amount
         result.append({"date": t.date, "balance": running})
     return result
-

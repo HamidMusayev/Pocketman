@@ -5,7 +5,7 @@
 # Pocketman
 
 A single-user personal finance tracker — transactions, budgets, recurring bills,
-accounts, transfers, and charts — behind a password lock. Built from a Claude-generated
+accounts, transfers, and charts — behind per-user accounts. Built from a Claude-generated
 UI prototype into a real product: **FastAPI + SQLite** backend, **React + TypeScript**
 frontend, packaged with **Docker Compose**.
 
@@ -70,7 +70,7 @@ docker compose -f Setup/docker-compose.yml up --build
 To pick up code changes later, run that same command again — `--build` is what
 rebuilds the images; your data lives in a volume and survives.
 
-First launch shows a one-time password setup screen.
+Each person signs up with a username and password; data is private per account.
 
 Other devices on the same network can reach it at `http://<host-ip>:3000` — the port
 is published on all interfaces, so no extra config is needed beyond letting it

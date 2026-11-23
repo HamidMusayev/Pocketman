@@ -3,6 +3,7 @@ from app.models.category import Category
 from app.models.recurring import PendingApproval, RecurringRule
 from app.models.settings import Settings
 from app.models.transaction import Transaction
+from app.models.user import User
 
 __all__ = [
     "Account",
@@ -11,4 +12,5 @@ __all__ = [
     "RecurringRule",
     "Settings",
     "Transaction",
+    "User",
 ]

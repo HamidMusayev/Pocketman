@@ -1,10 +1,10 @@
-import { useRef, useState, type FormEvent } from 'react'
-import { changePassword } from '../api/auth'
+import { useRef, useState } from 'react'
 import { apiErrorMessage } from '../api/client'
 import { downloadCsvBlob, exportTransactionsCsv } from '../api/transactions'
 import type { ImportResult } from '../api/types'
 import { useSettings, useUpdateSettings } from '../hooks/useSettings'
 import { useImportTransactions } from '../hooks/useTransactions'
+import { AccountSecurity } from './AccountSecurity'
 import { ACCENT_COLORS } from '../lib/constants'
 import { getThemeMode, setThemeMode, type ThemeMode } from '../lib/themeMode'
 import './Settings.css'
@@ -13,35 +13,12 @@ export function SettingsPage() {
   const { data: settings } = useSettings()
   const updateSettings = useUpdateSettings()
 
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [pwError, setPwError] = useState<string | null>(null)
-  const [pwSuccess, setPwSuccess] = useState(false)
-  const [pwLoading, setPwLoading] = useState(false)
-
   const [themeMode, setThemeModeState] = useState<ThemeMode>(getThemeMode)
 
   const importTransactions = useImportTransactions()
   const fileInput = useRef<HTMLInputElement>(null)
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
   const [importError, setImportError] = useState<string | null>(null)
-
-  async function onChangePassword(e: FormEvent) {
-    e.preventDefault()
-    setPwError(null)
-    setPwSuccess(false)
-    setPwLoading(true)
-    try {
-      await changePassword(currentPassword, newPassword)
-      setPwSuccess(true)
-      setCurrentPassword('')
-      setNewPassword('')
-    } catch (err) {
-      setPwError(apiErrorMessage(err, 'Could not change password.'))
-    } finally {
-      setPwLoading(false)
-    }
-  }
 
   if (!settings) return null
 
@@ -164,30 +141,7 @@ export function SettingsPage() {
         )}
       </section>
 
-      <section className="settings-section">
-        <h2 className="settings-section-title">Change password</h2>
-        <form onSubmit={onChangePassword} className="settings-password-form">
-          <input
-            className="settings-input"
-            type="password"
-            placeholder="Current password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-          />
-          <input
-            className="settings-input"
-            type="password"
-            placeholder="New password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-          {pwError && <div className="settings-error">{pwError}</div>}
-          {pwSuccess && <div className="settings-success">Password changed.</div>}
-          <button className="settings-submit" type="submit" disabled={pwLoading}>
-            {pwLoading ? 'Changing…' : 'Change password'}
-          </button>
-        </form>
-      </section>
+      <AccountSecurity />
     </div>
   )
 }

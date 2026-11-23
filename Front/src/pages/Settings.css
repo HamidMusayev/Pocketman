@@ -136,3 +136,7 @@
   color: var(--down);
   font-size: 12px;
 }
+
+.settings-password-form + .settings-password-form {
+  margin-top: 20px;
+}

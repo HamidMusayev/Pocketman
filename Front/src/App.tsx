@@ -1,7 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { LoginRoute, ProtectedRoute, RootRedirect, SetupRoute } from './auth/guards'
+import { LoginRoute, ProtectedRoute, RegisterRoute, RootRedirect } from './auth/guards'
 import { Login } from './auth/Login'
-import { Setup } from './auth/Setup'
+import { Register } from './auth/Register'
 import { Layout } from './components/Layout'
 import { Accounts } from './pages/Accounts'
 import { Budget } from './pages/Budget'
@@ -14,11 +14,11 @@ function App() {
     <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route
-        path="/setup"
+        path="/register"
         element={
-          <SetupRoute>
-            <Setup />
-          </SetupRoute>
+          <RegisterRoute>
+            <Register />
+          </RegisterRoute>
         }
       />
       <Route
