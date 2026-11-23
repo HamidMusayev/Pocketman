@@ -1,5 +1,6 @@
 /* ============================================================================
-   App shell — top bar, period band, summary hero.
+   App shell — top bar, bottom nav (phones), page header, period picker,
+   compact summary.
    ========================================================================== */
 
 /* ---------------------------------- top bar ------------------------------ */
@@ -18,20 +19,21 @@
   display: flex;
   align-items: stretch;
   gap: 30px;
-  min-height: 62px;
+  min-height: 58px;
 }
 
 .topbar-brand {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
   flex: none;
+  text-decoration: none;
 }
 
 .topbar-brand-mark {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
   background: var(--yellow);
   display: grid;
   place-items: center;
@@ -39,9 +41,9 @@
 }
 
 .topbar-brand-name {
-  font: 800 21px/1 var(--sans);
+  font: 800 19px/1 var(--sans);
   letter-spacing: -0.6px;
-  color: #fff;
+  color: var(--strong);
 }
 
 .topbar-brand-name span {
@@ -51,14 +53,7 @@
 .topbar-tabs {
   display: flex;
   align-items: stretch;
-  gap: 26px;
-  min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.topbar-tabs::-webkit-scrollbar {
-  display: none;
+  gap: 24px;
 }
 
 .topbar-tab {
@@ -66,9 +61,6 @@
   display: flex;
   align-items: center;
   padding: 0 2px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
   text-decoration: none;
   white-space: nowrap;
   font: 500 14.5px var(--sans);
@@ -81,7 +73,7 @@
 }
 
 .topbar-tab.active {
-  color: #fff;
+  color: var(--strong);
   font-weight: 600;
 }
 
@@ -99,39 +91,69 @@
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
-.settings-link {
-  width: 34px;
-  height: 34px;
+.icon-btn {
+  width: 36px;
+  height: 36px;
   border-radius: 9px;
-  border: 1px solid var(--line2);
-  background: var(--card);
+  border: none;
+  background: transparent;
   color: var(--muted2);
   display: grid;
   place-items: center;
   text-decoration: none;
+  cursor: pointer;
   flex: none;
 }
 
-.settings-link:hover {
+.icon-btn:hover,
+.icon-btn.active {
+  background: var(--card);
   color: var(--body);
 }
 
-.logout-link {
-  border: 1px solid var(--line2);
-  background: transparent;
-  color: var(--muted2);
-  border-radius: 9px;
-  padding: 8px 13px;
-  font: 500 12px var(--sans);
-  cursor: pointer;
+/* ------------------------------- bottom nav ------------------------------ */
+.bottom-nav {
+  display: none;
 }
 
-.logout-link:hover {
-  color: var(--body);
-  border-color: var(--elev);
+@media (max-width: 720px) {
+  .topbar-tabs {
+    display: none;
+  }
+
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 30;
+    background: var(--canvas);
+    border-top: 1px solid var(--line);
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+  }
+
+  .bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 0;
+    text-decoration: none;
+    color: var(--muted);
+    font: 500 11px var(--sans);
+    border-radius: 10px;
+  }
+
+  .bottom-nav-item.active {
+    color: var(--strong);
+  }
+
+  .bottom-nav-item.active svg {
+    color: var(--yellow);
+  }
 }
 
 /* -------------------------- segmented controls --------------------------- */
@@ -146,13 +168,14 @@
 }
 
 .seg-btn {
-  padding: 7px 15px;
+  flex: 1;
+  padding: 7px 14px;
   border-radius: 7px;
   border: none;
   cursor: pointer;
   background: transparent;
   color: var(--muted);
-  font: 600 12.5px var(--sans);
+  font: 600 13px var(--sans);
   white-space: nowrap;
   transition: 0.15s;
 }
@@ -161,53 +184,66 @@
   color: var(--body);
 }
 
-.seg-period .seg-btn {
-  padding: 8px 18px;
-  font-size: 13px;
+.seg-btn.active {
+  background: var(--elev);
+  color: var(--strong);
 }
 
-.seg-period .seg-btn.active {
-  background: #f2f4f7;
-  color: #12151a;
+.seg-btn.active.expense {
+  background: var(--down-soft);
+  color: var(--down);
 }
 
-/* -------------------------------- period band ---------------------------- */
-.period-band {
-  border-bottom: 1px solid var(--line);
-  background: var(--canvas);
+.seg-btn.active.income {
+  background: var(--up-soft);
+  color: var(--up);
 }
 
-.period-row {
+/* ------------------------------- page shell ------------------------------ */
+.page-container {
   max-width: var(--shell);
   margin: 0 auto;
-  padding: 14px var(--px);
+  padding: 22px var(--px) 80px;
+}
+
+.page-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+  margin-bottom: 18px;
   flex-wrap: wrap;
 }
 
-.period-right {
+.page-title {
+  margin: 0;
+  font: 700 24px var(--sans);
+  letter-spacing: -0.5px;
+  color: var(--strong);
+}
+
+.page-head-actions {
   display: flex;
   align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.month-nav {
+/* ------------------------------ period picker ---------------------------- */
+.period-picker {
   display: inline-flex;
   align-items: center;
+  gap: 4px;
   border: 1px solid var(--line2);
   background: var(--card);
   border-radius: 10px;
-  overflow: hidden;
+  padding: 2px;
 }
 
-.month-nav button {
-  width: 38px;
-  height: 38px;
+.period-picker button {
+  width: 34px;
+  height: 34px;
   border: none;
+  border-radius: 8px;
   background: transparent;
   color: var(--muted2);
   cursor: pointer;
@@ -215,324 +251,178 @@
   line-height: 1;
 }
 
-.month-nav button:hover {
+.period-picker button:hover:not(:disabled) {
   background: var(--elev);
   color: var(--body);
 }
 
-.month-nav-label {
-  min-width: 96px;
-  text-align: center;
+.period-picker button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.period-picker select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--strong);
   font: 600 14px var(--sans);
-  color: #fff;
+  text-align: center;
+  text-align-last: center;
+  min-width: 104px;
+  padding: 6px 4px;
+  cursor: pointer;
 }
 
-.db-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font: 500 12.5px var(--mono);
-  color: var(--muted);
+.period-picker select option {
+  background: var(--card);
+  color: var(--body);
 }
 
-.db-chip-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--up);
-  flex: none;
-}
-
-/* ------------------------------- page shell ------------------------------ */
-.page-container {
-  max-width: var(--shell);
-  margin: 0 auto;
-  padding: var(--secgap) var(--px) 80px;
-}
-
-/* ------------------------------ summary hero ----------------------------- */
-.summary-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 30fr) minmax(0, 70fr);
-  gap: var(--gap);
-  margin-bottom: var(--secgap);
-}
-
-.balance-card {
-  position: relative;
-  overflow: hidden;
-  min-height: var(--heroh);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  background: linear-gradient(158deg, #1b2027 0%, #14171d 46%, #0f1216 100%);
-  padding: var(--cpad);
+/* ---------------------------- compact summary ---------------------------- */
+.summary {
   display: flex;
-  flex-direction: column;
+  align-items: flex-end;
   justify-content: space-between;
-  gap: 24px;
-}
-
-.balance-card-glow {
-  position: absolute;
-  top: -70px;
-  right: -50px;
-  width: 240px;
-  height: 240px;
-  border-radius: 50%;
-  background: var(--yellow);
-  opacity: 0.13;
-  filter: blur(48px);
-  pointer-events: none;
-}
-
-.balance-card-top {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.balance-card-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font: 600 11px var(--sans);
-  letter-spacing: 2.4px;
-  text-transform: uppercase;
-  color: var(--muted2);
-}
-
-.balance-card-chip {
-  width: 21px;
-  height: 21px;
-  border-radius: 6px;
-  background: var(--yellow);
-  color: var(--onyellow);
-  display: grid;
-  place-items: center;
-  font: 800 11px var(--sans);
-  letter-spacing: 0;
-  flex: none;
-}
-
-.balance-card-wave {
-  color: var(--muted);
-  display: grid;
-  place-items: center;
-}
-
-.balance-card-label {
-  position: relative;
-  font: 600 var(--statlabel) var(--sans);
-  letter-spacing: 1.3px;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.balance-card-value {
-  position: relative;
-  font: 700 clamp(28px, 3vw, 40px) var(--mono);
-  color: var(--yellow);
-  letter-spacing: -1.4px;
-  line-height: 1.05;
-  margin-top: 8px;
-  word-break: break-all;
-}
-
-.sum-stack {
-  display: flex;
-  flex-direction: column;
+  gap: 16px 28px;
+  flex-wrap: wrap;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 16px;
-  overflow: hidden;
+  padding: 18px 20px;
+  margin-bottom: 14px;
 }
 
-.sum-row {
-  flex: 1;
+.summary-label {
+  font: 500 12.5px var(--sans);
+  color: var(--muted);
+}
+
+.summary-balance {
+  font: 700 clamp(28px, 6vw, 36px) var(--mono);
+  letter-spacing: -1.2px;
+  color: var(--strong);
+  line-height: 1.1;
+  margin-top: 4px;
+}
+
+.summary-stats {
   display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 14px var(--cpad);
-  border-top: 1px solid var(--line);
-  min-height: 0;
+  gap: 22px;
+  flex-wrap: wrap;
 }
 
-.sum-row:first-child {
-  border-top: none;
-}
-
-.sum-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  flex: none;
-  background: var(--elev);
-  color: var(--muted2);
-}
-
-.sum-icon.up {
-  color: var(--up);
-  background: rgba(14, 203, 129, 0.11);
-}
-
-.sum-icon.down {
-  color: var(--down);
-  background: rgba(246, 70, 93, 0.11);
-}
-
-.sum-icon.accent {
-  color: var(--yellow);
-  background: rgba(252, 213, 53, 0.11);
-}
-
-.sum-label {
-  font: 600 var(--statlabel) var(--sans);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--muted2);
-}
-
-.sum-value {
-  margin-left: auto;
-  font: 600 var(--statnum) var(--mono);
-  letter-spacing: -0.5px;
+.summary-stat-value {
+  font: 600 16px var(--mono);
+  margin-top: 3px;
   white-space: nowrap;
 }
 
 /* ------------------------------- responsive ------------------------------ */
-@media (max-width: 1000px) {
-  .summary-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .balance-card {
-    min-height: 0;
-  }
-}
-
-/* Below this the top bar becomes two rows: brand + controls, then the tab
-   strip on its own full-bleed scrolling line. */
-@media (max-width: 860px) {
-  .topbar-inner {
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px 14px;
-    padding-top: 10px;
-    padding-bottom: 0;
-    min-height: 0;
-  }
-
-  .topbar-right {
-    margin-left: auto;
-  }
-
-  /* Full-bleed: cancel the shell gutter with negative margins and give it back
-     as padding + scroll-padding. Without this the first and last tabs come to
-     rest underneath the gutter, where a tap lands on the bar instead of the
-     link — which is why Overview and Accounts were unreachable on a phone. */
-  .topbar-tabs {
-    order: 3;
-    flex: none;
-    width: calc(100% + var(--px) * 2);
-    margin-inline: calc(var(--px) * -1);
-    padding-inline: var(--px);
-    scroll-padding-inline: var(--px);
-    gap: 2px;
-    scroll-snap-type: x proximity;
-    overscroll-behavior-x: contain;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .topbar-tab {
-    flex: none;
-    min-height: 46px;
-    padding: 0 12px;
-    font-size: 15px;
-    scroll-snap-align: center;
-  }
-
-  /* Touch devices get no hover, so the tapped tab needs to feel pressed. */
-  .topbar-tab:active {
-    background: var(--card);
-    border-radius: 8px 8px 0 0;
-  }
-}
-
 @media (max-width: 720px) {
-  .period-row {
-    padding-top: 11px;
-    padding-bottom: 11px;
-    gap: 10px;
-  }
-
-  .period-right {
-    width: 100%;
+  .topbar-inner {
+    min-height: 54px;
     gap: 12px;
   }
 
-  .month-nav {
-    flex: 1;
-  }
-
-  .month-nav button {
-    width: 44px;
-    height: 44px;
-  }
-
-  .month-nav-label {
-    flex: 1;
-  }
-
-  .seg-period {
-    width: 100%;
-  }
-
-  .seg-period .seg-btn {
-    flex: 1;
-    min-height: 40px;
-    padding: 8px 10px;
-  }
-}
-
-@media (max-width: 560px) {
-  /* --px is applied inline by themeVars(). Re-declaring it on these subtrees
-     (rather than hardcoding padding) keeps the tab strip's full-bleed calc in
-     step with the gutter it cancels — otherwise the strip overhangs and the
-     page picks up a phantom horizontal scroll. */
-  .topbar-inner,
-  .period-row,
   .page-container {
     --px: 16px;
+    padding-top: 16px;
+    /* room for the fixed bottom nav + the floating add button */
+    padding-bottom: calc(140px + env(safe-area-inset-bottom));
   }
 
-  .topbar-brand-mark {
-    width: 32px;
-    height: 32px;
+  .page-title {
+    font-size: 21px;
   }
 
-  .topbar-brand-name {
-    font-size: 19px;
+  .summary {
+    padding: 16px;
   }
 
-  .settings-link {
+  .summary-stats {
+    gap: 18px;
+  }
+
+  .icon-btn {
     width: 40px;
     height: 40px;
   }
+}
 
-  .logout-link {
-    min-height: 40px;
-    padding: 8px 14px;
+/* --------------------------- two-column pages ---------------------------- */
+/* Wide screens: a fixed side column (summary, totals) next to the main list,
+   so nothing stretches edge to edge. Narrow screens: stacked, side first. */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+
+@media (min-width: 960px) {
+  .split {
+    grid-template-columns: 320px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
   }
 
-  .db-chip {
-    display: none;
+  .split-side {
+    position: sticky;
+    top: 82px;
   }
 
-  .sum-row {
-    padding-inline: 16px;
+  .split-side .summary {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
   }
+
+  .split-side .summary-stats {
+    flex-direction: column;
+    gap: 0;
+    border-top: 1px solid var(--line);
+    padding-top: 6px;
+  }
+
+  .split-side .summary-stats > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 7px 0;
+  }
+
+  .split-side .summary-stat-value {
+    margin-top: 0;
+  }
+}
+
+/* keyboard focus: a soft ring instead of the browser's square outline */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.topbar-tab:focus-visible {
+  outline-offset: -2px;
+}
+
+.split-side > :last-child {
+  margin-bottom: 0;
+}
+
+/* fields show focus with their own border colour */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+}
+
+.split-side .list-sub {
+  white-space: normal;
 }

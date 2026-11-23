@@ -72,14 +72,14 @@ Front/
 │   ├── auth/                     # AuthContext, guards (RootRedirect/Setup/Login/Protected), Setup.tsx, Login.tsx
 │   ├── context/PeriodContext.tsx # shared period state (monthly/all/range + month nav); usePeriod / usePeriodParams
 │   ├── components/               # shared UI shell + widgets:
-│   │   ├── TopBar / PeriodControls / SummaryCards / Layout / SettingsLayout / Logo
+│   │   ├── TopBar (top bar + phone bottom nav) / PeriodPicker / PendingPanel / Layout / Logo
 │   │   ├── CategoryIcon.tsx      # renders an icons.ts glyph by key
-│   │   ├── Modal / CategoryFormModal / TransactionEditModal   # add/edit dialogs (real CRUD the prototype stubbed)
-│   │   └── charts/               # TrendBars, CategoryDonut, CumulativeLineChart, CategoryRanking, MonthCalendar (hand-rolled SVG/grid)
+│   │   ├── Modal / AddTransactionModal / TransactionEditModal / CategoryFormModal / RecurringFormModal   # add/edit dialogs (bottom sheets on phones)
+│   │   └── charts/               # TrendBars, CategoryDonut, CumulativeLineChart, MonthCalendar (hand-rolled SVG/grid)
 │   ├── icons.ts                  # ported ICON path map (one SVG path array per icon key; keep in sync w/ constants.py)
-│   ├── pages/                    # Overview, Recurring, Charts, Categories, Accounts, Settings (+ *.test.tsx)
+│   ├── pages/                    # Overview, Charts, Budget (categories + recurring), Accounts, Settings (+ *.test.tsx)
 │   ├── hooks/                    # TanStack Query hooks per resource + queryKeys.ts + useCategoryIcons.ts
-│   └── lib/                      # pure helpers, unit-tested: money.ts, dates.ts, charts.ts, calendar.ts, colorRamp.ts, theme.ts, constants.ts
+│   └── lib/                      # pure helpers, unit-tested: money.ts, dates.ts, charts.ts, calendar.ts, colorRamp.ts, theme.ts, themeMode.ts, constants.ts
 ├── index.html
 ├── package.json
 ├── vite.config.ts                # dev server proxies /api -> localhost:8000; also holds the vitest config
@@ -104,7 +104,7 @@ Dockerfiles live next to the code they build (`Backend/Dockerfile`, `Front/Docke
 - **Auth**: JWT bearer token in `Authorization` header, issued by `/api/auth/setup` or `/api/auth/login`, stored in `localStorage` on the frontend. Every router except `/api/auth/*` requires it.
 - **IDs**: integer autoincrement primary keys everywhere (prototype uses client-generated string ids like `t1`, `r1` — those are UI-only artifacts, not a schema requirement).
 - **Category icon keys** and **account icon keys** are a closed set defined once in `Backend/app/models/category.py` / `icons.ts` (frontend) — keep both lists in sync. See the `ICON` map in `UI Design/Pocketman.dc.html` (search for `const ICON = {`) for the canonical path data.
-- **Colors for charts** (donut segments, category ranking bars) are assigned by sort order from a fixed ramp array (`RAMP` in the prototype), not stored per-category. Port the same ramp array into `Front/src/lib/colorRamp.ts`.
+- **Colors for charts** (donut segments) are assigned by sort order from a fixed ramp array (`RAMP` in the prototype), not stored per-category. Port the same ramp array into `Front/src/lib/colorRamp.ts`.
 - **"Today"**: the prototype hardcodes `2026-07-04`. The real backend must use the actual server date (`date.today()` / `datetime.now()`), never a hardcoded date.
 
 ## Where the plan and progress live

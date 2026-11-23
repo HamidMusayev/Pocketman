@@ -23,18 +23,19 @@ DEFAULT_CATEGORIES: list[tuple[str, str, str]] = [
 ]
 
 
-def seed_defaults(db: Session) -> None:
-    """Seed the one default account and the standard category set.
+def seed_defaults(db: Session, user_id: int) -> None:
+    """Seed a new user's default account and standard category set.
 
-    Only ever called once, from POST /api/auth/setup on a fresh database.
-    Deliberately does NOT seed any demo transactions.
+    Called from POST /api/auth/register. Deliberately seeds no demo transactions.
     """
-    if not db.query(Account).filter(Account.name == "Main").first():
-        db.add(Account(name="Main", type="cash", icon="wallet", removable=False))
+    if not db.query(Account).filter(Account.user_id == user_id, Account.name == "Main").first():
+        db.add(Account(user_id=user_id, name="Main", type="cash", icon="wallet", removable=False))
 
-    existing_names = {c.name for c in db.query(Category.name).all()}
+    existing_names = {
+        name for (name,) in db.query(Category.name).filter(Category.user_id == user_id).all()
+    }
     for name, type_, icon in DEFAULT_CATEGORIES:
         if name not in existing_names:
-            db.add(Category(name=name, type=type_, icon=icon, budget=None))
+            db.add(Category(user_id=user_id, name=name, type=type_, icon=icon, budget=None))
 
     db.commit()

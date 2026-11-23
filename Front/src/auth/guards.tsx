@@ -11,30 +11,26 @@ function FullScreenLoading() {
   )
 }
 
-/** Landing route ("/"): sends the visitor to the right place based on
- * whether the app has ever been set up and whether they're logged in. */
+/** Landing route ("/"): signed-in visitors go to the app, everyone else to login. */
 export function RootRedirect() {
-  const { data, isLoading } = useAuthStatus()
   const { isAuthenticated } = useAuth()
-  if (isLoading || !data) return <FullScreenLoading />
-  if (!data.setup_complete) return <Navigate to="/setup" replace />
-  if (!isAuthenticated) return <Navigate to="/login" replace />
-  return <Navigate to="/overview" replace />
+  return <Navigate to={isAuthenticated ? '/overview' : '/login'} replace />
 }
 
-export function SetupRoute({ children }: { children: ReactNode }) {
-  const { data, isLoading } = useAuthStatus()
-  if (isLoading || !data) return <FullScreenLoading />
-  if (data.setup_complete) return <Navigate to="/login" replace />
+/** Login page: skipped when already signed in. */
+export function LoginRoute({ children }: { children: ReactNode }) {
+  const { isAuthenticated } = useAuth()
+  if (isAuthenticated) return <Navigate to="/overview" replace />
   return <>{children}</>
 }
 
-export function LoginRoute({ children }: { children: ReactNode }) {
-  const { data, isLoading } = useAuthStatus()
+/** Sign-up page: skipped when signed in, and closed when the server disables registration. */
+export function RegisterRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth()
-  if (isLoading || !data) return <FullScreenLoading />
-  if (!data.setup_complete) return <Navigate to="/setup" replace />
+  const { data, isLoading } = useAuthStatus()
   if (isAuthenticated) return <Navigate to="/overview" replace />
+  if (isLoading) return <FullScreenLoading />
+  if (data && !data.registration_enabled) return <Navigate to="/login" replace />
   return <>{children}</>
 }
 

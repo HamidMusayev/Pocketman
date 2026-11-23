@@ -20,13 +20,6 @@ export function ringColor(pct: number): string {
   return 'var(--up)'
 }
 
-/** `stroke-dasharray` for a ring: the filled arc length then the full circumference. */
-export function ringDash(spent: number, total: number, radius = 30): string {
-  const c = 2 * Math.PI * radius
-  const frac = total > 0 ? Math.min(1, spent / total) : 0
-  return `${(frac * c).toFixed(2)} ${c.toFixed(2)}`
-}
-
 export interface DonutSegment {
   color: string
   dash: string
@@ -60,27 +53,6 @@ export function trendBars(trend: TrendPoint[]): TrendBar[] {
     label: t.label,
     incH: Math.round((t.income / maxT) * 100) + '%',
     expH: Math.round((t.expense / maxT) * 100) + '%',
-  }))
-}
-
-export interface RankingRow {
-  name: string
-  amount: number
-  pct: number
-  w: string
-  color: string
-}
-
-/** Horizontal bar widths for the "top spending categories" ranking. */
-export function categoryRanking(items: CategoryBreakdownItem[], limit = 7): RankingRow[] {
-  const top = items.slice(0, limit)
-  const max = top.length ? top[0].amount : 1
-  return top.map((it, i) => ({
-    name: it.name,
-    amount: it.amount,
-    pct: it.pct,
-    w: Math.round((it.amount / max) * 100) + '%',
-    color: rampColor(i),
   }))
 }
 

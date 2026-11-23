@@ -11,9 +11,22 @@ from app.services.periods import period_bounds
 
 CSV_HEADER = ["Date", "Type", "Description", "Category", "Account", "Amount", "To Account"]
 
+MAX_IMPORT_ROWS = 20_000
+MAX_NAME_LEN = 100
+MAX_DESCRIPTION_LEN = 500
+
+# Cells starting with these are interpreted as formulas by Excel/Sheets
+# ("CSV injection"); prefix them with ' on export so they stay plain text.
+_FORMULA_PREFIXES = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _escape_like(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
 
 def query_transactions(
     db: Session,
+    user_id: int,
     period: str = "all",
     year: int | None = None,
     month: int | None = None,
@@ -23,11 +36,13 @@ def query_transactions(
     type_: str | None = None,
 ):
     start, end = period_bounds(period, year, month)
-    query = db.query(Transaction)
+    query = db.query(Transaction).filter(Transaction.user_id == user_id)
     if start is not None:
         query = query.filter(Transaction.date >= start, Transaction.date <= end)
     if search:
-        query = query.filter(Transaction.description.ilike(f"%{search}%"))
+        query = query.filter(
+            Transaction.description.ilike(f"%{_escape_like(search)}%", escape="\\")
+        )
     if category_id is not None:
         query = query.filter(Transaction.category_id == category_id)
     if account_id is not None:
@@ -53,6 +68,10 @@ def to_response_dict(txn: Transaction) -> dict:
     }
 
 
+def _csv_safe(value: str) -> str:
+    return "'" + value if value.startswith(_FORMULA_PREFIXES) else value
+
+
 def export_csv(transactions: list[Transaction]) -> str:
     buffer = io.StringIO()
     writer = csv.writer(buffer)
@@ -62,47 +81,60 @@ def export_csv(transactions: list[Transaction]) -> str:
             [
                 t.date.isoformat(),
                 t.type,
-                t.description,
-                t.category.name if t.category else "",
-                t.account.name if t.account else "",
+                _csv_safe(t.description),
+                _csv_safe(t.category.name) if t.category else "",
+                _csv_safe(t.account.name) if t.account else "",
                 f"{t.amount:.2f}",
-                t.transfer_account.name if t.transfer_account else "",
+                _csv_safe(t.transfer_account.name) if t.transfer_account else "",
             ]
         )
     return buffer.getvalue()
 
 
-def _get_or_create_category(db: Session, name: str, type_: str, cache: dict) -> Category:
-    key = (name.strip().lower(), type_)
+def _get_or_create_category(
+    db: Session, user_id: int, name: str, type_: str, cache: dict
+) -> Category:
+    name = name.strip()[:MAX_NAME_LEN]
+    key = (name.lower(), type_)
     if key in cache:
         return cache[key]
-    category = (
+    candidates = (
         db.query(Category)
-        .filter(Category.name.ilike(name.strip()), Category.type == type_)
-        .first()
+        .filter(Category.user_id == user_id, Category.name.ilike(_escape_like(name), escape="\\"))
+        .all()
     )
+    category = next((c for c in candidates if c.type == type_), None)
     if category is None:
-        category = Category(name=name.strip(), type=type_, icon="other", budget=None)
+        if candidates:
+            # name is unique per user, so an income category can't share a
+            # name with an expense one
+            raise ValueError(f"Category '{name}' already exists as {candidates[0].type}")
+        category = Category(user_id=user_id, name=name, type=type_, icon="other", budget=None)
         db.add(category)
         db.flush()
     cache[key] = category
     return category
 
 
-def _get_or_create_account(db: Session, name: str, cache: dict) -> Account:
-    key = name.strip().lower()
+def _get_or_create_account(db: Session, user_id: int, name: str, cache: dict) -> Account:
+    name = name.strip()[:MAX_NAME_LEN]
+    key = name.lower()
     if key in cache:
         return cache[key]
-    account = db.query(Account).filter(Account.name.ilike(name.strip())).first()
+    account = (
+        db.query(Account)
+        .filter(Account.user_id == user_id, Account.name.ilike(_escape_like(name), escape="\\"))
+        .first()
+    )
     if account is None:
-        account = Account(name=name.strip(), type="cash", icon="wallet", removable=True)
+        account = Account(user_id=user_id, name=name, type="cash", icon="wallet", removable=True)
         db.add(account)
         db.flush()
     cache[key] = account
     return account
 
 
-def import_csv(db: Session, content: str) -> dict:
+def import_csv(db: Session, user_id: int, content: str) -> dict:
     reader = csv.DictReader(io.StringIO(content))
     required = {"Date", "Type", "Description", "Category", "Account", "Amount"}
     if reader.fieldnames is None or not required.issubset(set(reader.fieldnames)):
@@ -119,6 +151,9 @@ def import_csv(db: Session, content: str) -> dict:
     errors: list[dict] = []
 
     for i, row in enumerate(reader, start=2):  # row 1 is the header
+        if i - 1 > MAX_IMPORT_ROWS:
+            errors.append({"row": i, "reason": f"Only the first {MAX_IMPORT_ROWS} rows are imported"})
+            break
         try:
             type_ = (row.get("Type") or "").strip().lower()
             if type_ not in ("income", "expense", "transfer"):
@@ -127,10 +162,10 @@ def import_csv(db: Session, content: str) -> dict:
                 )
 
             amount = float(row.get("Amount") or "")
-            if amount <= 0:
+            if not (0 < amount < 1e12):
                 raise ValueError("Amount must be greater than 0")
 
-            description = (row.get("Description") or "").strip()
+            description = (row.get("Description") or "").strip()[:MAX_DESCRIPTION_LEN]
             if not description:
                 raise ValueError("Description cannot be empty")
 
@@ -141,17 +176,18 @@ def import_csv(db: Session, content: str) -> dict:
                 raise ValueError(f"Date must be YYYY-MM-DD, got '{raw_date}'") from None
 
             account_name = (row.get("Account") or "Main").strip() or "Main"
-            account = _get_or_create_account(db, account_name, account_cache)
+            account = _get_or_create_account(db, user_id, account_name, account_cache)
 
             if type_ == "transfer":
                 to_name = (row.get("To Account") or "").strip()
                 if not to_name:
                     raise ValueError("Transfer requires a 'To Account'")
-                to_account = _get_or_create_account(db, to_name, account_cache)
+                to_account = _get_or_create_account(db, user_id, to_name, account_cache)
                 if to_account.id == account.id:
                     raise ValueError("Transfer source and destination must differ")
                 db.add(
                     Transaction(
+                        user_id=user_id,
                         type="transfer",
                         amount=amount,
                         description=description,
@@ -163,9 +199,12 @@ def import_csv(db: Session, content: str) -> dict:
                 )
             else:
                 category_name = (row.get("Category") or "Other").strip() or "Other"
-                category = _get_or_create_category(db, category_name, type_, category_cache)
+                category = _get_or_create_category(
+                    db, user_id, category_name, type_, category_cache
+                )
                 db.add(
                     Transaction(
+                        user_id=user_id,
                         type=type_,
                         amount=amount,
                         description=description,
@@ -180,4 +219,4 @@ def import_csv(db: Session, content: str) -> dict:
             errors.append({"row": i, "reason": str(exc)})
 
     db.commit()
-    return {"created": created, "skipped": skipped, "errors": errors}
+    return {"created": created, "skipped": skipped, "errors": errors[:200]}

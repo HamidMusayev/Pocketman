@@ -1,28 +1,35 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { login } from '../api/auth'
 import { apiErrorMessage } from '../api/client'
-import { LogoMark } from '../components/Logo'
+import { useAuthStatus } from '../hooks/useAuthStatus'
+import { AuthCardHeader } from './AuthCardHeader'
 import { useAuth } from './AuthContext'
 import './auth.css'
 
 export function Login() {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const { setToken } = useAuth()
+  const { setSession } = useAuth()
+  const { data: status } = useAuthStatus()
   const navigate = useNavigate()
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    if (!username.trim() || !password) {
+      setError('Enter your username and password.')
+      return
+    }
     setLoading(true)
     try {
-      const { token } = await login(password)
-      setToken(token)
+      const res = await login(username.trim().toLowerCase(), password)
+      setSession(res.token, res.username)
       navigate('/overview', { replace: true })
     } catch (err) {
-      setError(apiErrorMessage(err, 'Incorrect password.'))
+      setError(apiErrorMessage(err, 'Incorrect username or password.'))
     } finally {
       setLoading(false)
     }
@@ -31,17 +38,26 @@ export function Login() {
   return (
     <div className="auth-screen">
       <div className="auth-card">
-        <div className="auth-logo">
-          <div className="auth-logo-mark">
-            <LogoMark />
-          </div>
-          <div className="auth-logo-text">
-            pocket<span>man</span>
-          </div>
-        </div>
+        <AuthCardHeader />
         <h1 className="auth-title">Welcome back</h1>
-        <p className="auth-subtitle">Enter your password to unlock Pocketman.</p>
-        <form onSubmit={onSubmit}>
+        <p className="auth-subtitle">Sign in to your Pocketman account.</p>
+        <form onSubmit={onSubmit} noValidate>
+          <div className="auth-field">
+            <label className="auth-label" htmlFor="username">
+              Username
+            </label>
+            <input
+              id="username"
+              className="auth-input"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              autoFocus
+            />
+          </div>
           <div className="auth-field">
             <label className="auth-label" htmlFor="password">
               Password
@@ -52,14 +68,23 @@ export function Login() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoFocus
+              autoComplete="current-password"
             />
           </div>
-          {error && <div className="auth-error">{error}</div>}
+          {error && (
+            <div className="auth-error" role="alert">
+              {error}
+            </div>
+          )}
           <button className="auth-submit" type="submit" disabled={loading}>
-            {loading ? 'Unlocking…' : 'Unlock'}
+            {loading ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
+        {status?.registration_enabled && (
+          <p className="auth-switch">
+            No account yet? <Link to="/register">Create one</Link>
+          </p>
+        )}
       </div>
     </div>
   )

@@ -84,7 +84,3 @@ export const ICONS: Record<string, string[]> = {
   card: ['M3 6.5h18v11H3v-11Z', 'M3 10.5h18', 'M6.5 14.5h4'],
   transfer: ['M4 9h13', 'M14 6l3 3-3 3', 'M20 15H7', 'M10 12l-3 3 3 3'],
 }
-
-export function iconPaths(key: string): string[] {
-  return ICONS[key] ?? ICONS.other
-}

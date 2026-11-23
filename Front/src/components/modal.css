@@ -1,7 +1,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--overlay);
   display: grid;
   place-items: center;
   padding: 24px;
@@ -10,7 +10,7 @@
 
 .modal-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 440px;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -27,7 +27,7 @@
 
 .modal-title {
   font: 700 16px var(--sans);
-  color: #fff;
+  color: var(--strong);
 }
 
 .modal-close {
@@ -55,4 +55,129 @@
   justify-content: flex-end;
   gap: 10px;
   margin-top: 20px;
+}
+
+.modal-danger {
+  margin-right: auto;
+  background: transparent;
+  color: var(--down);
+  border: 1px solid var(--line);
+}
+
+/* --------------------------- add-transaction form ------------------------ */
+.add-type {
+  margin-bottom: 18px;
+}
+
+.add-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.add-amount span {
+  font: 500 22px var(--mono);
+  color: var(--muted);
+}
+
+.add-amount input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--strong);
+  font: 600 36px var(--mono);
+  letter-spacing: -1px;
+  padding: 0;
+}
+
+.add-amount input::-webkit-outer-spin-button,
+.add-amount input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.add-desc {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.add-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.add-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line2);
+  background: transparent;
+  color: var(--body);
+  font: 500 13px var(--sans);
+  cursor: pointer;
+}
+
+.add-chip svg {
+  color: var(--muted2);
+}
+
+.add-chip.active {
+  border-color: var(--yellow);
+  background: var(--elev);
+  color: var(--strong);
+}
+
+.add-chip.active svg {
+  color: var(--yellow);
+}
+
+.add-chip-more {
+  color: var(--muted2);
+  border-style: dashed;
+}
+
+.add-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0 10px;
+}
+
+.add-row .pm-select,
+.add-row .pm-input {
+  width: 100%;
+}
+
+.add-submit {
+  width: 100%;
+  margin-top: 8px;
+  padding: 13px;
+  font-size: 15px;
+}
+
+/* phones: modals become bottom sheets */
+@media (max-width: 560px) {
+  .modal-overlay {
+    place-items: end stretch;
+    padding: 0;
+  }
+
+  .modal-card {
+    max-width: none;
+    max-height: 92vh;
+    overflow-y: auto;
+    border-radius: 18px 18px 0 0;
+    border-bottom: none;
+    padding: 18px 16px calc(18px + env(safe-area-inset-bottom));
+  }
+
+  /* 16px+ stops iOS from zooming into focused fields */
+  .modal-card .pm-input,
+  .modal-card .pm-select {
+    font-size: 16px;
+  }
 }

@@ -59,7 +59,7 @@
 }
 .chart-title {
   font: 700 15px var(--sans);
-  color: #fff;
+  color: var(--strong);
 }
 .chart-title span {
   color: var(--muted);
@@ -227,73 +227,9 @@
 }
 
 /* ranking */
-.ranking-list {
-  display: flex;
-  flex-direction: column;
-  gap: 13px;
-}
-.ranking-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.ranking-name {
-  width: 104px;
-  font: 500 13px var(--sans);
-  color: var(--body);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  flex: none;
-}
-.ranking-track {
-  flex: 1;
-  height: 10px;
-  border-radius: 6px;
-  background: var(--elev);
-  overflow: hidden;
-}
-.ranking-fill {
-  height: 100%;
-  border-radius: 6px;
-}
-.ranking-amount {
-  width: 84px;
-  text-align: right;
-  font: 500 13px var(--mono);
-  color: var(--body);
-  flex: none;
-}
-.ranking-pct {
-  width: 38px;
-  text-align: right;
-  font: 500 12px var(--mono);
-  color: var(--muted);
-  flex: none;
-}
 
 /* month calendar */
-.cal-nav {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.cal-nav button {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: var(--elev);
-  color: var(--body);
-  cursor: pointer;
-  font-size: 15px;
-}
-.cal-nav-label {
-  min-width: 92px;
-  text-align: center;
-  font: 600 14px var(--sans);
-  color: var(--body);
-}
+
 .cal-scroll {
   overflow-x: auto;
   padding-bottom: 4px;
@@ -375,20 +311,6 @@
 
   /* Give the bar its share back: the fixed name/amount/pct columns were
      eating almost everything on a phone. */
-  .ranking-name {
-    width: 82px;
-    font-size: 12.5px;
-  }
-  .ranking-amount {
-    width: 70px;
-    font-size: 12px;
-  }
-  .ranking-pct {
-    display: none;
-  }
-  .ranking-row {
-    gap: 9px;
-  }
 
   .line-yaxis {
     width: 44px;
@@ -423,13 +345,5 @@
   .cal-amt {
     font-size: 9px;
     letter-spacing: -0.3px;
-  }
-  .cal-nav-label {
-    min-width: 78px;
-    font-size: 13px;
-  }
-  .cal-nav button {
-    width: 40px;
-    height: 40px;
   }
 }

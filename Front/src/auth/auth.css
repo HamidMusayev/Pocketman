@@ -36,7 +36,7 @@
 .auth-logo-text {
   font: 700 19px var(--sans);
   letter-spacing: -0.4px;
-  color: #fff;
+  color: var(--strong);
 }
 
 .auth-logo-text span {
@@ -45,7 +45,7 @@
 
 .auth-title {
   font: 700 18px var(--sans);
-  color: #fff;
+  color: var(--strong);
   margin: 0 0 6px;
 }
 
@@ -101,4 +101,31 @@
 .auth-submit:disabled {
   opacity: 0.6;
   cursor: default;
+}
+
+.auth-hint {
+  font: 400 12px var(--sans);
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.auth-hint.bad {
+  color: var(--down);
+}
+
+.auth-input[aria-invalid='true'] {
+  border-color: var(--down);
+}
+
+.auth-switch {
+  font: 400 13px var(--sans);
+  color: var(--muted);
+  text-align: center;
+  margin: 18px 0 0;
+}
+
+.auth-switch a {
+  color: var(--yellow);
+  font-weight: 600;
+  text-decoration: none;
 }

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { apiErrorMessage } from '../api/client'
 import type { Account, Category, Transaction, TransactionType } from '../api/types'
-import { useUpdateTransaction } from '../hooks/useTransactions'
+import { useDeleteTransaction, useUpdateTransaction } from '../hooks/useTransactions'
 import { useSettings } from '../hooks/useSettings'
 import { Modal } from './Modal'
 
@@ -14,6 +14,7 @@ interface Props {
 
 export function TransactionEditModal({ transaction, categories, accounts, onClose }: Props) {
   const updateTransaction = useUpdateTransaction()
+  const deleteTransaction = useDeleteTransaction()
   const { data: settings } = useSettings()
   const currency = settings?.currency_symbol ?? '$'
 
@@ -217,6 +218,21 @@ export function TransactionEditModal({ transaction, categories, accounts, onClos
       {error && <div className="pm-inline-error">{error}</div>}
 
       <div className="modal-actions">
+        <button
+          className="pm-btn modal-danger"
+          disabled={deleteTransaction.isPending}
+          onClick={async () => {
+            if (!window.confirm(`Delete "${transaction.description}"?`)) return
+            try {
+              await deleteTransaction.mutateAsync(transaction.id)
+              onClose()
+            } catch (err) {
+              setError(apiErrorMessage(err, 'Could not delete transaction.'))
+            }
+          }}
+        >
+          Delete
+        </button>
         <button className="pm-btn pm-btn-ghost-elev" onClick={onClose}>
           Cancel
         </button>

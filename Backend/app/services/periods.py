@@ -28,7 +28,13 @@ def period_bounds(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="year and month are required for period=monthly",
             )
-        start = date(year, month, 1)
+        try:
+            start = date(year, month, 1)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="invalid year or month",
+            ) from None
         end = start + relativedelta(months=1) - timedelta(days=1)
         return start, end
 

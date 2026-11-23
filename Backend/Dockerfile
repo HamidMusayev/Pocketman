@@ -15,4 +15,8 @@ ENV DATABASE_URL=sqlite:////app/data/pocketman.db
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+# strip CRLF in case the repo was checked out on Windows
+RUN sed -i 's/\r$//' docker-entrypoint.sh && chmod +x docker-entrypoint.sh
+
+# backs up the database before a pending migration, then migrates and serves
+CMD ["./docker-entrypoint.sh"]

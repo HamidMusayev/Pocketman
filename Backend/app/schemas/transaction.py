@@ -1,6 +1,6 @@
 from datetime import date as Date
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.constants import TRANSACTION_TYPES
 
@@ -8,7 +8,7 @@ from app.constants import TRANSACTION_TYPES
 class TransactionBase(BaseModel):
     type: str
     amount: float
-    description: str
+    description: str = Field(max_length=500)
     category_id: int | None = None
     account_id: int
     transfer_account_id: int | None = None
@@ -56,11 +56,21 @@ class TransactionCreate(TransactionBase):
 class TransactionUpdate(BaseModel):
     type: str | None = None
     amount: float | None = None
-    description: str | None = None
+    description: str | None = Field(default=None, max_length=500)
     category_id: int | None = None
     account_id: int | None = None
     transfer_account_id: int | None = None
     date: Date | None = None
+
+    @field_validator("type")
+    @classmethod
+    def validate_type(cls, v: str | None) -> str | None:
+        return None if v is None else TransactionBase.validate_type(v)
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, v: str | None) -> str | None:
+        return None if v is None else TransactionBase.validate_description(v)
 
 
 class TransactionResponse(BaseModel):

@@ -1,13 +1,24 @@
 import os
 import tempfile
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-os.environ["SECRET_KEY"] = "test-secret-key"
+os.environ["SECRET_KEY"] = "test-secret-key-that-is-long-enough-0123456789"
+
+TEST_PASSWORD = "testpass123"
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limits() -> Generator[None, None, None]:
+    from app.ratelimit import limiter
+
+    limiter.reset()
+    yield
+    limiter.reset()
 
 
 @pytest.fixture()
@@ -44,10 +55,21 @@ def client(db_path: str) -> Generator[TestClient, None, None]:
 
 
 @pytest.fixture()
-def auth_client(client: TestClient) -> TestClient:
-    """A client with the app already set up and an Authorization header attached."""
-    resp = client.post("/api/auth/setup", json={"password": "testpass123"})
-    assert resp.status_code == 200
-    token = resp.json()["token"]
-    client.headers.update({"Authorization": f"Bearer {token}"})
+def register(client: TestClient) -> Callable[..., dict]:
+    """Register a user and return {"token", "username", "headers"}."""
+
+    def _register(username: str = "alice_01", password: str = TEST_PASSWORD) -> dict:
+        resp = client.post("/api/auth/register", json={"username": username, "password": password})
+        assert resp.status_code == 201, resp.text
+        token = resp.json()["token"]
+        return {"token": token, "username": username, "headers": {"Authorization": f"Bearer {token}"}}
+
+    return _register
+
+
+@pytest.fixture()
+def auth_client(client: TestClient, register) -> TestClient:
+    """A client with one registered user and their Authorization header attached."""
+    user = register()
+    client.headers.update(user["headers"])
     return client

@@ -21,8 +21,15 @@ Then open <http://localhost:3000>.
   survives `docker compose down` + `up`. To wipe it: `docker compose -f
   Setup/docker-compose.yml down -v`.
 
-First launch shows a one-time password setup screen; after that the app is
-locked behind that password.
+Pocketman is multi-user: each person creates an account (username + password)
+and only ever sees their own data. Usernames are 6-32 characters of lowercase
+letters, digits and `_`; passwords need 8+ characters with letters and digits.
+Login is rate limited (5 failed attempts per username per 15 minutes).
+
+**Upgrading from the single-user version:** the first start runs a migration
+that moves all existing data into an owner account named `OWNER_USERNAME`
+(default `pocketman`) with the old password. Sign in with that, then rename it
+and set a stronger password under Settings → Account.
 
 ### Configuration
 
@@ -32,7 +39,9 @@ Copy `Setup/.env.example` to `Setup/.env` and edit it (at minimum set a real
 
 | Variable | Purpose | Default |
 |---|---|---|
-| `SECRET_KEY` | Signs JWT auth tokens — **change in production** | `dev-secret-key-change-me` |
+| `SECRET_KEY` | Signs JWT auth tokens. If unset, a placeholder, or under 32 chars, a random key is generated and kept in the data volume | generated |
+| `ALLOW_REGISTRATION` | Let new people sign up (`false` closes sign-ups) | `true` |
+| `OWNER_USERNAME` | Username given to pre-existing single-user data on upgrade | `pocketman` |
 | `CORS_ORIGINS` | Allowed origins for the API (dev only; prod proxies same-origin) | `http://localhost:3000` |
 | `FRONTEND_PORT` | Host port for the frontend | `3000` |
 

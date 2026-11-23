@@ -10,6 +10,7 @@ class RecurringRule(Base):
     __tablename__ = "recurring_rules"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     description: Mapped[str] = mapped_column(String, nullable=False)
     amount: Mapped[float] = mapped_column(Float, nullable=False)
     category_id: Mapped[int] = mapped_column(ForeignKey("categories.id"), nullable=False)
@@ -35,6 +36,7 @@ class PendingApproval(Base):
     __tablename__ = "pending_approvals"
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     recurring_rule_id: Mapped[int] = mapped_column(
         ForeignKey("recurring_rules.id"), nullable=False
     )

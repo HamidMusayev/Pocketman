@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { apiErrorMessage } from '../api/client'
 import type { Category, TxnType } from '../api/types'
-import { useCreateCategory, useUpdateCategory } from '../hooks/useCategories'
+import { useCreateCategory, useDeleteCategory, useUpdateCategory } from '../hooks/useCategories'
 import { CATEGORY_ICON_KEYS } from '../lib/constants'
 import { CategoryIcon } from './CategoryIcon'
 import { Modal } from './Modal'
@@ -17,6 +17,7 @@ export function CategoryFormModal({ category, onClose }: Props) {
   const isEdit = !!category
   const createCategory = useCreateCategory()
   const updateCategory = useUpdateCategory()
+  const deleteCategory = useDeleteCategory()
 
   const [name, setName] = useState(category?.name ?? '')
   const [type, setType] = useState<TxnType>(category?.type ?? 'expense')
@@ -122,6 +123,23 @@ export function CategoryFormModal({ category, onClose }: Props) {
       {error && <div className="pm-inline-error">{error}</div>}
 
       <div className="modal-actions">
+        {isEdit && (
+          <button
+            className="pm-btn modal-danger"
+            disabled={deleteCategory.isPending}
+            onClick={async () => {
+              if (!window.confirm(`Delete the "${category!.name}" category?`)) return
+              try {
+                await deleteCategory.mutateAsync(category!.id)
+                onClose()
+              } catch (err) {
+                setError(apiErrorMessage(err, 'Could not delete category.'))
+              }
+            }}
+          >
+            Delete
+          </button>
+        )}
         <button className="pm-btn pm-btn-ghost-elev" onClick={onClose}>
           Cancel
         </button>

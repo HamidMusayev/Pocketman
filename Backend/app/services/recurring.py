@@ -22,7 +22,7 @@ def advance_date(d: date, frequency: str) -> date:
     return d + step
 
 
-def run_catch_up(db: Session, today: date | None = None) -> list[PendingApproval]:
+def run_catch_up(db: Session, user_id: int, today: date | None = None) -> list[PendingApproval]:
     """Generate PendingApproval rows for every occurrence due up to `today`.
 
     Idempotent: a rule's `next_due_date` is advanced past `today` as part of
@@ -31,7 +31,7 @@ def run_catch_up(db: Session, today: date | None = None) -> list[PendingApproval
     today = today or date.today()
     generated: list[PendingApproval] = []
 
-    rules = db.query(RecurringRule).all()
+    rules = db.query(RecurringRule).filter(RecurringRule.user_id == user_id).all()
     for rule in rules:
         occurrences: list[date] = []
         cursor = rule.next_due_date
@@ -43,6 +43,7 @@ def run_catch_up(db: Session, today: date | None = None) -> list[PendingApproval
 
         for occ_date in occurrences:
             pending = PendingApproval(
+                user_id=rule.user_id,
                 recurring_rule_id=rule.id,
                 description=rule.description,
                 amount=rule.amount,
@@ -65,6 +66,7 @@ def run_catch_up(db: Session, today: date | None = None) -> list[PendingApproval
 
 def approve_pending(db: Session, pending: PendingApproval) -> Transaction:
     txn = Transaction(
+        user_id=pending.user_id,
         type=pending.type,
         amount=pending.amount,
         description=pending.description,

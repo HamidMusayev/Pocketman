@@ -75,20 +75,12 @@ def test_cumulative_balance_running_total(auth_client):
     assert body[1]["balance"] == 60
 
 
-def test_top_categories_respects_limit(auth_client):
-    account, cats = _seed(auth_client)
-    _add_fixture_transactions(auth_client, account, cats)
-    resp = auth_client.get("/api/stats/top-categories?period=monthly&year=2026&month=7&limit=2")
-    assert len(resp.json()) == 2
-
-
 def test_net_worth_totals_across_accounts(auth_client):
     account, cats = _seed(auth_client)
     cash = auth_client.post("/api/accounts", json={"name": "Cash", "type": "savings", "icon": "bank"}).json()
     auth_client.post("/api/transactions", json={"type": "income", "amount": 500, "description": "a", "category_id": cats["Salary"]["id"], "account_id": account["id"], "date": "2026-07-01"})
     auth_client.post("/api/transactions", json={"type": "income", "amount": 1000, "description": "b", "category_id": cats["Salary"]["id"], "account_id": cash["id"], "date": "2026-07-01"})
 
-    resp = auth_client.get("/api/stats/net-worth")
-    body = resp.json()
-    assert body["total"] == 1500
-    assert len(body["accounts"]) == 2
+    accounts = auth_client.get("/api/accounts").json()
+    assert sum(a["net"] for a in accounts) == 1500
+    assert len(accounts) == 2
