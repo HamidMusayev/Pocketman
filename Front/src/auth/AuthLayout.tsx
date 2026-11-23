@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { AuthCardHeader } from './AuthCardHeader'
+import { IntroVideo } from './IntroVideo'
 import './auth.css'
 
 const ShieldIcon = () => (
@@ -61,8 +62,11 @@ export function AuthLayout({ children }: { children: ReactNode }) {
             Your money, <span>under lock.</span>
           </h2>
           <p className="auth-hero-sub">
-            Track spending, budgets and savings in a space that only you can open.
+            Pocketman is a personal finance tracker: log income and expenses, set budgets, keep
+            recurring bills and savings goals on track, and see it all in charts, in a space that
+            only you can open.
           </p>
+          <IntroVideo />
           <ul className="auth-points">
             {POINTS.map((p) => (
               <li key={p.title}>
