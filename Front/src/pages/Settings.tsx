@@ -3,6 +3,7 @@ import { apiErrorMessage } from '../api/client'
 import { downloadCsvBlob, exportTransactionsCsv } from '../api/transactions'
 import { MMBAK_MAX_BYTES, previewMmbak } from '../api/imports'
 import type { ImportResult, MmbakPreview, MmbakResult } from '../api/types'
+import { InstallSettingRow } from '../components/InstallSettingRow'
 import { MmbakImportModal } from '../components/MmbakImportModal'
 import { useSettings, useUpdateSettings } from '../hooks/useSettings'
 import { useImportTransactions } from '../hooks/useTransactions'
@@ -38,6 +39,11 @@ export function SettingsPage() {
       </div>
 
       <ProfileCard />
+
+      <h2 className="set-group-title">App</h2>
+      <section className="set-group">
+        <InstallSettingRow />
+      </section>
 
       <h2 className="set-group-title">Appearance</h2>
       <section className="set-group">

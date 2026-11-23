@@ -4,6 +4,7 @@ import { PeriodProvider } from '../context/PeriodContext'
 import { useCatchUp } from '../hooks/useRecurring'
 import { useSettings } from '../hooks/useSettings'
 import { themeVars } from '../lib/theme'
+import { InstallPrompt } from './InstallPrompt'
 import { TopBar } from './TopBar'
 import './shell.css'
 
@@ -25,6 +26,7 @@ export function Layout() {
         <main className="page-container">
           <Outlet />
         </main>
+        <InstallPrompt />
       </div>
     </PeriodProvider>
   )
